@@ -5,7 +5,8 @@ const route = require('./routes/index.route');
 const connectDB = require('./app/database'); 
 const app = express();
 const port = 3000;
-
+// ,
+//   "proxy": "http://localhost:3000"
 // Kết nối tới MongoDB
 connectDB();
 
