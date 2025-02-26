@@ -1,0 +1,197 @@
+<script>
+    // Kiểm tra xem token có tồn tại hay không
+    const token = "{{token}}"; // Lấy giá trị token từ server
+    if (token) {
+        // Lưu token vào localStorage
+        localStorage.setItem('token', token);
+        console.log('Token saved to localStorage:', token);
+    } else {
+        console.log('No token provided');
+    }
+</script>
+<!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+</div>
+
+<!-- Content Row -->
+<div class="row" id="page-top">
+
+    <!-- Courses Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Device</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">10</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-book fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Reward</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">10</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-user fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Posts Card  -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Room
+                        </div>
+                        <div class="row no-gutters align-items-center">
+                            <div class="col-auto">
+                                <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">15</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comments Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Diff</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">18</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-comments fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Content Row -->
+
+<div class="row">
+    <style>
+        .chart-area {
+        height: 400px; /* Đặt chiều cao tối đa cố định cho biểu đồ */
+        max-height: 400px; /* Đảm bảo chiều cao tối đa */
+        overflow: hidden; /* Ẩn phần dư thừa nếu có */
+        }
+        .card-body {
+        max-height: 500px; /* Chiều cao tối đa của thẻ card */
+        overflow-y: auto; /* Kích hoạt cuộn dọc */
+        }
+
+    </style>
+    <!-- Area Chart -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-dark">Device loan and return history</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-area">
+                    <canvas id="visitChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+  // Lấy dữ liệu từ API
+  fetch('/admin/api/visits')
+    .then(response => response.json())
+    .then(data => {
+      // Tạo mảng tên URL và số lượt truy cập
+      const labels = data.map(item => {
+        const parts = item.route.split('/'); // Tách route theo dấu "/"
+        const mainRoute = parts[1] || 'Home'; // Lấy phần đầu tiên, hoặc "Home" nếu rỗng
+
+        // Phân loại route thành các loại tài khoản
+        if (mainRoute === 'Home') {
+            return 'Tài Khoản Khách';
+        } else if (mainRoute === 'User') {
+            return 'Tài Khoản Hệ thống';
+        } else if (mainRoute === 'LoginGoogle') {
+            return 'Tài Khoản Google';
+        } else {
+            return 'Khác'; // Nếu route không thuộc các loại trên
+        }
+        });
+
+      const counts = data.map(item => item.count);
+
+      // Vẽ biểu đồ
+      const ctx = document.getElementById('visitChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar', // Biểu đồ dạng cột
+        data: {
+          labels: labels, // Cột ngang (Tên URL)
+          datasets: [{
+            label: 'Số lượt truy cập',
+            data: counts, // Cột dọc (Số lượt truy cập)
+            backgroundColor: '#0C5776', // Màu cột
+            borderColor: '#001C44', // Màu viền cột
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true, // Tự động điều chỉnh kích thước
+          maintainAspectRatio: false, // Không duy trì tỷ lệ cố định
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Tên URL'
+              }
+            },
+            y: {
+                type: 'logarithmic',
+                beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Số lượt truy cập'
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: false // Ẩn chú thích nếu không cần
+            }
+          }
+        }
+      });
+    })
+    .catch(error => console.error('Error fetching visit data:', error));
+});
+
+</script>
+

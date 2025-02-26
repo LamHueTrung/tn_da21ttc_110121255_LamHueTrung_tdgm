@@ -1,0 +1,85 @@
+<div class="box ">
+    <div class="row w-100">
+        <div class="col-sm ">
+            <img class="banner-logo" src="/img/banner-home.png" alt="Banner Home" />
+        </div>
+        <div class="col-sm">
+            <div class="text-center">
+                <img src="img/logo-short.png" style="width: 150px" alt="logo" />
+                <h4 style="color: #333" class="mt-1 mb-5 pb-1">Teaching Device Reward Manager</h4>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <input type="email" id="email" class="form-control" required />
+                    <label for="email">Username</label>
+                </div>
+
+                <div class="form-group">
+                    <input type="password" id="password" class="form-control" required />
+                    <label for="password">Password</label>
+                </div>
+
+                <div class="text-center pt-1 mb-5 pb-1">
+                    <button class="btn btn-login btn-block" type="submit">Log in</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+      setTimeout(() => {
+          document.querySelector(".box").classList.add("show");
+      }, 100); // Hiển thị sau 100ms để tạo hiệu ứng
+  });
+
+  document.getElementById("loginForm").addEventListener("submit", async function(event) {
+      event.preventDefault(); // Ngăn chặn tải lại trang
+
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      // Hiển thị loading
+      Swal.fire({
+          title: "Logging in...",
+          text: "Please wait",
+          icon: "info",
+          allowOutsideClick: false,
+          didOpen: () => {
+              Swal.showLoading();
+          },
+      });
+
+      // Giả lập gọi API (Thay thế bằng API thực tế của bạn)
+      setTimeout(async () => {  
+          const response = await fetch("/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email, password })
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+              // Hiển thị thông báo thành công
+              Swal.fire({
+                  title: "Success!",
+                  text: "Logged in successfully",
+                  icon: "success",
+                  timer: 2000,
+                  showConfirmButton: false,
+              }).then(() => {
+                  window.location.href = "/home"; // Chuyển hướng sang trang Home
+              });
+          } else {
+              // Hiển thị thông báo lỗi
+              Swal.fire({
+                  title: "Login Failed",
+                  text: data.message || "Invalid username or password",
+                  icon: "error",
+              });
+          }
+      }, 1500); // Giả lập delay 1.5 giây
+  });
+</script>
