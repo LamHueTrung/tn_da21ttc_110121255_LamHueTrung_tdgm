@@ -34,52 +34,32 @@
       }, 100); // Hiển thị sau 100ms để tạo hiệu ứng
   });
 
-  document.getElementById("loginForm").addEventListener("submit", async function(event) {
-      event.preventDefault(); // Ngăn chặn tải lại trang
+  document.getElementById("loginForm").addEventListener("submit", function(event) {
+    event.preventDefault(); // Ngăn chặn tải lại trang
 
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+    // Hiển thị loading
+    Swal.fire({
+        title: "Logging in...",
+        text: "Please wait",
+        icon: "info",
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        },
+    });
 
-      // Hiển thị loading
-      Swal.fire({
-          title: "Logging in...",
-          text: "Please wait",
-          icon: "info",
-          allowOutsideClick: false,
-          didOpen: () => {
-              Swal.showLoading();
-          },
-      });
+    // Giả lập thời gian chờ 1.5 giây trước khi thông báo thành công
+    setTimeout(() => {  
+        Swal.fire({
+            title: "Success!",
+            text: "Logged in successfully",
+            icon: "success",
+            timer: 2000,
+            showConfirmButton: false,
+        }).then(() => {
+            window.location.href = "/home"; // Chuyển hướng đến trang Home
+        });
+    }, 1500); // Chờ 1.5 giây trước khi hiển thị thông báo thành công
+});
 
-      // Giả lập gọi API (Thay thế bằng API thực tế của bạn)
-      setTimeout(async () => {  
-          const response = await fetch("/login", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ email, password })
-          });
-
-          const data = await response.json();
-
-          if (response.ok) {
-              // Hiển thị thông báo thành công
-              Swal.fire({
-                  title: "Success!",
-                  text: "Logged in successfully",
-                  icon: "success",
-                  timer: 2000,
-                  showConfirmButton: false,
-              }).then(() => {
-                  window.location.href = "/home"; // Chuyển hướng sang trang Home
-              });
-          } else {
-              // Hiển thị thông báo lỗi
-              Swal.fire({
-                  title: "Login Failed",
-                  text: data.message || "Invalid username or password",
-                  icon: "error",
-              });
-          }
-      }, 1500); // Giả lập delay 1.5 giây
-  });
 </script>

@@ -1,0 +1,148 @@
+<div class="row add-user mb-4">
+    <h1 class="title-add-user text-center mb-4">Add Device</h1>
+
+    <!-- Chọn phương thức nhập -->
+    <div class="d-flex justify-content-center mb-4">
+        <button class="btn btn-darks me-2" id="manualBtn">Add Manually</button>
+        <button class="btn btn-choicefile" id="fileBtn">Import from File</button>
+    </div>
+
+    <!-- Form thêm thủ công -->
+    <div id="manualForm" style="display: none;">
+        <form action="/admin/user/addUser" method="POST" enctype="multipart/form-data" class="col-md-6 offset-md-3">
+            <div class="mb-3">
+                <label class="form-label">Name</label>
+                <input type="text" class="form-control" name="Name" id="Name" placeholder="Example: Remote" value="{{Name}}">
+                {{#if errors.Name}} <div class="text-danger">{{errors.Name}}</div> {{/if}}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea class="form-control" name="Decscription" id="Decscription"  > {{Decscription}}</textarea>
+                {{#if errors.Decscription}} <div class="text-danger">{{errors.Decscription}}</div> {{/if}}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Quantity</label>
+                <input type="number" class="form-control" name="Quantity" id="Quantity" placeholder="Example: 1-50" value="{{Quantity}}">
+                {{#if errors.Quantity}} <div class="text-danger">{{errors.Quantity}}</div> {{/if}}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Category</label>
+                <select class="form-control" name="category" id="category">
+                    <option value="sub_admin" {{#if (eq category "sub_admin")}}selected{{/if}}>Máy Tính</option>
+                    <option value="user" {{#if (eq category "user")}}selected{{/if}}>Máy chiếu</option>
+                </select>
+                {{#if errors.category}} <div class="text-danger">{{errors.category}}</div> {{/if}}
+            </div>
+
+            <div class="d-flex" style="float: right;">
+                <button type="submit" class="btn btn-system btn-submit">Submit</button>
+                <button type="button" onclick="javascript:history.back()" class="btn btn-secondary btn-previou">Back</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Form thêm bằng file -->
+    <div id="fileForm" style="display: none;">
+        <form action="/admin/user/importUsers" method="POST" enctype="multipart/form-data" class="col-md-6 offset-md-3">
+            <div class="mb-3">
+                <label class="form-label">Upload File (CSV, Excel)</label>
+                <input type="file" class="form-control" name="userFile" id="userFile" accept=".csv, .xlsx">
+            </div>
+
+            <div class="d-flex" style="float: right;">
+                <button type="submit" class="btn btn-system btn-submit">Upload</button>
+                <button type="button" onclick="javascript:history.back()" class="btn btn-secondary btn-previou">Back</button>
+            </div>
+
+        </form>
+
+        <!-- Danh sách file đã tải lên -->
+        
+        <h3 class="mt-4">Uploaded Files</h3>
+        <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Status</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each accounts}}
+                    <tr>
+                        <td style="color: {{#if this.isDeleted}} red {{else}} green {{/if}}">
+                            {{#if this.isDeleted}} Vô hiệu hóa {{else}} Đang hoạt động {{/if}}
+                        </td>
+                        <td>{{#if (eq this.role "sub_admin")}}SUB ADMIN{{else}}USER{{/if}}</td>
+                        <td>{{this.profile.fullName}}</td>
+                        <td>{{this.username}}</td>
+                        <td>
+                            {{#if this.passwordDecrypted}}
+                            <span class="password-hidden" id="password-{{@index}}">********</span>
+                            <span class="password-visible" id="password-visible-{{@index}}" style="display: none;">{{this.passwordDecrypted}}</span>
+                            <button type="button" onclick="togglePassword({{@index}})" class="btn btn-sm btn-outline-primary">Xem mật khẩu</button>
+                            {{else}}
+                                <span>Bảo mật Google</span>
+                            {{/if}}
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+            <button type="button" onclick="javascript:history.back()" class="btn btn-secondary btn-previou">Back</button>
+        </div>
+
+    </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Lấy phần tử bằng ID
+    const manualBtn = document.getElementById("manualBtn");
+    const fileBtn = document.getElementById("fileBtn");
+    const manualForm = document.getElementById("manualForm");
+    const fileForm = document.getElementById("fileForm");
+    
+    // Kiểm tra xem các phần tử có tồn tại không trước khi gán sự kiện
+    if (manualBtn && fileBtn && manualForm && fileForm) {
+        // Ẩn cả hai form ban đầu
+        manualForm.style.display = "none";
+        fileForm.style.display = "none";
+
+        // Khi bấm "Add Manually" thì hiển thị form thủ công, ẩn form file
+        manualBtn.addEventListener("click", function() {
+            manualForm.style.display = "block";
+            fileForm.style.display = "none";
+        });
+
+        // Khi bấm "Import from File" thì hiển thị form file, ẩn form thủ công
+        fileBtn.addEventListener("click", function() {
+            manualForm.style.display = "none";
+            fileForm.style.display = "block";
+        });
+    }
+
+    {{!-- // Kiểm tra biến isCreate từ server để hiển thị thông báo thành công
+    const isCreate = {{isCreate}};
+    if (isCreate) {
+        Swal.fire({
+            title: 'Tạo người dùng thành công!',
+            icon: 'success',
+            confirmButtonText: 'OK'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/admin/user/listAllUser';
+            }
+        });
+        fetch('/admin/user/clear-create-flag', { method: 'POST' });
+    } --}}
+});
+</script>

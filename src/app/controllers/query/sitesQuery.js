@@ -1,4 +1,3 @@
-const currentYear = new Date().getFullYear();
 const jwt = require('jsonwebtoken');
 
 class SitesQuery {

@@ -1,4 +1,6 @@
 const sitesRouter = require('./sites');
+const usersRouter = require('./user');
+const deviceManagersRouter = require('./deviceManager');
 const session = require('express-session');
 const passport = require('passport');
 
@@ -18,6 +20,8 @@ function Route(app) {
         res.locals.dataUser = req.session.dataUser || {};
         next();
     });
+    app.use('/deviceManger', deviceManagersRouter);
+    app.use('/users', usersRouter);
     app.use('/', sitesRouter);
     
 
