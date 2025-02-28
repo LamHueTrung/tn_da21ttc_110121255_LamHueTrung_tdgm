@@ -1,0 +1,140 @@
+<div class="card shadow mb-4" id="page-top">
+    <div class="card-header py-3">
+        <a href="/borrowRepay/addNew" class="btn btn-darks">Create Order</a>
+    </div>
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">History borrow repay</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Order ID</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Name User</th>
+                        <th>Borrow Date</th>
+                        <th>Return Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="orderList">
+                    <!-- Dữ liệu demo -->
+                    <tr>
+                        <td>1</td>
+                        <td>ORD12345</td>
+                        <td>Borrow</td>
+                        <td><span class="text-warning">Pending</span></td>
+                        <td>Nguyễn Văn A</td>
+                        <td>2024-02-20</td>
+                        <td>2024-02-25</td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-sm " type="button" id="dropdownMenuButton" data-toggle="dropdown">
+                                    <img width="30px" src="/img/dotsMenu.png" alt="">
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="#"><i class="fa-brands fa-openid"></i> View</a>
+                                    <a class="dropdown-item" onclick="confirmReturn('ORD12345')">
+                                        <i class="fa-regular fa-pen-to-square"></i> Confirm Return
+                                    </a>
+                                    <a class="dropdown-item" onclick="confirmDelete('ORD12345')">
+                                        <i class="fa-regular fa-trash-can"></i> Cancel Order
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>ORD67890</td>
+                        <td>Repay</td>
+                        <td><span class="text-success">Completed</span></td>
+                        <td>Trần Thị B</td>
+                        <td>2024-02-15</td>
+                        <td>2024-02-20</td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-sm " type="button" id="dropdownMenuButton" data-toggle="dropdown">
+                                    <img width="30px" src="/img/dotsMenu.png" alt="">
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="#"><i class="fa-brands fa-openid"></i> View</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <button type="button" onclick="javascript:history.back()" class="btn btn-secondary">Back</button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Xác nhận trả thiết bị (Dữ liệu chỉ demo, không gọi API)
+    function confirmReturn(orderId) {
+        Swal.fire({
+            title: "Confirm Return",
+            text: "Are you sure you want to mark this order as returned?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, confirm!",
+            cancelButtonText: "Cancel"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Cập nhật trạng thái trên giao diện (không gọi API)
+                const rows = document.querySelectorAll("#orderList tr");
+                rows.forEach(row => {
+                    if (row.children[1].textContent === orderId) {
+                        row.children[3].innerHTML = '<span class="text-success">Completed</span>';
+                    }
+                });
+
+                Swal.fire({
+                    title: "Return Confirmed",
+                    text: "The order has been successfully marked as returned.",
+                    icon: "success",
+                    confirmButtonText: "OK"
+                });
+            }
+        });
+    }
+
+    // Xác nhận hủy đơn (Dữ liệu chỉ demo, không gọi API)
+    function confirmDelete(orderId) {
+        Swal.fire({
+            title: "Cancel Order",
+            text: "Are you sure you want to cancel this order?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, cancel it!",
+            cancelButtonText: "No"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Xóa đơn khỏi giao diện (không gọi API)
+                const rows = document.querySelectorAll("#orderList tr");
+                rows.forEach(row => {
+                    if (row.children[1].textContent === orderId) {
+                        row.remove();
+                    }
+                });
+
+                Swal.fire({
+                    title: "Order Canceled",
+                    text: "The order has been successfully canceled.",
+                    icon: "success",
+                    confirmButtonText: "OK"
+                });
+            }
+        });
+    }
+
+    // Gán sự kiện cho các nút
+    window.confirmReturn = confirmReturn;
+    window.confirmDelete = confirmDelete;
+});
+</script>

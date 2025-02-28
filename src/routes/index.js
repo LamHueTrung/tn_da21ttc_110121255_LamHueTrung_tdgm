@@ -1,6 +1,10 @@
 const sitesRouter = require('./sites');
 const usersRouter = require('./user');
 const deviceManagersRouter = require('./deviceManager');
+const rewardManagersRouter = require('./rewardManager');
+const statisticRouter = require('./statistic');
+const deviceToRoomsRouter = require('./deviceToRoom');
+const borrowRepaysRouter = require('./borrowRepay');
 const session = require('express-session');
 const passport = require('passport');
 
@@ -20,6 +24,10 @@ function Route(app) {
         res.locals.dataUser = req.session.dataUser || {};
         next();
     });
+    app.use('/statistic', statisticRouter);
+    app.use('/reward', rewardManagersRouter);
+    app.use('/deviceToRoom', deviceToRoomsRouter);
+    app.use('/borrowRepay', borrowRepaysRouter);
     app.use('/deviceManger', deviceManagersRouter);
     app.use('/users', usersRouter);
     app.use('/', sitesRouter);

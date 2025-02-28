@@ -1,0 +1,151 @@
+<div class="row add-user mb-4">
+    <h1 class="title-add-user text-center mb-4">Add New</h1>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <!-- Bảng danh sách thiết bị có thể chọn -->
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Status</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+                <tbody id="deviceList">
+                    <tr>
+                        <td style="text-align: center;">
+                            <input style="height: 20px; width: 20px;" class="checkbox" type="checkbox" 
+                                   data-name="Remote" data-category="Máy tính" data-quantity="1">
+                        </td>
+                        <td style="color: green">Đang hoạt động</td>
+                        <td>Remote</td>
+                        <td>Máy tính</td>
+                        <td>1</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center;">
+                            <input style="height: 20px; width: 20px;" class="checkbox" type="checkbox" 
+                                   data-name="Projector" data-category="Thiết bị trình chiếu" data-quantity="1">
+                        </td>
+                        <td style="color: green">Đang hoạt động</td>
+                        <td>Projector</td>
+                        <td>Thiết bị trình chiếu</td>
+                        <td>1</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Bảng danh sách thiết bị đã chọn -->
+        <h3 class="mt-4">Borrowed Devices</h3>
+        <table class="table table-bordered" id="borrowedTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="borrowedList">
+                <!-- Thiết bị được chọn sẽ hiển thị ở đây -->
+            </tbody>
+        </table>
+        
+        <div class="d-flex" style="float: right;">
+            <button id="createOrderBtn" type="submit" class="btn btn-system btn-submit">Create Order</button>
+            <button type="button" onclick="javascript:history.back()" class="btn btn-secondary btn-previou">Back</button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const checkboxes = document.querySelectorAll(".checkbox");
+    const borrowedList = document.getElementById("borrowedList");
+    const createOrderBtn = document.getElementById("createOrderBtn");
+
+    // Danh sách thiết bị được chọn
+    let selectedDevices = [];
+
+    // Xử lý khi chọn checkbox
+    checkboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", function () {
+            const name = this.dataset.name;
+            const category = this.dataset.category;
+            const quantity = this.dataset.quantity;
+
+            if (this.checked) {
+                // Nếu checkbox được chọn, thêm vào danh sách mượn
+                selectedDevices.push({ name, category, quantity });
+
+                // Cập nhật giao diện danh sách mượn
+                const newRow = document.createElement("tr");
+                newRow.innerHTML = `
+                    <td>${name}</td>
+                    <td>${category}</td>
+                    <td>${quantity}</td>
+                    <td><button class="btn btn-danger btn-sm remove-device">Remove</button></td>
+                `;
+                borrowedList.appendChild(newRow);
+
+                // Thêm sự kiện cho nút "Remove"
+                newRow.querySelector(".remove-device").addEventListener("click", function () {
+                    removeDevice(name);
+                });
+            } else {
+                // Nếu checkbox bỏ chọn, xóa khỏi danh sách mượn
+                removeDevice(name);
+            }
+        });
+    });
+
+    // Xử lý khi nhấn "Remove"
+    function removeDevice(deviceName) {
+        selectedDevices = selectedDevices.filter(device => device.name !== deviceName);
+        updateBorrowedList();
+    }
+
+    // Cập nhật danh sách thiết bị mượn trong bảng
+    function updateBorrowedList() {
+        borrowedList.innerHTML = ""; // Xóa nội dung cũ
+        selectedDevices.forEach((device) => {
+            const newRow = document.createElement("tr");
+            newRow.innerHTML = `
+                <td>${device.name}</td>
+                <td>${device.category}</td>
+                <td>${device.quantity}</td>
+                <td><button class="btn btn-danger btn-sm remove-device">Remove</button></td>
+            `;
+            borrowedList.appendChild(newRow);
+
+            // Gán sự kiện xóa cho nút Remove
+            newRow.querySelector(".remove-device").addEventListener("click", function () {
+                removeDevice(device.name);
+            });
+
+            // Cập nhật checkbox khi xóa thiết bị
+            checkboxes.forEach((checkbox) => {
+                if (checkbox.dataset.name === device.name) {
+                    checkbox.checked = true;
+                }
+            });
+        });
+    }
+
+    // Khi nhấn "Create Order", in danh sách đã chọn
+    createOrderBtn.addEventListener("click", function () {
+        console.log("Danh sách thiết bị đã chọn:", selectedDevices);
+        Swal.fire({
+            title: "Order Created",
+            text: "Devices have been selected successfully!",
+            icon: "success",
+            confirmButtonText: "OK"
+        });
+    });
+});
+</script>

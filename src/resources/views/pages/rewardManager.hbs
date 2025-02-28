@@ -1,0 +1,122 @@
+<div class="card shadow mb-4" id="page-top">
+    <div class="card-header py-3">
+        <a href="/reward/addReward" class="btn btn-darks">Add New Gift</a>
+    </div>
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">List All Gifts</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Gift Name</th>
+                        <th>Category</th>
+                        <th>Stock Quantity</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dữ liệu demo -->
+                    <tr>
+                        <td>1</td>
+                        <td>Notebook</td>
+                        <td>Stationery</td>
+                        <td>50</td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <img width="30px" src="/img/dotsMenu.png" alt="">
+                                    <style>
+                                        .dropdown-toggle::after {
+                                            display: none;
+                                        }
+                                        .btn-outline-primary {
+                                            border: none;
+                                        }
+                                        .btn-outline-primary:hover {
+                                            background: none;
+                                        }
+                                    </style>
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <!-- Edit -->
+                                    <a class="dropdown-item" onclick="editGift('Notebook')"><i class="fa-regular fa-pen-to-square"></i> Edit</a>
+                                    
+                                    <!-- Delete -->
+                                    <a class="dropdown-item" onclick="confirmDelete('Notebook')"> <i class="fa-regular fa-trash-can"></i> Delete</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Trophy</td>
+                        <td>Award</td>
+                        <td>20</td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <img width="30px" src="/img/dotsMenu.png" alt="">
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" onclick="editGift('Trophy')"><i class="fa-regular fa-pen-to-square"></i> Edit</a>
+                                    <a class="dropdown-item" onclick="confirmDelete('Trophy')"><i class="fa-regular fa-trash-can"></i> Delete</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <button type="button" onclick="javascript:history.back()" class="btn btn-secondary">Back</button>
+        </div>
+    </div>
+</div>
+
+<script>
+window.editGift = function (giftName) {
+    Swal.fire({
+        title: `Edit Gift: ${giftName}`,
+        html: `
+            <input type="text" id="editGiftName" class="swal2-input" value="${giftName}">
+            <input type="text" id="editGiftCategory" class="swal2-input" placeholder="New Category">
+            <input type="number" id="editGiftQuantity" class="swal2-input" placeholder="New Quantity">
+        `,
+        showCancelButton: true,
+        confirmButtonText: "Save",
+        preConfirm: () => {
+            const newName = document.getElementById("editGiftName").value;
+            const newCategory = document.getElementById("editGiftCategory").value;
+            const newQuantity = document.getElementById("editGiftQuantity").value;
+
+            if (!newName || !newCategory || !newQuantity) {
+                Swal.showValidationMessage("Please fill in all fields.");
+            }
+            return { newName, newCategory, newQuantity };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire("Updated!", "Gift details have been updated.", "success");
+        }
+    });
+};
+
+window.confirmDelete = function (giftName) {
+    Swal.fire({
+        title: `Delete Gift: ${giftName}?`,
+        text: "Are you sure you want to remove this gift from inventory?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete it!",
+        cancelButtonText: "Cancel"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.querySelectorAll("#giftList tr").forEach(row => {
+                if (row.children[1].textContent === giftName) row.remove();
+            });
+            Swal.fire("Deleted!", "The gift has been removed from inventory.", "success");
+        }
+    });
+};
+</script>

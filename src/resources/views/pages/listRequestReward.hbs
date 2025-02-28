@@ -1,0 +1,126 @@
+<div class="card shadow mb-4" id="page-top">
+    <div class="card-header py-3">
+        <button class="btn btn-darks" id="importPdfBtn">Import Request (PDF)</button>
+        <button class="btn btn-system ml-2" id="exportPdfBtn">Export Approved Requests (PDF)</button>
+    </div>
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">List of Imported Request Forms</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Requester</th>
+                        <th>File Name</th>
+                        <th>Uploaded Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dữ liệu demo -->
+                    <tr>
+                        <td>1</td>
+                        <td>John Doe</td>
+                        <td>request_JohnDoe.pdf</td>
+                        <td>2024-02-26</td>
+                        <td><span class="text-warning">Pending</span></td>
+                        <td>
+                            <a href="/uploads/request_JohnDoe.pdf" target="_blank" class="btn btn-sm btn-primary">View</a>
+                            <button class="btn btn-sm btn-success" onclick="confirmApprove('1')">Approve</button>
+                            <button class="btn btn-sm btn-danger" onclick="confirmReject('1')">Reject</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Jane Smith</td>
+                        <td>request_JaneSmith.pdf</td>
+                        <td>2024-02-25</td>
+                        <td><span class="text-success">Approved</span></td>
+                        <td>
+                            <a href="/uploads/request_JaneSmith.pdf" target="_blank" class="btn btn-sm btn-primary">View</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <button type="button" onclick="javascript:history.back()" class="btn btn-secondary">Back</button>
+    </div>
+</div>
+
+<!-- Form upload PDF -->
+<div id="uploadForm" style="display: none;" class="col-md-6 offset-md-3 mt-4">
+    <form action="/reward/request/uploadPDF" method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label class="form-label">Upload Request Form (PDF)</label>
+            <input type="file" class="form-control" name="requestPDF" id="requestPDF" accept=".pdf">
+        </div>
+
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-system btn-submit">Upload</button>
+            <button type="button" class="btn btn-secondary ml-2" id="cancelUpload">Cancel</button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Lấy phần tử bằng ID
+    const importPdfBtn = document.getElementById("importPdfBtn");
+    const exportPdfBtn = document.getElementById("exportPdfBtn");
+    const uploadForm = document.getElementById("uploadForm");
+    const cancelUpload = document.getElementById("cancelUpload");
+    
+    // Ẩn form tải lên ban đầu
+    uploadForm.style.display = "none";
+
+    // Khi bấm "Import Request (PDF)" thì hiển thị form tải lên
+    importPdfBtn.addEventListener("click", function() {
+        uploadForm.style.display = "block";
+    });
+
+    // Khi bấm "Cancel" thì ẩn form tải lên
+    cancelUpload.addEventListener("click", function() {
+        uploadForm.style.display = "none";
+    });
+
+    // Khi bấm "Export Approved Requests (PDF)"
+    exportPdfBtn.addEventListener("click", function () {
+        Swal.fire("Success!", "Approved request list exported as PDF!", "success");
+    });
+});
+
+// Duyệt đơn đề nghị
+window.confirmApprove = function (requestId) {
+    Swal.fire({
+        title: "Approve Request",
+        text: "Are you sure you want to approve this request?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes, approve it!",
+        cancelButtonText: "Cancel"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire("Approved!", "The request has been approved.", "success");
+        }
+    });
+};
+
+// Từ chối đơn đề nghị
+window.confirmReject = function (requestId) {
+    Swal.fire({
+        title: "Reject Request",
+        text: "Are you sure you want to reject this request?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, reject it!",
+        cancelButtonText: "Cancel"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire("Rejected!", "The request has been rejected.", "error");
+        }
+    });
+};
+</script>

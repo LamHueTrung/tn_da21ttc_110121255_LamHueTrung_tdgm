@@ -1,0 +1,79 @@
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Device Statistics</h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <!-- Biểu đồ tình trạng thiết bị -->
+            <div class="col-lg-6">
+                <canvas id="deviceStatusChart"></canvas>
+            </div>
+
+            <!-- Biểu đồ thiết bị theo loại -->
+            <div class="col-lg-6">
+                <canvas id="deviceTypeChart"></canvas>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <!-- Biểu đồ kho thiết bị -->
+            <div class="col-lg-12">
+                <canvas id="deviceStockChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Biểu đồ tình trạng thiết bị
+    new Chart(document.getElementById("deviceStatusChart"), {
+        type: "doughnut",
+        data: {
+            labels: ["Operational", "Damaged", "Maintenance"],
+            datasets: [{
+                data: [60, 25, 15], // Dữ liệu demo
+                backgroundColor: ["#28a745", "#dc3545", "#ffc107"]
+            }]
+        },
+        options: {
+            title: { display: true, text: "Device Status Overview" },
+            responsive: true
+        }
+    });
+
+    // Biểu đồ thiết bị theo loại
+    new Chart(document.getElementById("deviceTypeChart"), {
+        type: "pie",
+        data: {
+            labels: ["Laptops", "Projectors", "Whiteboards"],
+            datasets: [{
+                data: [50, 30, 20], // Dữ liệu demo
+                backgroundColor: ["#007bff", "#17a2b8", "#ffc107"]
+            }]
+        },
+        options: {
+            title: { display: true, text: "Devices by Type" },
+            responsive: true
+        }
+    });
+
+    // Biểu đồ kho thiết bị
+    new Chart(document.getElementById("deviceStockChart"), {
+        type: "bar",
+        data: {
+            labels: ["Laptops", "Projectors", "Whiteboards"],
+            datasets: [{
+                label: "Stock Quantity",
+                data: [120, 50, 75], // Dữ liệu demo
+                backgroundColor: "#007bff"
+            }]
+        },
+        options: {
+            title: { display: true, text: "Device Stock Overview" },
+            responsive: true
+        }
+    });
+});
+</script>

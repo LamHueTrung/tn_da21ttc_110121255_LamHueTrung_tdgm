@@ -1,6 +1,6 @@
 const express = require('express');
 const router  = express.Router();
-const sitesControllers = require('../app/controllers/query/sitesQuery');
+const sitesControllers = require('../app/controllers/query/SitesQuery');
 
 router.use('/home', sitesControllers.Index);
 router.use('/', sitesControllers.login);

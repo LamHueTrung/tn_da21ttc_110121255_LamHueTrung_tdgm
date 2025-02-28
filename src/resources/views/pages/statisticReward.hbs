@@ -1,0 +1,63 @@
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Gift Reward Statistics</h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <!-- Biểu đồ kho quà thưởng -->
+            <div class="col-lg-6">
+                <canvas id="giftStockChart"></canvas>
+            </div>
+
+            <!-- Biểu đồ nhập xuất kho quà tặng -->
+            <div class="col-lg-6">
+                <canvas id="giftTransactionChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Biểu đồ kho quà tặng
+    new Chart(document.getElementById("giftStockChart"), {
+        type: "bar",
+        data: {
+            labels: ["Notebooks", "Trophies", "Gift Cards"],
+            datasets: [{
+                label: "Stock Quantity",
+                data: [80, 40, 120], // Dữ liệu demo
+                backgroundColor: "#dc3545"
+            }]
+        },
+        options: {
+            title: { display: true, text: "Gift Inventory Overview" },
+            responsive: true
+        }
+    });
+
+    // Biểu đồ nhập xuất kho quà tặng
+    new Chart(document.getElementById("giftTransactionChart"), {
+        type: "line",
+        data: {
+            labels: ["Jan", "Feb", "Mar", "Apr", "May"],
+            datasets: [{
+                label: "Imported",
+                data: [30, 50, 40, 60, 45], // Dữ liệu demo
+                borderColor: "#17a2b8",
+                fill: false
+            }, {
+                label: "Exported",
+                data: [20, 40, 35, 50, 38], // Dữ liệu demo
+                borderColor: "#dc3545",
+                fill: false
+            }]
+        },
+        options: {
+            title: { display: true, text: "Gift Import/Export Over Time" },
+            responsive: true
+        }
+    });
+});
+</script>

@@ -1,6 +1,6 @@
 const express = require('express');
 const router  = express.Router();
-const DeviceManagerQuery = require('../app/controllers/query/deivceMangerQuery');
+const DeviceManagerQuery = require('../app/controllers/query/DeivceMangerQuery');
 
 router.use('/home', DeviceManagerQuery.Index);
 router.use('/addDevice', DeviceManagerQuery.AddDevice);

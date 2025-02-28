@@ -1,0 +1,67 @@
+<div class="card shadow mb-4" id="page-top">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Add Devices to Room: RM101</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Device Name</th>
+                        <th>Category</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+                <tbody id="deviceList">
+                    <!-- Dữ liệu demo: Danh sách thiết bị chưa thuộc phòng nào -->
+                    <tr>
+                        <td><input type="checkbox" class="device-checkbox" data-id="D001" data-name="Projector"></td>
+                        <td>Projector</td>
+                        <td>Presentation</td>
+                        <td>2</td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="device-checkbox" data-id="D002" data-name="Laptop"></td>
+                        <td>Laptop</td>
+                        <td>Workstation</td>
+                        <td>5</td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="device-checkbox" data-id="D003" data-name="Speaker"></td>
+                        <td>Speaker</td>
+                        <td>Audio</td>
+                        <td>3</td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="device-checkbox" data-id="D004" data-name="Whiteboard"></td>
+                        <td>Whiteboard</td>
+                        <td>Teaching Aid</td>
+                        <td>1</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <button id="confirmAddDevice" class="btn btn-primary">Add Selected Devices</button>
+        <button type="button" onclick="javascript:history.back()" class="btn btn-secondary">Back</button>
+    </div>
+</div>
+
+<script>
+document.getElementById("confirmAddDevice").addEventListener("click", function () {
+    let selectedDevices = [];
+    document.querySelectorAll(".device-checkbox:checked").forEach((checkbox) => {
+        selectedDevices.push({
+            id: checkbox.dataset.id,
+            name: checkbox.dataset.name
+        });
+    });
+
+    if (selectedDevices.length === 0) {
+        Swal.fire("Error", "Please select at least one device!", "error");
+        return;
+    }
+
+    Swal.fire("Success!", `Devices ${selectedDevices.map(d => d.name).join(", ")} added to Room RM101`, "success");
+});
+</script>

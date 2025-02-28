@@ -1,6 +1,6 @@
 const express = require('express');
 const router  = express.Router();
-const UserQuery = require('../app/controllers/query/userQuery');
+const UserQuery = require('../app/controllers/query/UserQuery');
 
 router.use('/addUser', UserQuery.AddUser);
 router.use('/ListAllUser', UserQuery.ListAllUser);

@@ -1,0 +1,116 @@
+<div class="card shadow mb-4" id="page-top">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Devices in Room: RM101</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Device Name</th>
+                        <th>Category</th>
+                        <th>Quantity</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="deviceList">
+                    <!-- Dữ liệu demo: Danh sách thiết bị trong phòng RM101 -->
+                    <tr>
+                        <td>1</td>
+                        <td>Projector</td>
+                        <td>Presentation</td>
+                        <td>2</td>
+                        <td><span class="text-success">Available</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" onclick="transferDevice('Projector', 'RM101')">Transfer</button>
+                            <button class="btn btn-sm btn-danger" onclick="removeDevice('Projector', 'RM101')">Remove</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Laptop</td>
+                        <td>Workstation</td>
+                        <td>3</td>
+                        <td><span class="text-danger">In Use</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" onclick="transferDevice('Laptop', 'RM101')">Transfer</button>
+                            <button class="btn btn-sm btn-danger" onclick="removeDevice('Laptop', 'RM101')">Remove</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Speaker</td>
+                        <td>Audio</td>
+                        <td>1</td>
+                        <td><span class="text-success">Available</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" onclick="transferDevice('Speaker', 'RM101')">Transfer</button>
+                            <button class="btn btn-sm btn-danger" onclick="removeDevice('Speaker', 'RM101')">Remove</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-between mt-3">
+            <a href="/deviceManager/homeRoom" class="btn btn-secondary">Back</a>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Xóa thiết bị khỏi phòng (Chỉ xóa trên giao diện, không kết nối API)
+    window.removeDevice = function (deviceName, roomCode) {
+        Swal.fire({
+            title: "Remove Device",
+            text: `Are you sure you want to remove "${deviceName}" from ${roomCode}?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, remove it!",
+            cancelButtonText: "Cancel"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.querySelectorAll("#deviceList tr").forEach(row => {
+                    if (row.children[1].textContent === deviceName) row.remove();
+                });
+                Swal.fire("Removed!", `The device "${deviceName}" has been removed from ${roomCode}.`, "success");
+            }
+        });
+    };
+
+    // Chuyển thiết bị sang phòng khác (Chỉ cập nhật giao diện, không kết nối API)
+    window.transferDevice = function (deviceName, currentRoom) {
+        Swal.fire({
+            title: "Transfer Device",
+            html: `
+                <label for="destinationRoom">Select destination room:</label>
+                <select id="destinationRoom" class="swal2-input">
+                    <option value="RM102">Room 102</option>
+                    <option value="RM103">Room 103</option>
+                    <option value="RM104">Room 104</option>
+                </select>
+            `,
+            showCancelButton: true,
+            confirmButtonText: "Transfer",
+            cancelButtonText: "Cancel",
+            preConfirm: () => {
+                const destinationRoom = document.getElementById("destinationRoom").value;
+                if (!destinationRoom || destinationRoom === currentRoom) {
+                    Swal.showValidationMessage("Please select a valid destination room.");
+                }
+                return destinationRoom;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.querySelectorAll("#deviceList tr").forEach(row => {
+                    if (row.children[1].textContent === deviceName) row.remove();
+                });
+                Swal.fire("Transferred!", `The device "${deviceName}" has been moved to ${result.value}.`, "success");
+            }
+        });
+    };
+});
+</script>

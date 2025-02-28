@@ -1,0 +1,126 @@
+<div class="card shadow mb-4" id="page-top">
+    <div class="card-header py-3">
+        <a href="#" class="btn btn-darks" id="addRoomBtn">Add Room</a>
+        <a href="#" class="btn btn-darks" id="importRoomsBtn">Import Rooms</a>
+    </div>
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Room Management</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Room Code</th>
+                        <th>Room Name</th>
+                        <th>Devices</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="roomList">
+                    <!-- Dữ liệu demo -->
+                    <tr>
+                        <td>1</td>
+                        <td>RM101</td>
+                        <td>Room 101</td>
+                        <td><a href="/deviceToRoom/viewDevices/RM101">View Devices</a></td>
+                        <td>
+                            <a href="/deviceToRoom/addDevices/RM101" class="btn btn-sm btn-primary">Add Device</a>
+                            <button class="btn btn-sm btn-danger" onclick="deleteRoom('RM101')">Delete</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>RM102</td>
+                        <td>Room 102</td>
+                        <td><a href="/deviceToRoom/viewDevices/RM102">View Devices</a></td>
+                        <td>
+                            <a href="/deviceToRoom/addDevice/RM102" class="btn btn-sm btn-primary">Add Device</a>
+                            <button class="btn btn-sm btn-danger" onclick="deleteRoom('RM102')">Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <button type="button" onclick="javascript:history.back()" class="btn btn-secondary">Back</button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Thêm phòng thủ công
+    document.getElementById("addRoomBtn").addEventListener("click", function () {
+        Swal.fire({
+            title: "Add New Room",
+            html: `
+                <input type="text" id="roomCode" class="swal2-input" placeholder="Room Code">
+                <input type="text" id="roomName" class="swal2-input" placeholder="Room Name">
+            `,
+            showCancelButton: true,
+            confirmButtonText: "Add",
+            preConfirm: () => {
+                const roomCode = document.getElementById("roomCode").value;
+                const roomName = document.getElementById("roomName").value;
+                if (!roomCode || !roomName) {
+                    Swal.showValidationMessage("Please enter both Room Code and Room Name");
+                }
+                return { roomCode, roomName };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const roomTable = document.getElementById("roomList");
+                const newRow = `<tr>
+                    <td>${roomTable.rows.length + 1}</td>
+                    <td>${result.value.roomCode}</td>
+                    <td>${result.value.roomName}</td>
+                    <td><a href="/deviceManager/viewDevices/${result.value.roomCode}">View Devices</a></td>
+                    <td>
+                        <a href="/deviceManager/addDevice/${result.value.roomCode}" class="btn btn-sm btn-primary">Add Device</a>
+                        <a href="/deviceManager/transferDevice/${result.value.roomCode}" class="btn btn-sm btn-warning">Transfer Device</a>
+                        <button class="btn btn-sm btn-danger" onclick="deleteRoom('${result.value.roomCode}')">Delete</button>
+                    </td>
+                </tr>`;
+                roomTable.insertAdjacentHTML("beforeend", newRow);
+                Swal.fire("Success!", "Room added successfully!", "success");
+            }
+        });
+    });
+
+    // Import phòng từ file CSV/Excel
+    document.getElementById("importRoomsBtn").addEventListener("click", function () {
+        Swal.fire({
+            title: "Upload Room List",
+            text: "Please upload a CSV/Excel file containing room data.",
+            input: "file",
+            inputAttributes: { accept: ".csv, .xlsx" },
+            showCancelButton: true,
+            confirmButtonText: "Upload",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire("Success!", "Rooms imported successfully!", "success");
+            }
+        });
+    });
+
+    // Xóa phòng
+    window.deleteRoom = function (roomCode) {
+        Swal.fire({
+            title: "Delete Room",
+            text: `Are you sure you want to delete ${roomCode}?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, delete it!",
+            cancelButtonText: "Cancel"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.querySelectorAll("#roomList tr").forEach(row => {
+                    if (row.children[1].textContent === roomCode) row.remove();
+                });
+                Swal.fire("Deleted!", "Room has been deleted.", "success");
+            }
+        });
+    };
+});
+</script>
