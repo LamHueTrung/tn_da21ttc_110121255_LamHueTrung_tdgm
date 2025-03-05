@@ -1,74 +1,21 @@
 const mongoose = require('mongoose');
 
-const degreeSchema = new mongoose.Schema({
-    degreeName: {
-        type: String, 
-        required: true 
-    }, 
-    degreeFile: { 
-        type: String, 
-        required: true 
-    }  
-}); 
-
 const profileSchema = new mongoose.Schema({
-    fullName: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    birthDate: {
-        type: Date,
-        // required: true
-    },
-    specialty: {
-        type: String,
-        // required: true
-    },
-    avatar: {
-        type: String,
-        default: null 
-    },
-    address: {
-        type: String,
-        // required: true
-    },
-    phone: {
-        type: String,
-        // required: true,
-        match: [/^\d{10,15}$/, 'Số điện thoại không hợp lệ'] 
-    },
-    degree: [degreeSchema]
+    fullName: { type: String, required: true, trim: true },
+    birthDate: Date,
+    avatar: { type: String, default: null },
+    address: String,
+    phone: { type: String, match: [/^\d{10,15}$/, 'Số điện thoại không hợp lệ'] }
 });
 
-const acountSchema = new mongoose.Schema({
-    username: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true
-    },
-    password: {
-        type: String,
-        // required: true
-    },
-    role: {
-        type: String,
-        enum: ['system_admin', 'sub_admin', 'user'], 
-        required: true
-    },
+const accountSchema = new mongoose.Schema({
+    username: { type: String, required: true, unique: true, trim: true },
+    password: { type: String, required: true },
+    role: { type: String, enum: ['system_admin', 'sub_admin'], required: true },
     profile: profileSchema,
-    googleId: {   // Lưu Google ID để dễ dàng tham chiếu
-        type: String,
-    },
-    isDeleted: {
-        type: Boolean,
-        default: false 
-    }
-}, {
-    timestamps: true
-});
+    isDeleted: { type: Boolean, default: false }
+}, { timestamps: true });
 
-const Acount = mongoose.model('Acount', acountSchema);
+const Account = mongoose.model('Account', accountSchema);
 
-module.exports = Acount;
+module.exports = Account;

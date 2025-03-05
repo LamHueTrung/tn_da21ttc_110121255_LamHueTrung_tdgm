@@ -5,6 +5,7 @@ const rewardManagersRouter = require('./rewardManager');
 const statisticRouter = require('./statistic');
 const deviceToRoomsRouter = require('./deviceToRoom');
 const borrowRepaysRouter = require('./borrowRepay');
+const apiRoute = require('./api/index');
 const session = require('express-session');
 const passport = require('passport');
 
@@ -24,6 +25,8 @@ function Route(app) {
         res.locals.dataUser = req.session.dataUser || {};
         next();
     });
+    
+    app.use('/api', apiRoute);
     app.use('/statistic', statisticRouter);
     app.use('/reward', rewardManagersRouter);
     app.use('/deviceToRoom', deviceToRoomsRouter);
