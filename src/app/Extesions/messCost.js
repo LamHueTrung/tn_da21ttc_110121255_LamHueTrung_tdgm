@@ -25,7 +25,7 @@ const messages = {
     token: {
         tokenVerificationFailed: 'Token verification failed.',
         tokenVerificationSucces: 'Token verification success.',
-        tokenNotFound: 'Admin not found.',
+        tokenNotFound: 'Token not found.',
         tokenFetchingError: 'Error fetching data.'
     },
 

@@ -177,7 +177,7 @@ class Validator {
      * @param {Array} allowedExtensions - Các định dạng tệp cho phép.
      * @returns {string|null} - Thông báo lỗi nếu không phải ảnh hợp lệ, null nếu hợp lệ.
      */
-    static isImageFile(file, fieldName, allowedExtensions = ['png', 'jpg', 'jpeg']) {
+    static isImageFile(file, fieldName, allowedExtensions = ['png', 'jpg', 'jpeg', 'webp']) {
         if (file && file.name) { 
             const extension = file.name.split('.').pop().toLowerCase();
             if (!allowedExtensions.includes(extension)) {

@@ -88,7 +88,8 @@ class LoginAdmin {
                 { expiresIn: '1h' }
             );
             req.session.token = token;
-
+            req.headers.authorization = token;
+            
             // Trả về JSON khi đăng nhập thành công
             return res.status(200).json({
                 success: true,
