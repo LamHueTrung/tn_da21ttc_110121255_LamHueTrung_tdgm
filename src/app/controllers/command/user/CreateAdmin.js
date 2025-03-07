@@ -1,4 +1,4 @@
-const Acounts = require('../../../model/Acount');
+const Acounts = require('../../../model/Account');
 const CryptoService = require('../../../Extesions/cryptoService');
 const messages = require('../../../Extesions/messCost');
 

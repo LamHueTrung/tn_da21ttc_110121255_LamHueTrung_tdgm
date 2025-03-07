@@ -1,4 +1,5 @@
 // const CryptoService = require('../../../Extesions/cryptoService');
+const Acounts = require('../../model/Account');
 const jwt = require('jsonwebtoken');
 const messages = require('../../Extesions/messCost');
 
@@ -33,130 +34,62 @@ class UserQuery {
         }
     }
     
-    // /**
-    //  * Hàm UpdateUser: Xử lý trang cập nhật thông tin người dùng.
-    //  * - Tìm kiếm người dùng theo ID và trả về dữ liệu để hiển thị lên form.
-    //  * - Nếu không tìm thấy người dùng, trả về lỗi 404.
-    //  * @param {Object} req - Request từ client
-    //  * @param {Object} res - Response trả về cho client
-    //  * @param {Function} next - Hàm tiếp theo trong chuỗi middleware
-    //  */
-    // async UpdateUser(req, res, next) {
-    //     const currentYear = new Date().getFullYear();
-    //     const userId = req.params.id;
+    /**
+     * 🔹 Lấy danh sách tất cả người dùng (hỗ trợ phân trang)
+     * @param {Object} req - Request từ client.
+     * @param {Object} res - Response trả về JSON danh sách người dùng.
+     */
+    async getAllUsers(req, res) {
+        try {
+            const { page = 1, limit = 10 } = req.query; // Hỗ trợ phân trang
 
-    //     try {
-    //         const admin = await Acounts.findById(userId);
+            // Chuyển đổi sang số nguyên
+            const pageNumber = parseInt(page, 10);
+            const limitNumber = parseInt(limit, 10);
 
-    //         if (!admin) {
-    //             return res.status(404).send(messages.token.tokenNotFound);  // Nếu không tìm thấy người dùng
-    //         }
+            const users = await Acounts.find({})
+                .select("-password") // Loại bỏ trường `password`
+                .skip((pageNumber - 1) * limitNumber)
+                .limit(limitNumber);
 
-    //         res.render('pages/admin/updateUser', {
-    //             layout: 'admin',
-    //             year: currentYear,
-    //             isUpdate: req.session.isUpdate,  // Trạng thái cập nhật người dùng
-    //             data: {
-    //                 id: admin._id,
-    //                 username: admin.username,
-    //                 role: admin.role,
-    //                 fullName: admin.profile.fullName,
-    //                 birthDate: admin.profile.birthDate,
-    //                 specialty: admin.profile.specialty,
-    //                 avatar: admin.profile.avatar,
-    //                 address: admin.profile.address,
-    //                 phone: admin.profile.phone,
-    //             }
-    //         });
-    //     } catch (error) {
-    //         console.error(messages.token.tokenFetchingError, error);
-    //         res.status(500).send('Internal Server Error');  // Trả về lỗi server nếu có lỗi
-    //     }
-    // }
+            const totalUsers = await Acounts.countDocuments();
 
-    // /**
-    //  * Hàm Profile: Xử lý trang hồ sơ người dùng.
-    //  * - Lấy thông tin người dùng từ token và trả về trang hồ sơ.
-    //  * @param {Object} req - Request từ client
-    //  * @param {Object} res - Response trả về cho client
-    //  * @param {Function} next - Hàm tiếp theo trong chuỗi middleware
-    //  */
-    // Profile(req, res, next) {
-    //     const currentYear = new Date().getFullYear();
-    //     const token = req.session.token;
-    //     const jwtSecretKey = process.env.JWT_SECRET_KEY;
+            return res.status(200).json({
+                success: true,
+                totalUsers,
+                page: pageNumber,
+                limit: limitNumber,
+                users
+            });
 
-    //     jwt.verify(token, jwtSecretKey, (err, decoded) => {
-    //         if (err) {
-    //             console.error(messages.token.tokenVerificationFailed, err);  // Nếu token không hợp lệ
-    //         }
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách người dùng:", error);
+            return res.status(500).json({ success: false, message: "Lỗi khi lấy danh sách người dùng.", error: error.message });
+        }
+    }
 
-    //         req.userId = decoded.id;  // Gán userId vào request từ decoded token
+    /**
+     * 🔹 Lấy thông tin chi tiết của một người dùng theo ID
+     * @param {Object} req - Request từ client (chứa `id`).
+     * @param {Object} res - Response trả về JSON chi tiết người dùng.
+     */
+    async getUserById(req, res) {
+        const { id } = req.params;
 
-    //         Acounts.findById(req.userId)
-    //             .then(admin => {
-    //                 if (!admin) {
-    //                     return res.status(404).send('Admin not found');  // Nếu không tìm thấy người dùng
-    //                 }
+        try {
+            const user = await Acounts.findById(id).select("-password"); // Loại bỏ trường `password`
 
-    //                 res.render('pages/admin/profile', {
-    //                     layout: 'admin',
-    //                     data: {
-    //                         role: admin.role == 'system_admin' ? 'SYSTEM ADMIN' : 'SUB ADMIN',  // Xử lý hiển thị role
-    //                         fullName: admin.profile.fullName,
-    //                         birthDate: admin.profile.birthDate,
-    //                         specialty: admin.profile.specialty,
-    //                         avatar: admin.profile.avatar,
-    //                         address: admin.profile.address,
-    //                         phone: admin.profile.phone,
-    //                     },
-    //                     year: currentYear
-    //                 });
-    //             })
-    //             .catch(error => {
-    //                 console.error(messages.token.tokenFetchingError, error);
-    //                 res.status(500).send('Internal Server Error');  // Trả về lỗi server nếu có lỗi khi lấy thông tin người dùng
-    //             });
-    //     });
-    // }
+            if (!user) {
+                return res.status(404).json({ success: false, message: messages.user.notFound || "Không tìm thấy người dùng." });
+            }
 
-    
+            return res.status(200).json({ success: true, user });
 
-    // /**
-    //  * Hàm ViewsProfileUser: Xử lý trang hồ sơ người dùng khi xem thông tin người khác.
-    //  * - Trả về thông tin người dùng cụ thể theo ID.
-    //  * @param {Object} req - Request từ client
-    //  * @param {Object} res - Response trả về cho client
-    //  * @param {Function} next - Hàm tiếp theo trong chuỗi middleware
-    //  */
-    // ViewsProfileUser(req, res, next) {
-    //     const currentYear = new Date().getFullYear();
-    //     const userId = req.params.id;  // Lấy ID người dùng từ params
-    //     Acounts.findById(userId)
-    //         .then(admin => {
-    //             if (!admin) {
-    //                 return res.status(404).send(messages.token.tokenNotFound);  // Nếu không tìm thấy người dùng
-    //             }
-
-    //             res.render('pages/admin/profile', {
-    //                 layout: 'admin',
-    //                 data: {
-    //                     role: admin.role == 'system_admin' ? 'SYSTEM ADMIN' : admin.role == 'sub_admin' ? 'SUB ADMIN' : 'USER',  // Xử lý hiển thị role
-    //                     fullName: admin.profile.fullName,
-    //                     birthDate: admin.profile.birthDate,
-    //                     specialty: admin.profile.specialty,
-    //                     avatar: admin.profile.avatar,
-    //                     address: admin.profile.address,
-    //                     phone: admin.profile.phone,
-    //                 },
-    //                 year: currentYear
-    //             });
-    //         })
-    //         .catch(error => {
-    //             console.error(messages.token.tokenFetchingError, error);
-    //             res.status(500).send('Internal Server Error');  // Trả về lỗi server nếu có lỗi khi lấy thông tin người dùng
-    //         });
-    // }
+        } catch (error) {
+            console.error("Lỗi khi lấy thông tin người dùng:", error);
+            return res.status(500).json({ success: false, message: "Lỗi khi lấy thông tin người dùng.", error: error.message });
+        }
+    }
 }
 
 module.exports = new UserQuery;

@@ -1,5 +1,5 @@
 const messages = require('../../../Extesions/messCost');
-const Acounts = require('../../../model/Acount');
+const Acounts = require('../../../model/Account');
 const fs = require('fs');
 const path = require('path');
 

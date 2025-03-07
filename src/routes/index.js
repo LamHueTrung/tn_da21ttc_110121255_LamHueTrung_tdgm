@@ -10,6 +10,7 @@ const session = require('express-session');
 const passport = require('passport');
 
 function Route(app) {
+    
     app.use(session({
         secret: process.env.JWT_SECRET_KEY, 
         resave: false,
