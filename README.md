@@ -78,6 +78,7 @@ Hệ thống được thiết kế để quản lý thiết bị dạy học và
 
 ### 4. Công nghệ sử dụng
 - **Backend:** Node.js & Express.js
+- **Frontend:** handlebar & boostrap 5
 - **Database:** MongoDB
 - **Authentication:** JWT
 - **API:** RESTful
