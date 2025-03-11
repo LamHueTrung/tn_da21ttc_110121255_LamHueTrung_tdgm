@@ -2,6 +2,7 @@ const express = require('express');
 const router  = express.Router();
 const userRoute = require('./user');
 const deviceRoute = require('./device');
+const roomRoute = require('./room');
 const Login = require('../../app/controllers/command/user/Login');
 const authenticateToken = require('../../app/middleware/authenticateTokenAdmin');
 
@@ -13,4 +14,7 @@ router.use('/user', authenticateToken, userRoute);
 
 // Deivce route 
 router.use('/device', authenticateToken, deviceRoute);
+
+// Room route
+router.use('/room', authenticateToken, roomRoute);
 module.exports = router;

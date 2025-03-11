@@ -4,11 +4,8 @@ const Devices = require("../../../model/Device");
 const DeviceItem = require("../../../model/DeviceItem");
 const Validator = require("../../../Extesions/validator");
 const messages = require("../../../Extesions/messCost");
-const Location = require("../../../model/Location");
+const Room = require("../../../model/Room");
 
-/**
- * Class UpdateDevice - Xử lý API cập nhật thiết bị
- */
 class UpdateDevice {
     /**
      * Kiểm tra tính hợp lệ của dữ liệu đầu vào
@@ -16,18 +13,20 @@ class UpdateDevice {
      * @returns {Object} errors - Đối tượng chứa các lỗi nếu có
      */
     Validate(req) {
-        const { name, category, description, status, quantity, location } = req.body;
+        const { name, category, description, status, quantity, room } = req.body;
         let errors = {};
 
         if (name) {
-            const nameError = Validator.notEmpty(name, "Tên thiết bị") ||
+            const nameError =
+                Validator.notEmpty(name, "Tên thiết bị") ||
                 Validator.notNull(name, "Tên thiết bị") ||
                 Validator.maxLength(name, 100, "Tên thiết bị");
             if (nameError) errors.name = nameError;
         }
 
         if (category) {
-            const categoryError = Validator.notEmpty(category, "Danh mục thiết bị") ||
+            const categoryError =
+                Validator.notEmpty(category, "Danh mục thiết bị") ||
                 Validator.notNull(category, "Danh mục thiết bị") ||
                 Validator.isEnum(
                     category,
@@ -43,7 +42,7 @@ class UpdateDevice {
         }
 
         if (status) {
-            const statusError = Validator.isEnum(status, ["Mới", "Hoạt động", "Hỏng", "Bảo trì"], "Trạng thái thiết bị");
+            const statusError = Validator.isEnum(status, ["Mới", "Hoạt động", 'Đang sử dụng', "Hỏng", "Bảo trì"], "Trạng thái thiết bị");
             if (statusError) errors.status = statusError;
         }
 
@@ -55,7 +54,8 @@ class UpdateDevice {
         // Kiểm tra ảnh nếu có upload ảnh mới
         if (req.files && req.files.length > 0) {
             req.files.forEach((file) => {
-                const imageError = Validator.maxFileSize(file, 10, "Hình ảnh thiết bị") ||
+                const imageError =
+                    Validator.maxFileSize(file, 10, "Hình ảnh thiết bị") ||
                     Validator.isImageFile(file, "Hình ảnh thiết bị");
                 if (imageError) errors.image = imageError;
             });
@@ -86,34 +86,34 @@ class UpdateDevice {
                 });
             }
 
-            const { name, category, description, status, quantity, location } = req.body;
+            const { name, category, description, status, quantity, room } = req.body;
 
-            // Kiểm tra vị trí hiện tại của thiết bị
-            let currentLocation = device.location ? await Location.findById(device.location) : null;
+            // Kiểm tra phòng hiện tại của thiết bị
+            let currentRoom = device.room ? await Room.findById(device.room) : null;
 
-            // Nếu thiết bị chưa có vị trí, mặc định là "Kho chính"
-            if (!currentLocation) {
-                let defaultLocation = await Location.findOne({ name: "Kho chính" });
-                if (!defaultLocation) {
-                    defaultLocation = await Location.create({ name: "Kho chính", description: "Vị trí mặc định" });
+            // Nếu thiết bị chưa có phòng, mặc định là "Kho chính"
+            if (!currentRoom) {
+                let defaultRoom = await Room.findOne({ name: "Kho chính" });
+                if (!defaultRoom) {
+                    defaultRoom = await Room.create({ name: "Kho chính", description: "Phòng mặc định" });
                 }
-                device.location = defaultLocation._id;
-                currentLocation = defaultLocation;
+                device.room = defaultRoom._id;
+                currentRoom = defaultRoom;
             }
 
-            // Nếu có location mới, kiểm tra xem có tồn tại không
-            let newLocation = null;
-            if (location && location !== currentLocation.name) {
-                newLocation = await Location.findOne({ name: location });
-                if (!newLocation) {
-                    newLocation = await Location.create({ name: location, description: "Vị trí mới được tạo" });
+            // Nếu có `room` mới, kiểm tra xem có tồn tại không
+            let newRoom = null;
+            if (room && room !== currentRoom.name) {
+                newRoom = await Room.findOne({ name: room });
+                if (!newRoom) {
+                    newRoom = await Room.create({ name: room, description: "Phòng mới được tạo" });
                 }
-                device.location = newLocation._id;
+                device.room = newRoom._id;
 
                 // Cập nhật tất cả `DeviceItem` liên quan đến thiết bị này
                 await DeviceItem.updateMany(
                     { device: device._id },
-                    { location: newLocation._id }
+                    { room: newRoom._id }
                 );
             }
 
@@ -160,7 +160,7 @@ class UpdateDevice {
                     category: device.category,
                     status: device.status,
                     quantity: device.quantity,
-                    location: newLocation ? newLocation.name : currentLocation.name, // Hiển thị tên vị trí mới nếu có
+                    room: newRoom ? newRoom.name : currentRoom.name, // Hiển thị tên phòng mới nếu có
                     images: device.images,
                 },
             });

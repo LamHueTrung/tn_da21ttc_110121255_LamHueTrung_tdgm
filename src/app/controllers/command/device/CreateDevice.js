@@ -4,20 +4,19 @@ const Devices = require('../../../model/Device');
 const DeviceItem = require('../../../model/DeviceItem');
 const Validator = require('../../../Extesions/validator');
 const messages = require('../../../Extesions/messCost');
-const Location = require('../../../model/Location');
+const Room = require('../../../model/Room');
 
 /**
  * Class CreateDevice - Xử lý API tạo thiết bị mới
  */
 class CreateDevice {
-
     /**
      * Kiểm tra tính hợp lệ của dữ liệu đầu vào
      * @param {Object} req - Request từ client
      * @returns {Object} errors - Đối tượng chứa các lỗi nếu có
      */
     Validate(req) {
-        const { name, category, description, status, quantity } = req.body;
+        const { name, category, description, status, quantity, room } = req.body;
         let errors = {};
 
         const nameError = 
@@ -34,7 +33,7 @@ class CreateDevice {
         const descriptionError = Validator.maxLength(description, 500, 'Mô tả thiết bị');
         if (descriptionError) errors.description = descriptionError;
 
-        const statusError = Validator.isEnum(status, ['Mới', 'Hoạt động', 'Hỏng', 'Bảo trì'], 'Trạng thái thiết bị');
+        const statusError = Validator.isEnum(status, ['Mới', 'Hoạt động', 'Đang sử dụng', 'Hỏng', 'Bảo trì'], 'Trạng thái thiết bị');
         if (statusError) errors.status = statusError;
 
         const quantityError = Validator.isPositiveNumber(quantity, 'Số lượng thiết bị');
@@ -64,7 +63,7 @@ class CreateDevice {
             return res.status(400).json({ success: false, errors });
         }
 
-        const { name, category, description, status, quantity, location } = req.body;
+        const { name, category, description, status, quantity, room } = req.body;
 
         try {
             // Kiểm tra xem thiết bị đã tồn tại chưa
@@ -76,10 +75,10 @@ class CreateDevice {
                 });
             }
 
-            // Nếu không có vị trí, mặc định là "Kho chính"
-            let deviceLocation = await Location.findOne({ name: "Kho chính" });
-            if (!deviceLocation) {
-                deviceLocation = await Location.create({ name: "Kho chính", description: "Kho mặc định cho thiết bị" });
+            // Kiểm tra hoặc tạo `Room` nếu chưa tồn tại
+            let deviceRoom = await Room.findOne({ name: room });
+            if (!deviceRoom) {
+                deviceRoom = await Room.create({ name: room, description: "Phòng mới được tạo" });
             }
 
             // Lưu ảnh vào thư mục tạm
@@ -88,14 +87,13 @@ class CreateDevice {
                 tempImagePaths = req.files.map(file => `src/public/uploads/devices/temp/${file.filename}`);
             }
 
-            // Tạo thiết bị mới (chưa có ảnh)
+            // Tạo thiết bị mới
             const newDevice = new Devices({
                 name,
                 category,
                 description: description || "",
                 status,
                 quantity,
-                location: location || deviceLocation._id,
                 images: [] // Chưa thêm ảnh vào đây
             });
 
@@ -107,7 +105,7 @@ class CreateDevice {
                 const newDeviceItem = new DeviceItem({
                     device: newDevice._id,
                     status: 'Mới',
-                    location: deviceLocation._id
+                    room: deviceRoom._id // 🔥 Cập nhật thành `room`
                 });
                 await newDeviceItem.save();
                 createdDeviceItems.push(newDeviceItem);
@@ -133,19 +131,19 @@ class CreateDevice {
                     category: newDevice.category,
                     status: newDevice.status,
                     quantity: newDevice.quantity,
-                    location: deviceLocation.name,
+                    room: deviceRoom.name,
                     images: newDevice.images,
                     deviceItems: createdDeviceItems.map(item => ({
                         id: item._id,
                         status: item.status,
-                        location: deviceLocation.name
+                        room: deviceRoom.name
                     }))
                 }
             });
 
         } catch (error) {
             // Nếu có lỗi, xóa ảnh trong thư mục tạm
-            for (let tempPath of req.files.map(file => `src/public/uploads/devices/temp/${file.filename}`)) {
+            for (let tempPath of req.files?.map(file => `src/public/uploads/devices/temp/${file.filename}`) || []) {
                 if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
             }
 

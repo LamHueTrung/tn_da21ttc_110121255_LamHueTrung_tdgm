@@ -80,7 +80,7 @@ class UserQuery {
             const user = await Acounts.findById(id).select("-password"); // Loại bỏ trường `password`
 
             if (!user) {
-                return res.status(404).json({ success: false, message: messages.user.notFound || "Không tìm thấy người dùng." });
+                return res.status(404).json({ success: false, message: messages.getByIdUser.getByIdUserNotfound || "Không tìm thấy người dùng." });
             }
 
             return res.status(200).json({ success: true, user });

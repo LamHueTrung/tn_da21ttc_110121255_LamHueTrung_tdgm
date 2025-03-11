@@ -93,49 +93,54 @@ class UpdateUser {
      * @param {Object} req - Request từ client.
      * @param {Object} res - Response JSON.
      */
+    /**
+     * Xử lý API cập nhật người dùng theo ID
+     * @param {Object} req - Request từ client
+     * @param {Object} res - Response để trả JSON
+     */
     Handle = async (req, res) => {
         try {
-            const token = req.user;
-            if (!token) return res.status(401).json({ success: false, message: messages.token.tokenNotFound });
+            const { id } = req.params; // Lấy ID từ URL
 
-            // Xác thực token
-            const decoded = token;
-            const currentUser = await Acounts.findById(decoded.id);
-            if (!currentUser) return res.status(404).json({ success: false, message: messages.updateUser.userNotFound });
-
-            // Kiểm tra dữ liệu
-            const { errors, values } = this.Validate(req, currentUser);
-            if (Object.values(errors).some(error => error)) {
-                return res.status(400).json({ success: false, errors });
+            // Kiểm tra xem người dùng có tồn tại không
+            const currentUser = await Acounts.findById(id);
+            if (!currentUser) {
+                return res.status(404).json({ success: false, message: messages.updateUser.userNotFound });
             }
 
-            // Cập nhật thông tin người dùng
+            // Lấy dữ liệu cần cập nhật từ request
+            const { fullName, birthday, address, numberPhone } = req.body;
+
+            // Tạo dữ liệu cập nhật, giữ nguyên dữ liệu cũ nếu không có giá trị mới
             const updatedData = {
                 username: currentUser.username,
                 role: currentUser.role,
                 profile: {
-                    fullName: values.fullName || currentUser.profile.fullName,
-                    birthDate: values.birthday ? new Date(values.birthday) : currentUser.profile.birthDate,
+                    fullName: fullName || currentUser.profile.fullName,
+                    birthDate: birthday ? new Date(birthday) : currentUser.profile.birthDate,
                     avatar: req.file ? '/avatars/' + req.file.filename : currentUser.profile.avatar,
-                    address: values.address || currentUser.profile.address,
-                    phone: values.numberPhone || currentUser.profile.phone,
+                    address: address || currentUser.profile.address,
+                    phone: numberPhone || currentUser.profile.phone,
                 }
             };
 
             // Xóa avatar cũ nếu có file mới
             if (req.file && currentUser.profile.avatar) {
                 const oldAvatarPath = path.join(__dirname, '../../../../../public', currentUser.profile.avatar);
-                if (fs.existsSync(oldAvatarPath)) fs.unlinkSync(oldAvatarPath);
+                if (fs.existsSync(oldAvatarPath)) {
+                    fs.unlinkSync(oldAvatarPath);
+                }
             }
 
-            await Acounts.findByIdAndUpdate(decoded.id, updatedData, { new: true });
+            // Cập nhật thông tin người dùng trong database
+            await Acounts.findByIdAndUpdate(id, updatedData, { new: true });
 
             return res.status(200).json({ success: true, message: messages.updateUser.updateSuccess });
 
         } catch (error) {
             return res.status(500).json({ success: false, message: messages.serverError, error: error.message });
         }
-    }
+    };
 
     /**
      * Khôi phục tài khoản người dùng bằng cách đặt thuộc tính `isDeleted` thành `false`.

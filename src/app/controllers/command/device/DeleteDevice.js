@@ -3,6 +3,7 @@ const path = require("path");
 const Devices = require("../../../model/Device");
 const DeviceItem = require("../../../model/DeviceItem");
 const messages = require("../../../Extesions/messCost");
+const Room = require("../../../model/Room");
 
 /**
  * Class DeleteDevice - Xử lý API xóa thiết bị
@@ -26,20 +27,20 @@ class DeleteDevice {
                 });
             }
 
-            // Xóa tất cả `DeviceItem` liên quan
+            // Xóa tất cả `DeviceItem` liên quan đến thiết bị
             await DeviceItem.deleteMany({ device: deviceId });
 
             // Xóa tất cả hình ảnh liên quan đến thiết bị
             if (device.images && device.images.length > 0) {
                 device.images.forEach((imagePath) => {
-                    const fullImagePath = `src/public${imagePath}`;
+                    const fullImagePath = path.join(__dirname, "../../../../public", imagePath);
                     if (fs.existsSync(fullImagePath)) {
                         fs.unlinkSync(fullImagePath);
                     }
                 });
             }
 
-            // Xóa thiết bị
+            // Xóa thiết bị khỏi database
             await Devices.findByIdAndDelete(deviceId);
 
             return res.status(200).json({

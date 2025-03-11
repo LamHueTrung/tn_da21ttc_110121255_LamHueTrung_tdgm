@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const Location = require('./Location'); // Import model Location
 
 const deviceItemSchema = new mongoose.Schema({
     device: {
@@ -10,12 +9,12 @@ const deviceItemSchema = new mongoose.Schema({
     status: {
         type: String,
         required: true,
-        enum: ['Mới', 'Hoạt động', 'Hỏng', 'Bảo trì'],
+        enum: ['Mới', 'Hoạt động', 'Đang sử dụng', 'Hỏng', 'Bảo trì'],
         default: 'Hoạt động'
     },
-    location: {
+    room: { // 🔥 Thay `location` bằng `room`
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Location',
+        ref: 'Room',
         required: true
     },
     last_maintenance: {
@@ -32,11 +31,14 @@ const deviceItemSchema = new mongoose.Schema({
     }
 });
 
-// Middleware: Gán vị trí mặc định là "Kho chính" nếu không có
+// Middleware: Gán phòng mặc định nếu chưa có
 deviceItemSchema.pre('save', async function (next) {
-    if (!this.location) {
-        const mainWarehouse = await Location.ensureMainWarehouse();
-        this.location = mainWarehouse._id;
+    if (!this.room) {
+        let mainRoom = await mongoose.model('Room').findOne({ name: "Kho chính" });
+        if (!mainRoom) {
+            mainRoom = await mongoose.model('Room').create({ name: "Kho chính", description: "Kho mặc định" });
+        }
+        this.room = mainRoom._id;
     }
     this.updated_at = Date.now();
     next();

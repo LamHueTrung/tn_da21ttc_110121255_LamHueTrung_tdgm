@@ -76,7 +76,9 @@ const messages = {
     getAllUser: {
         getAllUserError: 'Lỗi khi lấy danh sách tài khoản.',
     },
-
+    getByIdUser: {
+        getByIdUserNotfound: 'Không tìm thấy tài khoản.',
+    },
     restoreUser: {
         restoreError: "Lỗi khi khôi phục người dùng.",
         restoreSuccess: "Người dùng đã được khôi phục thành công."
@@ -113,6 +115,53 @@ const messages = {
         getAllError: "Lỗi khi lấy danh sách thiết bị.",
     },
 
+    importRooms: 
+    {
+        noFile: "Không có file nào được tải lên.",
+        invalidRow: "Dữ liệu không hợp lệ.",
+        success: "Danh sách phòng đã được import thành công.",
+        error: "Lỗi khi import danh sách phòng.",
+        emptyFile: "File không chứa dữ liệu.",
+    },
+
+    location: { 
+        defaultDescription: "Mô tả mặc định của tòa nhà."
+    },
+
+    room: {
+        updateSuccess: "Thông tin phòng đã được cập nhật thành công.",
+        updateError: "Lỗi khi cập nhật phòng học.",
+        toRoomNotFound: "Không tìm thấy phòng đích.",
+        importDescription: "Phòng học mới được thêm từ file CSV.",
+        getAllSuccess: "Lấy danh sách phòng học thành công.",
+        getAllError: "Lỗi khi lấy danh sách phòng học.",
+        getByIdSuccess: "Lấy thông tin chi tiết phòng học thành công.",
+        getByIdError: "Lỗi khi lấy thông tin chi tiết phòng học.",
+        roomNotFound: "Không tìm thấy phòng học.",
+        getDevicesSuccess: "Lấy danh sách thiết bị trong phòng thành công.",
+        getDevicesError: "Lỗi khi lấy danh sách thiết bị trong phòng.",
+        deleteSuccess: "Phòng đã được xóa thành công và thiết bị được chuyển về kho chính.",
+        deleteError: "Lỗi khi xóa phòng học."
+    },
+    assignDevice: {
+        invalidRequest: "Yêu cầu không hợp lệ.",
+        notEnoughDevices: "Không đủ thiết bị để thêm vào phòng học.",
+        noDeviceProvided: 'Không có thiết bị nào được cung cấp.',
+        invalidDevices: 'Danh sách thiết bị không hợp lệ.',
+        success: 'Thiết bị đã được thêm vào phòng học.',
+        error: 'Lỗi khi thêm thiết bị vào phòng học.'
+    },
+
+    device: {
+        deviceNotFoundInRoom: "Không tìm thấy thiết bị trong phòng.",
+        removeSuccess: "Thiết bị đã được xóa khỏi phòng và chuyển về kho chính.",
+        removeError: "Lỗi khi xóa thiết bị khỏi phòng.",
+        deviceNotFound: "Không tìm thấy thiết bị.",
+        alreadyInRoom: "Thiết bị đã có trong phòng đích.",
+        cannotMove: "Không thể di chuyển thiết bị khi đang hỏng hoặc bảo trì.",
+        moveSuccess: "Thiết bị đã được di chuyển thành công.",
+        moveError: "Lỗi khi di chuyển thiết bị."
+    }
 };
 
 module.exports = messages;

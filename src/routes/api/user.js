@@ -13,21 +13,21 @@ router.post('/create', upload.single('avatar'), (req, res) => {
 });
 
 //Route update user
-router.post('/changPassword', (req, res) => {
+router.put('/changPassword', (req, res) => {
     UpdateUserCommand.ChangePassword(req, res); 
 });
-router.post('/updateUser/:id', upload.single('avatar'), (req, res) => {
+router.put('/updateUser/:id', upload.single('avatar'), (req, res) => {
     UpdateUserCommand.Handle(req, res);
 });
-router.post('/restore/:id', (req, res) => {
+router.put('/restore/:id', (req, res) => {
     UpdateUserCommand.restore(req, res);
 });
 
 //Route detele user
-router.post('/disable/:id', (req, res) => {
+router.put('/disable/:id', (req, res) => {
     DeleteUserCommand.disable(req, res);
 });
-router.post('/delete/:id', (req, res) => {
+router.delete('/delete/:id', (req, res) => {
     DeleteUserCommand.delete(req, res);
 });
 

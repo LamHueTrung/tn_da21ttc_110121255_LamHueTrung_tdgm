@@ -27,7 +27,7 @@ locationSchema.pre('save', function (next) {
     next();
 });
 
-// Hàm để tạo "Kho chính" nếu chưa có
+// Hàm tạo "Kho chính" nếu chưa có
 locationSchema.statics.ensureMainWarehouse = async function () {
     let mainWarehouse = await this.findOne({ name: 'Kho chính' });
     if (!mainWarehouse) {
