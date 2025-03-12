@@ -36,5 +36,13 @@ locationSchema.statics.ensureMainWarehouse = async function () {
     return mainWarehouse;
 };
 
+locationSchema.statics.ensurePersonalUseLocation = async function () {
+    let personalLocation = await this.findOne({ name: "Giáo viên đang giữ" });
+    if (!personalLocation) {
+        personalLocation = await this.create({ name: "Giáo viên đang giữ", description: "Thiết bị đang được giáo viên sử dụng cá nhân." });
+    }
+    return personalLocation;
+};
+
 const Location = mongoose.model('Location', locationSchema);
 module.exports = Location;

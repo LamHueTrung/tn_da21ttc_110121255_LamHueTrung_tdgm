@@ -10,11 +10,11 @@ const roomSchema = new mongoose.Schema({
     location: {  // 🔥 Liên kết phòng với `Location`
         type: mongoose.Schema.Types.ObjectId,
         ref: "Location",
-        required: true
+        required: false
     },
     capacity: { // Số lượng thiết bị tối đa trong phòng
         type: Number,
-        required: true,
+        required: false,
         min: 1
     },
     description: {

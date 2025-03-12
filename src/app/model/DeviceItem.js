@@ -10,12 +10,22 @@ const deviceItemSchema = new mongoose.Schema({
         type: String,
         required: true,
         enum: ['Mới', 'Hoạt động', 'Đang sử dụng', 'Hỏng', 'Bảo trì'],
-        default: 'Hoạt động'
+        default: 'Mới'
     },
     room: { // 🔥 Thay `location` bằng `room`
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Room',
-        required: true
+        required: false
+    },
+    location: { 
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Location",
+        required: false // Nếu mượn cá nhân, thiết bị vẫn có vị trí
+    },
+    borrowedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Teacher",
+        required: false // Nếu giáo viên mượn cá nhân, lưu lại ID của họ
     },
     last_maintenance: {
         type: Date,

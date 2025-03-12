@@ -160,7 +160,46 @@ const messages = {
         alreadyInRoom: "Thiết bị đã có trong phòng đích.",
         cannotMove: "Không thể di chuyển thiết bị khi đang hỏng hoặc bảo trì.",
         moveSuccess: "Thiết bị đã được di chuyển thành công.",
-        moveError: "Lỗi khi di chuyển thiết bị."
+        moveError: "Lỗi khi di chuyển thiết bị.",
+        getAvailableSuccess: "Lấy danh sách thiết bị có thể mượn thành công.",
+        getAvailableError: "Lỗi khi lấy danh sách thiết bị có thể mượn."
+    },
+
+    teacher: {
+        noFile: "Vui lòng tải lên file CSV.",
+        emptyFile: "File CSV không chứa dữ liệu.",
+        teacherNotFound: "Không tìm thấy giảng viên.",
+        createSuccess: "Giảng viên đã được thêm thành công.",
+        createError: "Lỗi khi thêm giảng viên.",
+        duplicateEmail: "Email giảng viên đã tồn tại.",
+        importSuccess: "Danh sách giảng viên đã được import thành công.",
+        importError: "Lỗi khi import danh sách giảng viên.",
+        updateSuccess: "Thông tin giảng viên đã được cập nhật thành công.",
+        updateError: "Lỗi khi cập nhật giảng viên.",
+        deleteSuccess: "Giảng viên đã được xóa thành công.",
+        deleteError: "Lỗi khi xóa giảng viên.",
+        cannotDeleteWithBorrowRequests: "Không thể xóa giảng viên do đang có đơn mượn thiết bị.",
+        getAllSuccess: "Lấy danh sách giảng viên thành công.",
+        getAllError: "Lỗi khi lấy danh sách giảng viên.",
+        getByIdSuccess: "Lấy thông tin giảng viên thành công.",
+        getByIdError: "Lỗi khi lấy thông tin giảng viên.",
+    },
+    
+    borrowRequest: {
+        createSuccess: "Đơn mượn thiết bị đã được tạo thành công.",
+        createError: "Lỗi khi tạo đơn mượn thiết bị.",
+        teacherNotFound: "Không tìm thấy giảng viên.",
+        roomNotFound: "Không tìm thấy phòng học.",
+        deviceNotFound: "Không tìm thấy thiết bị.",
+        notEnoughDevices: "Không đủ số lượng thiết bị để mượn.",
+        noDevicesProvided: "Danh sách thiết bị không hợp lệ.",
+        invalidDevice: "Thiết bị hoặc số lượng không hợp lệ.",
+        returnSuccess: "Thiết bị đã được trả thành công.",
+        returnError: "Lỗi khi trả thiết bị.",
+        borrowNotFound: "Không tìm thấy đơn mượn thiết bị.",
+        invalidDeviceReturn: "Thiết bị không hợp lệ để trả.",
+        alreadyReturned: "Tất cả thiết bị trong đơn này đã được trả.",
+        
     }
 };
 
