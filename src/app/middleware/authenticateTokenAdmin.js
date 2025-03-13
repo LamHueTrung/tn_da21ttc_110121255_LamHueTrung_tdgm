@@ -7,14 +7,14 @@ const authenticateToken = (req, res, next) => {
 
     // Kiểm tra xem có token không, nếu không có thì chuyển hướng đến trang login
     if (!token) {
-        return res.redirect('/admin');
+        return res.redirect('/');
     }
 
     // Xác minh token với khóa bí mật
     jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
         // Nếu có lỗi xác minh token (token không hợp lệ hoặc hết hạn), chuyển hướng đến trang login
         if (err) {
-            return res.redirect('/admin');
+            return res.redirect('/');
         }
 
         // Lưu thông tin người dùng từ token vào đối tượng request để có thể sử dụng ở các route tiếp theo

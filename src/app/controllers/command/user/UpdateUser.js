@@ -35,7 +35,8 @@ class UpdateUser {
             // Kiểm tra mật khẩu cũ
             const decryptedPassword = CryptoService.decrypt(admin.password);
             if (passwordOld !== decryptedPassword) {
-                return res.status(403).json({ success: false, message: messages.updateUser.changePasswordDecrypt });
+                return res.status(403).json({ success: false, 
+                    errors: { passwordOld: messages.updateUser.changePasswordDecrypt } });
             }
 
             // Cập nhật mật khẩu mới
@@ -105,15 +106,16 @@ class UpdateUser {
             // Kiểm tra xem người dùng có tồn tại không
             const currentUser = await Acounts.findById(id);
             if (!currentUser) {
-                return res.status(404).json({ success: false, message: messages.updateUser.userNotFound });
+                return res.status(404).json({ success: false, 
+                    error: messages.updateUser.userNotFound });
             }
 
             // Lấy dữ liệu cần cập nhật từ request
-            const { fullName, birthday, address, numberPhone } = req.body;
+            const { userName, fullName, birthday, address, numberPhone } = req.body;
 
             // Tạo dữ liệu cập nhật, giữ nguyên dữ liệu cũ nếu không có giá trị mới
             const updatedData = {
-                username: currentUser.username,
+                username: userName,
                 role: currentUser.role,
                 profile: {
                     fullName: fullName || currentUser.profile.fullName,

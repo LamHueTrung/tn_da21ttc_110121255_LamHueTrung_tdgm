@@ -8,6 +8,7 @@ const borrowRepaysRouter = require('./borrowRepay');
 const apiRoute = require('./api/index');
 const session = require('express-session');
 const passport = require('passport');
+const authenticateToken = require('../app/middleware/authenticateTokenAdmin');
 
 function Route(app) {
     
@@ -33,7 +34,7 @@ function Route(app) {
     app.use('/deviceToRoom', deviceToRoomsRouter);
     app.use('/borrowRepay', borrowRepaysRouter);
     app.use('/deviceManger', deviceManagersRouter);
-    app.use('/users', usersRouter);
+    app.use('/users', authenticateToken, usersRouter);
     app.use('/', sitesRouter);
     
 

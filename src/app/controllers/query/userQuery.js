@@ -17,6 +17,17 @@ class UserQuery {
     }
 
     /**
+     * Hàm AddUser: Xử lý trang thêm người dùng mới.
+     * - Trả về trang thêm người dùng với năm hiện tại và trạng thái tạo mới (nếu có).
+     * @param {Object} req - Request từ client
+     * @param {Object} res - Response trả về cho client
+     * @param {Function} next - Hàm tiếp theo trong chuỗi middleware
+     */
+    UpdateUser(req, res, next) {
+        res.render('pages/updateUser', { layout: 'main'});
+    }
+    
+    /**
      * Hàm ListAllUser: Xử lý trang danh sách tất cả người dùng.
      * - Lấy tất cả các tài khoản ngoại trừ "system_admin".
      * - Nếu không có người dùng, trả về trang danh sách người dùng rỗng.
@@ -27,7 +38,21 @@ class UserQuery {
      */
     async ListAllUser(req, res, next) {
         try {
-            res.render('pages/listAllUser', { layout: 'main'});
+            const users = await Acounts.find({role: { $ne: 'system_admin' }})
+                .select("-password");
+
+            const totalUsers = await Acounts.countDocuments();
+
+            const accountData = users.map(account => ({
+                ...account.toObject(),
+            }));
+
+            console.log(users);
+            res.render('pages/listAllUser', { 
+                layout: 'main',
+                accounts: accountData,
+                totalUsers,
+            });
         } catch (error) {
             console.error(messages.getAllUser.getAllUserError, error);
             res.status(500).send('Internal Server Error');  // Trả về lỗi server nếu có lỗi
@@ -74,7 +99,12 @@ class UserQuery {
      * @param {Object} res - Response trả về JSON chi tiết người dùng.
      */
     async getUserById(req, res) {
-        const { id } = req.params;
+        let { id } = req.params;
+
+        if(id === 'me') {
+            
+            id = req.user.id.toString();
+        } 
 
         try {
             const user = await Acounts.findById(id).select("-password"); // Loại bỏ trường `password`
@@ -90,6 +120,18 @@ class UserQuery {
             return res.status(500).json({ success: false, message: "Lỗi khi lấy thông tin người dùng.", error: error.message });
         }
     }
+
+    /**
+     * Hàm Profile: Xử lý trang hồ sơ người dùng.
+     * - Lấy thông tin người dùng từ token và trả về trang hồ sơ.
+     * @param {Object} req - Request từ client
+     * @param {Object} res - Response trả về cho client
+     * @param {Function} next - Hàm tiếp theo trong chuỗi middleware
+     */
+    FrofileUser(req, res, next) {
+        res.render('pages/profile', { layout: 'main'});
+    }
+    
 }
 
 module.exports = new UserQuery;

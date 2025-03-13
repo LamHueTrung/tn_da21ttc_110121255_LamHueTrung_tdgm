@@ -71,7 +71,7 @@ class CreateUser {
             if (existingAccount) {
                 return res.status(400).json({
                     success: false,
-                    message: messages.createUser.accountExist
+                    errors: { userName: messages.createUser.accountExist },
                 });
             }
 

@@ -3,6 +3,8 @@ const router  = express.Router();
 const UserQuery = require('../app/controllers/query/UserQuery');
 
 router.use('/addUser', UserQuery.AddUser);
+router.use('/profile/:id', UserQuery.FrofileUser);
+router.use('/updateUser/:id', UserQuery.UpdateUser);
 router.use('/ListAllUser', UserQuery.ListAllUser);
 
 module.exports = router;

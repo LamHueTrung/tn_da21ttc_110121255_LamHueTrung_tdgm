@@ -1,26 +1,28 @@
-<div class="box ">
+<div class="box">
     <div class="row w-100">
-        <div class="col-sm ">
+        <div class="col-sm">
             <img class="banner-logo" src="/img/banner-home.png" alt="Banner Home" />
         </div>
         <div class="col-sm">
             <div class="text-center">
                 <img src="img/logo-short.png" style="width: 150px" alt="logo" />
-                <h4 style="color: #333" class="mt-1 mb-5 pb-1">Teaching Device Reward Manager</h4>
+                <h4 style="color: #333" class="mt-1 mb-5 pb-1">HỆ THỐNG QUẢN LÝ THIẾT BỊ</h4>
             </div>
             <form id="loginForm">
                 <div class="form-group">
-                    <input type="email" id="email" class="form-control" required />
-                    <label for="email">Username</label>
+                    <input type="text" id="email" class="form-control" required />
+                    <label for="email">Tài khoản</label>
+                    <div id="emailError" class="text-danger" style="display: none;"></div> <!-- Error message here -->
                 </div>
 
                 <div class="form-group">
                     <input type="password" id="password" class="form-control" required />
-                    <label for="password">Password</label>
+                    <label for="password">Mật khẩu</label>
+                    <div id="passwordError" class="text-danger" style="display: none;"></div> <!-- Error message here -->
                 </div>
 
                 <div class="text-center pt-1 mb-5 pb-1">
-                    <button class="btn btn-login btn-block" type="submit">Log in</button>
+                    <button class="btn btn-login btn-block" type="submit">Đăng nhập</button>
                 </div>
             </form>
         </div>
@@ -34,32 +36,61 @@
       }, 100); // Hiển thị sau 100ms để tạo hiệu ứng
   });
 
-  document.getElementById("loginForm").addEventListener("submit", function(event) {
+  document.getElementById("loginForm").addEventListener("submit", async function(event) {
     event.preventDefault(); // Ngăn chặn tải lại trang
 
-    // Hiển thị loading
-    Swal.fire({
-        title: "Logging in...",
-        text: "Please wait",
-        icon: "info",
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        },
-    });
+    // Lấy giá trị từ form
+    const username = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
 
-    // Giả lập thời gian chờ 1.5 giây trước khi thông báo thành công
-    setTimeout(() => {  
-        Swal.fire({
-            title: "Success!",
-            text: "Logged in successfully",
-            icon: "success",
-            timer: 2000,
-            showConfirmButton: false,
-        }).then(() => {
-            window.location.href = "/home"; // Chuyển hướng đến trang Home
+    try {
+        // Gửi yêu cầu đăng nhập tới API
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, password }),
         });
-    }, 1500); // Chờ 1.5 giây trước khi hiển thị thông báo thành công
-});
 
+        const result = await response.json();
+        if (result.success) {
+            // Đăng nhập thành công
+            Swal.fire({
+                title: "Thành công",
+                text: result.message,
+                icon: "success",
+                timer: 2000,
+                showConfirmButton: false,
+            }).then(() => {
+                window.location.href = "/home"; // Chuyển đến trang home
+            });
+        } else {
+            if (result.errors) {
+                // Nếu có lỗi từ validator
+                if (result.errors.username) {
+                    document.getElementById("emailError").textContent = result.errors.username;
+                    document.getElementById("emailError").style.display = "block";
+                } else {
+                    document.getElementById("emailError").style.display = "none";
+                }
+                if (result.errors.password) {
+                    document.getElementById("passwordError").textContent = result.errors.password;
+                    document.getElementById("passwordError").style.display = "block";
+                } else {
+                    document.getElementById("passwordError").style.display = "none";
+                }
+            }
+        }
+    } catch (error) {
+        // Xử lý lỗi kết nối hoặc lỗi server
+        Swal.fire({
+            title: "Lỗi",
+            text: "Có lỗi xảy ra. Vui lòng thử lại.",
+            icon: "error",
+            timer: 3000,
+            showConfirmButton: false,
+        });
+    }
+});
 </script>

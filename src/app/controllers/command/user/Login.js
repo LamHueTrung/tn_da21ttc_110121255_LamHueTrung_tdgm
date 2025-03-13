@@ -44,14 +44,15 @@ class LoginAdmin {
         }
 
         const { username, password } = req.body;
-
         try {
             // Tìm kiếm tài khoản trong DB
             const admin = await Acounts.findOne({ username });
             if (!admin) {
                 return res.status(404).json({
                     success: false,
-                    message: messages.login.usernameNotFound
+                    errors: {
+                        username: messages.login.usernameNotFound
+                    } 
                 });
             }
 
@@ -59,16 +60,21 @@ class LoginAdmin {
             if (admin.isDeleted) {
                 return res.status(403).json({
                     success: false,
-                    message: messages.login.usernamesoftDelete
+                    errors: {
+                        username: messages.login.usernamesoftDelete
+                    } 
                 });
             }
 
             // Giải mã mật khẩu
             const decryptedPassword = CryptoService.decrypt(admin.password);
+
             if (password !== decryptedPassword) {
                 return res.status(401).json({
                     success: false,
-                    message: messages.login.passwordCompaseFailed
+                    errors: {
+                        password: messages.login.passwordCompaseFailed
+                    } 
                 });
             }
 
@@ -76,7 +82,9 @@ class LoginAdmin {
             if (!['system_admin', 'sub_admin'].includes(admin.role)) {
                 return res.status(403).json({
                     success: false,
-                    message: messages.login.usernameNotRole
+                    errors: {
+                        username: messages.login.usernameNotRole
+                    } 
                 });
             }
 

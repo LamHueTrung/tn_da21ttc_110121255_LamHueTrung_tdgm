@@ -23,7 +23,7 @@
 
     <!-- Heading -->
     <div class="sidebar-heading">
-        Manager
+        Quản lý
     </div>
 
     <!-- Nav Item - Pages Collapse Menu -->
@@ -31,13 +31,13 @@
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUser"
             aria-expanded="true" aria-controls="collapseTwo">
             <i class="fas fa-fw fa-user"></i>
-            <span>User</span>
+            <span>Người dùng</span>
         </a>
         <div id="collapseUser" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Custom User Manager:</h6>
-                <a class="collapse-item" href="/users/addUser">Add User</a>
-                <a class="collapse-item" href="/users/listAllUser">List User</a>
+                <h6 class="collapse-header">Chức năng:</h6>
+                <a class="collapse-item" href="/users/addUser">Thêm mới</a>
+                <a class="collapse-item" href="/users/listAllUser">Danh sách</a>
             </div>
         </div>
     </li>
@@ -45,15 +45,15 @@
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#listAllCourse"
             aria-expanded="true" aria-controls="collapseTwo">
-            <i class="fas fa-fw fa-book"></i>
-            <span>Device</span>
+            <i class="fa-regular fa-hard-drive"></i>
+            <span>Thiết bị</span>
         </a>
         <div id="listAllCourse" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Custom device Manager:</h6>
-                <a class="collapse-item" href="/deviceManger/home" >Device management</a>
-                <a class="collapse-item" href="/borrowRepay/home">Borrow/Repay</a>
-                <a class="collapse-item" href="/deviceToRoom/home">Devices by room</a>
+                <h6 class="collapse-header">Chức năng:</h6>
+                <a class="collapse-item" href="/deviceManger/home" >Quản lý thiết bị</a>
+                <a class="collapse-item" href="/deviceToRoom/home">Quản lý theo phòng</a>
+                <a class="collapse-item" href="/borrowRepay/home">Quản lý mượn/trả</a>
             </div>
         </div>
     </li>
@@ -61,14 +61,14 @@
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseBlog"
             aria-expanded="true" aria-controls="collapseBlog">
-            <i class="fas fa-fw fa-images"></i>
-            <span>Reward</span>
+            <i class="fa-solid fa-gift"></i>
+            <span>Quà tặng</span>
         </a>
         <div id="collapseBlog" class="collapse" aria-labelledby="headingBlog" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Custom reward Manager:</h6>
-                <a class="collapse-item" href="/reward/home" >Gift management</a>
-                <a class="collapse-item" href="/reward/listRequestReward" >List request form</a>
+                <h6 class="collapse-header">Chức năng:</h6>
+                <a class="collapse-item" href="/reward/home" >Quản lý quà tặng</a>
+                <a class="collapse-item" href="/reward/listRequestReward" >Quản lý đơn yêu cầu</a>
             </div>
         </div>
     </li>
@@ -77,66 +77,82 @@
     <hr class="sidebar-divider">
     <!-- Heading -->
     <div class="sidebar-heading">
-        Statistics
+        Thống kê
     </div>
 
     <li class="nav-item">
         <a class="nav-link" href="/statistic/user">
             <i class="fas fa-fw fa-user"></i>
-            <span>Users</span></a>
+            <span>Người dùng</span></a>
     </li>
     <li class="nav-item">
         <a class="nav-link" href="/statistic/device">
-            <i class="fas fa-fw fa-book"></i>
-            <span>Device</span></a>
+            <i class="fa-regular fa-hard-drive"></i>
+            <span>Thiết bị</span></a>
     </li>
     <li class="nav-item">
         <a class="nav-link" href="/statistic/reward">
-            <i class="fas fa-fw fa-signal"></i>
-            <span>Reward</span></a>
+            <i class="fa-solid fa-gift"></i>
+            <span>Quà tặng</span></a>
     </li>
 
     <!-- Divider -->
     <hr class="sidebar-divider">
 
     <li class="nav-item">
-        <a class="nav-link" href="/admin/user/profile">
-            <i class="fas fa-fw fa-user"></i>
-            <span>Profile</span></a>
+        <a class="nav-link" href="/users/profile/me">
+            <i class="fa-solid fa-address-card"></i>
+            <span>Thông tin cá nhân</span></a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" onclick="handleLogout()">
-            <i class="fas fa-fw fa-cogs"></i>
-            <span>Log out</span></a>
-            <script>
-                function handleLogout() {
-                    Swal.fire({
-                        title: 'Bạn muốn đăng xuất?',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Đồng ý',
-                        cancelButtonText: 'Hủy',
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            sessionStorage.removeItem('hasLoggedIn');
-                            fetch('/admin/logout', { method: 'POST' })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.message === 'Logged out successfully.') { 
-                                        window.location.href = '/admin';
-                                    } else {
-                                        Swal.fire('Lỗi', 'Đăng xuất thất bại', 'error');
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Error:', error);
-                                    Swal.fire('Lỗi', 'Đăng xuất thất bại', 'error');
-                                });
+    <a class="nav-link" onclick="handleLogout()">
+        <i class="fas fa-fw fa-cogs"></i>
+        <span>Đăng xuất</span>
+    </a>
+    <script>
+        function handleLogout() {
+            Swal.fire({
+                title: 'Bạn muốn đăng xuất?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Đồng ý',
+                cancelButtonText: 'Hủy',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Gọi API đăng xuất
+                    fetch('http://localhost:3000/api/logout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'same-origin' // Đảm bảo rằng cookies/session sẽ được gửi cùng yêu cầu
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) { 
+                            // Đăng xuất thành công, chuyển hướng về trang đăng nhập
+                            Swal.fire({
+                                title: 'Đăng xuất thành công!',
+                                icon: 'success',
+                                timer: 2000,
+                                showConfirmButton: false,
+                            }).then(() => {
+                                window.location.href = '/'; 
+                            });
+                        } else {
+                            Swal.fire('Lỗi', 'Đăng xuất thất bại', 'error');
                         }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire('Lỗi', 'Đăng xuất thất bại', 'error');
                     });
                 }
-            </script>
+            });
+        }
+    </script>
     </li>
+
     <!-- Sidebar Toggler (Sidebar) -->
     <div class="text-center d-none d-md-inline">
         <button class="rounded-circle border-0" id="sidebarToggle"></button>
