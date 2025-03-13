@@ -27,6 +27,19 @@ class DeleteDevice {
                 });
             }
 
+            // Kiểm tra các DeviceItem có trạng thái 'Hoạt động' hoặc 'Đang sử dụng'
+            const activeDeviceItems = await DeviceItem.find({
+                device: deviceId,
+                status: { $in: ['Hoạt động', 'Đang sử dụng'] }
+            });
+
+            if (activeDeviceItems.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Không thể xóa thiết bị vì có thiết bị đang được sử dụng hoặc hoạt động.',
+                });
+            }
+
             // Xóa tất cả `DeviceItem` liên quan đến thiết bị
             await DeviceItem.deleteMany({ device: deviceId });
 

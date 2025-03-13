@@ -16,7 +16,7 @@ class CreateDevice {
      * @returns {Object} errors - Đối tượng chứa các lỗi nếu có
      */
     Validate(req) {
-        const { name, category, description, status, quantity, room } = req.body;
+        const { name, category, description, quantity, room } = req.body;
         let errors = {};
 
         const nameError = 
@@ -32,9 +32,6 @@ class CreateDevice {
 
         const descriptionError = Validator.maxLength(description, 500, 'Mô tả thiết bị');
         if (descriptionError) errors.description = descriptionError;
-
-        const statusError = Validator.isEnum(status, ['Mới', 'Hoạt động', 'Đang sử dụng', 'Hỏng', 'Bảo trì'], 'Trạng thái thiết bị');
-        if (statusError) errors.status = statusError;
 
         const quantityError = Validator.isPositiveNumber(quantity, 'Số lượng thiết bị');
         if (quantityError) errors.quantity = quantityError;
@@ -63,15 +60,15 @@ class CreateDevice {
             return res.status(400).json({ success: false, errors });
         }
 
-        const { name, category, description, status, quantity, room } = req.body;
-
+        const { name, category, description, quantity } = req.body;
+        const room = 'Kho chính'; // Phòng mặc định
         try {
             // Kiểm tra xem thiết bị đã tồn tại chưa
             const existingDevice = await Devices.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
             if (existingDevice) {
                 return res.status(400).json({
                     success: false,
-                    message: messages.createDevice.deviceExist
+                    errors: { name: messages.createDevice.deviceExist },
                 });
             }
 
@@ -92,8 +89,7 @@ class CreateDevice {
                 name,
                 category,
                 description: description || "",
-                status,
-                quantity,
+                total_quantity: quantity,
                 images: [] // Chưa thêm ảnh vào đây
             });
 

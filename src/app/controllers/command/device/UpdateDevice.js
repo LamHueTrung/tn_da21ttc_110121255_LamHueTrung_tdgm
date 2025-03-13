@@ -86,7 +86,7 @@ class UpdateDevice {
                 });
             }
 
-            const { name, category, description, status, quantity, room } = req.body;
+            const { name, category, description, status, total_quantity, room } = req.body;
 
             // Kiểm tra phòng hiện tại của thiết bị
             let currentRoom = device.room ? await Room.findById(device.room) : null;
@@ -130,7 +130,49 @@ class UpdateDevice {
             device.category = category || device.category;
             device.description = description || device.description;
             device.status = status || device.status;
-            device.quantity = quantity || device.quantity;
+            device.total_quantity = total_quantity || device.total_quantity;
+
+            // Kiểm tra và cập nhật số lượng DeviceItem
+            const currentDeviceItems = await DeviceItem.find({ device: device._id });
+            const currentDeviceItemCount = currentDeviceItems.length;
+
+            // Nếu số lượng device item lớn hơn số lượng cập nhật
+            if (currentDeviceItemCount > total_quantity) {
+                let excessItemsCount = currentDeviceItemCount - total_quantity; // Số lượng thừa cần xóa
+                for (const item of currentDeviceItems) {
+                    if (excessItemsCount <= 0) break; // Nếu đã đủ số lượng để xóa thì dừng lại
+
+                    // Chỉ xóa những item có trạng thái khác "Hoạt động" và "Đang sử dụng"
+                    if (item.status !== "Hoạt động" && item.status !== "Đang sử dụng") {
+                        await DeviceItem.findByIdAndDelete(item._id);
+                        excessItemsCount--; // Giảm số lượng thừa cần xóa
+                    } else {
+                        // Nếu gặp thiết bị có trạng thái "Hoạt động" hoặc "Đang sử dụng", không xóa nó
+                        continue;
+                    }
+                }
+
+                // Kiểm tra nếu vẫn còn thừa thiết bị mà không thể xóa (do tất cả đều là "Hoạt động" hoặc "Đang sử dụng")
+                if (excessItemsCount > 0) {
+                    return res.status(400).json({
+                        success: false,
+                        errors: { quantity: "Không thể xóa thiết bị đang sử dụng hoặc hoạt động." },
+                    });
+                }
+            }
+
+            // Nếu số lượng device item nhỏ hơn số lượng cập nhật
+            if (currentDeviceItemCount < total_quantity) {
+                const itemsToAdd = total_quantity - currentDeviceItemCount;
+                for (let i = 0; i < itemsToAdd; i++) {
+                    const newDeviceItem = new DeviceItem({
+                        device: device._id,
+                        status: "Mới", // Trạng thái mặc định là "Mới"
+                        room: newRoom ? newRoom._id : currentRoom._id,
+                    });
+                    await newDeviceItem.save();
+                }
+            }
 
             // Nếu có ảnh mới, xóa ảnh cũ và cập nhật ảnh mới
             if (tempImagePaths.length > 0) {
@@ -159,7 +201,7 @@ class UpdateDevice {
                     name: device.name,
                     category: device.category,
                     status: device.status,
-                    quantity: device.quantity,
+                    quantity: device.total_quantity,
                     room: newRoom ? newRoom.name : currentRoom.name, // Hiển thị tên phòng mới nếu có
                     images: device.images,
                 },

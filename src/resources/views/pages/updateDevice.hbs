@@ -1,0 +1,127 @@
+<div class="row add-user mb-4">
+    <h1 class="title-add-user text-center mb-4">Chỉnh sửa thông tin thiết bị</h1>
+
+    <!-- Form chỉnh sửa thiết bị -->
+    <div id="manualForm">
+        <form id="updateDeviceForm" enctype="multipart/form-data" class="col-md-6 offset-md-3">
+            <div class="mb-3">
+                <label class="form-label">Tên thiết bị</label>
+                <input type="text" class="form-control" name="name" id="name" value="{{device.name}}" placeholder="Example: Laptop Dell">
+                <div id="nameError" class="text-danger"></div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Mô tả</label>
+                <textarea class="form-control" name="description" id="description" placeholder="Example: Laptop Dell XPS 15">{{device.description}}</textarea>
+                <div id="descriptionError" class="text-danger"></div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Loại thiết bị</label>
+                <select class="form-control" name="category" id="category">
+                    <option value="Máy tính" {{#if (eq device.category "Máy tính")}}selected{{/if}}>Máy tính</option>
+                    <option value="Máy chiếu" {{#if (eq device.category "Máy chiếu")}}selected{{/if}}>Máy chiếu</option>
+                    <option value="Bảng trắng" {{#if (eq device.category "Bảng trắng")}}selected{{/if}}>Bảng trắng</option>
+                    <option value="Loa" {{#if (eq device.category "Loa")}}selected{{/if}}>Loa</option>
+                    <option value="Thiết bị mạng" {{#if (eq device.category "Thiết bị mạng")}}selected{{/if}}>Thiết bị mạng</option>
+                    <option value="Khác" {{#if (eq device.category "Khác")}}selected{{/if}}>Khác</option>
+                </select>
+                <div id="categoryError" class="text-danger"></div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Tổng số lượng</label>
+                <input type="number" class="form-control" name="total_quantity" id="total_quantity" value="{{device.total_quantity}}" placeholder="Ví dụ: 5">
+                <div id="total_quantityError" class="text-danger"></div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Ảnh thiết bị</label>
+                <input type="file" class="form-control" name="images" id="images">
+                <div id="imgDeviceError" class="text-danger"></div>
+            </div>
+
+            <div class="d-flex" style="float: right;">
+                <button type="submit" class="btn btn-system btn-submit">Lưu thay đổi</button>
+                <button type="button" onclick="javascript:history.back()" class="btn btn-secondary btn-previou">Quay lại</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Lấy ID thiết bị từ URL (ví dụ: /updateDevice/:id)
+    const deviceId = window.location.pathname.split('/').pop(); // Lấy ID từ URL
+
+    // Gửi yêu cầu GET để lấy thông tin thiết bị
+    fetch(`/api/device/getById/${deviceId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.device) {
+                // Điền giá trị vào form với dữ liệu thiết bị
+                document.getElementById("name").value = data.device.name;
+                document.getElementById("description").value = data.device.description;
+                document.getElementById("total_quantity").value = data.device.total_quantity;
+                document.getElementById("category").value = data.device.category;
+                
+                // Nếu có ảnh, điền vào input ảnh thiết bị
+                if (data.device.images && data.device.images[0]) {
+                    const imgInput = document.getElementById("images");
+                    imgInput.setAttribute("data-default-image", data.device.images); // Để lưu trữ giá trị ảnh cũ
+                }
+            } else {
+                Swal.fire('Lỗi', 'Không thể tải thông tin thiết bị', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Lỗi', 'Có lỗi xảy ra khi tải dữ liệu thiết bị', 'error');
+        });
+
+    // Xử lý submit form khi chỉnh sửa thông tin thiết bị
+    document.getElementById("updateDeviceForm").addEventListener("submit", function (event) {
+        event.preventDefault(); // Ngăn chặn gửi form theo phương thức POST
+
+        const formData = new FormData(this); // Lấy dữ liệu từ form
+
+        // Thêm ID thiết bị vào formData để biết thiết bị nào đang được chỉnh sửa
+        formData.append('deviceId', deviceId);
+
+        // Gửi yêu cầu API để chỉnh sửa thông tin thiết bị
+        fetch(`/api/device/update/${deviceId}`, {
+            method: 'PUT',
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: "Chỉnh sửa thành công!",
+                    text: data.message,
+                    icon: "success",
+                    timer: 2000,
+                    showConfirmButton: false,
+                }).then(() => {
+                    window.location.href = '/deviceManger/home'; // Chuyển đến danh sách thiết bị hoặc trang khác
+                });
+            } else {
+                // Hiển thị lỗi từ API
+                if (data.errors) {
+                    // Hiển thị lỗi từng trường
+                    document.getElementById("nameError").textContent = data.errors.name || "";
+                    document.getElementById("descriptionError").textContent = data.errors.description || "";
+                    document.getElementById("total_quantityError").textContent = data.errors.quantity || "";
+                    document.getElementById("categoryError").textContent = data.errors.category || "";
+                    document.getElementById("imgDeviceError").textContent = data.errors.imgDevice || "";
+                }
+                Swal.fire('Lỗi', 'Có lỗi xảy ra, vui lòng kiểm tra lại thông tin', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Lỗi', 'Có lỗi xảy ra, vui lòng thử lại', 'error');
+        });
+    });
+});
+</script>

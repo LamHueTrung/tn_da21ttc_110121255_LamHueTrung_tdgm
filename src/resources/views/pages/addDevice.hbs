@@ -1,45 +1,55 @@
 <div class="row add-user mb-4">
-    <h1 class="title-add-user text-center mb-4">Add Device</h1>
+    <h1 class="title-add-user text-center mb-4">Thêm mới thiết bị</h1>
 
     <!-- Chọn phương thức nhập -->
     <div class="d-flex justify-content-center mb-4">
-        <button class="btn btn-darks me-2" id="manualBtn">Add Manually</button>
-        <button class="btn btn-choicefile" id="fileBtn">Import from File</button>
+        <button class="btn btn-darks me-2" id="manualBtn">Tạo thủ công</button>
+        <button class="btn btn-choicefile" id="fileBtn">Tạo bằng file</button>
     </div>
 
     <!-- Form thêm thủ công -->
     <div id="manualForm" style="display: none;">
-        <form action="/admin/user/addUser" method="POST" enctype="multipart/form-data" class="col-md-6 offset-md-3">
+        <form id="createDeviceForm" enctype="multipart/form-data" class="col-md-6 offset-md-3">
             <div class="mb-3">
-                <label class="form-label">Name</label>
-                <input type="text" class="form-control" name="Name" id="Name" placeholder="Example: Remote" value="{{Name}}">
-                {{#if errors.Name}} <div class="text-danger">{{errors.Name}}</div> {{/if}}
+                <label class="form-label">Tên thiết bị</label>
+                <input type="text" class="form-control" name="name" id="name" placeholder="Example: Remote">
+                <div class="text-danger" id="nameError"></div>
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Description</label>
-                <textarea class="form-control" name="Decscription" id="Decscription"  > {{Decscription}}</textarea>
-                {{#if errors.Decscription}} <div class="text-danger">{{errors.Decscription}}</div> {{/if}}
+                <label class="form-label">Mô tả</label>
+                <textarea class="form-control" name="description" id="description"></textarea>
+                <div class="text-danger" id="descriptionError"></div>
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Quantity</label>
-                <input type="number" class="form-control" name="Quantity" id="Quantity" placeholder="Example: 1-50" value="{{Quantity}}">
-                {{#if errors.Quantity}} <div class="text-danger">{{errors.Quantity}}</div> {{/if}}
+                <label class="form-label">Số lượng</label>
+                <input type="number" class="form-control" name="quantity" id="quantity" placeholder="Example: 1-50">
+                <div class="text-danger" id="quantityError"></div>
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Category</label>
+                <label class="form-label">Loại thiết bị</label>
                 <select class="form-control" name="category" id="category">
-                    <option value="sub_admin" {{#if (eq category "sub_admin")}}selected{{/if}}>Máy Tính</option>
-                    <option value="user" {{#if (eq category "user")}}selected{{/if}}>Máy chiếu</option>
+                    <option value="Máy tính">Máy tính</option>
+                    <option value="Máy chiếu">Máy chiếu</option>
+                    <option value="Bảng trắng">Bảng trắng</option>
+                    <option value="Loa">Loa</option>
+                    <option value="Thiết bị mạng">Thiết bị mạng</option>
+                    <option value="Khác">Khác</option>
                 </select>
-                {{#if errors.category}} <div class="text-danger">{{errors.category}}</div> {{/if}}
+                <div class="text-danger" id="categoryError"></div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Ảnh thiết bị</label>
+                <input type="file" class="form-control" name="images" id="images">
+                <div class="text-danger" id="imgDeviceError"></div>
             </div>
 
             <div class="d-flex" style="float: right;">
-                <button type="submit" class="btn btn-system btn-submit">Submit</button>
-                <button type="button" onclick="javascript:history.back()" class="btn btn-secondary btn-previou">Back</button>
+                <button type="submit" class="btn btn-system btn-submit" id="submitBtn">Tạo mới</button>
+                <button type="button" onclick="javascript:history.back()" class="btn btn-secondary">Quay lại</button>
             </div>
         </form>
     </div>
@@ -60,7 +70,6 @@
         </form>
 
         <!-- Danh sách file đã tải lên -->
-        
         <h3 class="mt-4">Uploaded Files</h3>
         <div class="card-body">
         <div class="table-responsive">
@@ -98,20 +107,18 @@
             </table>
             <button type="button" onclick="javascript:history.back()" class="btn btn-secondary btn-previou">Back</button>
         </div>
-
     </div>
     </div>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // Lấy phần tử bằng ID
     const manualBtn = document.getElementById("manualBtn");
     const fileBtn = document.getElementById("fileBtn");
     const manualForm = document.getElementById("manualForm");
     const fileForm = document.getElementById("fileForm");
-    
-    // Kiểm tra xem các phần tử có tồn tại không trước khi gán sự kiện
+
+    // Kiểm tra nếu phần tử tồn tại trước khi gán sự kiện
     if (manualBtn && fileBtn && manualForm && fileForm) {
         // Ẩn cả hai form ban đầu
         manualForm.style.display = "none";
@@ -130,19 +137,38 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    {{!-- // Kiểm tra biến isCreate từ server để hiển thị thông báo thành công
-    const isCreate = {{isCreate}};
-    if (isCreate) {
-        Swal.fire({
-            title: 'Tạo người dùng thành công!',
-            icon: 'success',
-            confirmButtonText: 'OK'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = '/admin/user/listAllUser';
+    document.getElementById("createDeviceForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+
+        try {
+            const response = await fetch("/api/device/create", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            document.querySelectorAll(".text-danger").forEach(el => el.innerText = "");
+
+            if (!data.success) {
+                Object.keys(data.errors).forEach(key => {
+                    document.getElementById(`${key}Error`).innerText = data.errors[key];
+                });
+            } else {
+                Swal.fire({
+                    title: "Thành công!",
+                    text: "Thiết bị đã được tạo thành công!",
+                    icon: "success",
+                    confirmButtonText: "OK"
+                }).then(() => {
+                    window.location.href = "/deviceManger/home";
+                });
             }
-        });
-        fetch('/admin/user/clear-create-flag', { method: 'POST' });
-    } --}}
+        } catch (error) {
+            console.error("Error:", error);
+            Swal.fire('Lỗi', 'Có lỗi xảy ra, vui lòng thử lại', 'error');
+        }
+    });
 });
 </script>

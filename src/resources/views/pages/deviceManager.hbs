@@ -1,37 +1,33 @@
 <div class="card shadow mb-4" id="page-top">
     <div class="card-header py-3">
-        <a href="/deviceManger/homeType" class="btn btn-darks">Device Type</a>
-        <a href="/deviceManger/addDevice" class="btn btn-darks">Add Device</a>
+        <a href="/deviceManger/addDevice" class="btn btn-darks">Thêm thiết bị mới</a>
     </div>
     <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">List all device</h6>
+        <h6 class="m-0 font-weight-bold text-primary">Danh sách thiết bị</h6>
     </div>
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Status</th>
-                        <th>Name</th>
-                        <th>Category</th>
-                        <th>Quantity</th>
-                        <th>Actions</th>
+                        <th>Tên thiết bị</th>
+                        <th>Loại thiết bị</th>
+                        <th>Tổng số lượng</th>
+                        <th>Ngày nhập</th>
+                        <th>Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
+                    {{#each devices}}
                     <tr>
-                        <td>1</td>
-                        <td style="color: green">
-                            Đang hoạt động 
-                        </td>
-                        <td>Remote</td>
-                        <td>Máy tính</td>
-                        <td>1</td>
+                        <td>{{ this.name }}</td>
+                        <td >{{ this.category }}</td>
+                        <td>{{ this.total_items }}</td>
+                        <td>{{formatDate this.created_at }}</td>
                         <td>
                             <!-- Dropdown for course actions -->
                             <div class="btn-group">
-                                <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <button class="btn btn-sm " type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <img  width="30px" src="/img/dotsMenu.png" alt="">
                                     <style>
                                         .dropdown-toggle::after {
@@ -47,59 +43,55 @@
                                 </button>
                                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                     <!-- View -->
-                                    <a class="dropdown-item" href="/admin/user/profiles/{{this._id}}"> <i class="fa-brands fa-openid"></i> View</a>
+                                    <a class="dropdown-item" href="/deviceManger/viewDevice/{{this._id}}"> <i class="fa-brands fa-openid"></i> Xem chi tiết</a>
 
                                     <!-- Edit  -->
-                                    <a class="dropdown-item" href="/admin/user/updateUser/{{this._id}}"><i class="fa-regular fa-pen-to-square"></i> Edit</a>
+                                    <a class="dropdown-item" href="/deviceManger/updateDevice/{{this._id}}"><i class="fa-regular fa-pen-to-square"></i> Chỉnh sửa</a>
                                     
-                                    <!-- Disable/Restore -->
-                                    {{#if this.isDeleted}}
-                                        <a class="dropdown-item" onclick="confirmRestore('{{this._id}}')"><i class="fa-regular fa-eye"></i></i> Restore</a>
-                                    {{else}}
-                                        <a class="dropdown-item" onclick="confirmDisable('{{this._id}}')"> <i class="fa-regular fa-eye-slash"></i> Disable</a>
-                                    {{/if}}
-
                                     <!-- Delete  -->
-                                    <a class="dropdown-item" onclick="confirmDelete('{{this._id}}')"> <i class="fa-regular fa-trash-can"></i> Delete</a>
+                                    <a class="dropdown-item" onclick="confirmDelete('{{this._id}}')"> <i class="fa-regular fa-trash-can"></i> Xoá</a>
 
                                 </div>
                             </div>
-                            
                         </td>
                     </tr>
+                    {{/each}}
                 </tbody>
             </table>
-            <button type="button" onclick="javascript:history.back()" class="btn btn-secondary btn-previou">Back</button>
+            <button type="button" onclick="javascript:history.back()" class="btn btn-secondary btn-previou">Quay lại</button>
         </div>
 
     </div>
 </div>
 <script>
-    // Common function for confirming actions
-    function confirmAction(action, idUser) {
-        const messages = {
-            disable: 'Vô hiệu hóa khóa học này?',
-            restore: 'Khôi phục khóa học này?',
-            delete: 'Xóa khóa học này?'
-        };
-
+    // Confirm Delete course
+    function confirmDelete(id) {
         Swal.fire({
-            title: messages[action],
+            title: 'Xóa thiết bị này?',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Đồng ý',
             cancelButtonText: 'Hủy',
         }).then((result) => {
             if (result.isConfirmed) {
-                fetch(`/admin/user/${action}/${idUser}`, { method: 'POST' })
-                    .then(response => response.ok ? response.json() : Promise.reject('Lỗi khi thực hiện hành động'))
+                fetch(`/api/device/delete/${id}`, { method: 'DELETE' })  // Ensure using DELETE request
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(data => {
+                                throw new Error(data.message || 'Đã xảy ra lỗi không xác định');
+                            });
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         if (data.success) {
                             Swal.fire({
-                                title: data.success ? `Khóa học đã được ${action === 'delete' ? 'xóa' : action === 'disable' ? 'vô hiệu hóa' : 'khôi phục'}!` : `Không thể ${action === 'delete' ? 'xóa' : action === 'disable' ? 'vô hiệu hóa' : 'khôi phục'} khóa học!`,
-                                icon: data.success ? 'success' : 'error',
+                                title: 'Thiết bị đã được xoá!',
+                                icon: 'success',
                                 confirmButtonText: 'OK'
-                            }).then(() => { if (data.success) location.reload(); });
+                            }).then(() => {
+                                location.reload();  // Reload the page after successful deletion
+                            });
                         } else {
                             // Hiển thị thông báo lỗi từ server
                             Swal.fire({
@@ -110,23 +102,17 @@
                             });
                         }
                     })
-                    .catch(error => Swal.fire({ title: 'Có lỗi xảy ra!', icon: 'error', confirmButtonText: 'OK' }));
+                    .catch(error => {
+                        Swal.fire({
+                            title: 'Có lỗi xảy ra!',
+                            text: error.message || 'Không thể xóa thiết bị. Vui lòng thử lại.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                        console.error('Error:', error);
+                    });
             }
         });
     }
-
-    // Confirm Disable course
-    function confirmDisable(idCourse) {
-        confirmAction('disable', idCourse);
-    }
-
-    // Confirm Restore course
-    function confirmRestore(idCourse) {
-        confirmAction('restore', idCourse);
-    }
-
-    // Confirm Delete course
-    function confirmDelete(idCourse) {
-        confirmAction('delete', idCourse);
-    }
 </script>
+
