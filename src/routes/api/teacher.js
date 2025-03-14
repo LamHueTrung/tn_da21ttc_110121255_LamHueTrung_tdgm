@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const multer = require('multer');
+const upload = multer();
 const CreateTeacher = require("../../app/controllers/command/teacher/CreateTeacher");
 const ImportTeachers = require("../../app/controllers/command/teacher/ImportTeachers");
 const UpdateTeacher = require("../../app/controllers/command/teacher/UpdateTeacher");
@@ -7,7 +9,7 @@ const DeleteTeacher = require("../../app/controllers/command/teacher/DeleteTeach
 const TeacherQuery = require("../../app/controllers/query/TeacherQuery");
 
 // API thêm giảng viên bằng trình duyệt
-router.post("/create", (req, res) => {
+router.post("/create", upload.none(), (req, res) => {
     CreateTeacher.Handle(req, res);
 });
 
@@ -17,7 +19,7 @@ router.post("/import", (req, res) => {
 });
 
 // API cập nhật giảng viên
-router.put("/update/:teacherId", (req, res) => {
+router.put("/update/:teacherId", upload.none(), (req, res) => {
     UpdateTeacher.Handle(req, res);
 });
 

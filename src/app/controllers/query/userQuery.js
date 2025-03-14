@@ -128,10 +128,9 @@ class UserQuery {
      * @param {Object} res - Response trả về cho client
      * @param {Function} next - Hàm tiếp theo trong chuỗi middleware
      */
-    FrofileUser(req, res, next) {
+    ProfileUser(req, res, next) {
         res.render('pages/profile', { layout: 'main'});
     }
-    
 }
 
 module.exports = new UserQuery;

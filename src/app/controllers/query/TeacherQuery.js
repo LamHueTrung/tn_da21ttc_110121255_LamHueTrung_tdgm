@@ -5,6 +5,31 @@ const messages = require("../../Extesions/messCost");
  * Class TeacherQuery - Xử lý API lấy danh sách giảng viên và chi tiết giảng viên
  */
 class TeacherQuery {
+
+    async ListAllTeacher(req, res, next) {
+        try {
+
+            const teachers = await Teacher.find().lean();
+
+            const total = await Teacher.countDocuments();
+
+            return res.render('pages/listAllTeacher', { 
+                layout: 'main',
+                success: true,
+                message: messages.teacher.getAllSuccess,
+                totalRecords: total,
+                teachers,
+            });
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: messages.teacher.getAllError,
+                error: error.message,
+            });
+        }
+        
+    }
+
     /**
      * Lấy danh sách tất cả giảng viên (hỗ trợ phân trang và lọc theo bộ môn)
      * @param {Object} req - Request từ client
@@ -74,6 +99,16 @@ class TeacherQuery {
             });
         }
     }
+
+    async AddTeacher(req, res) {
+        res.render('pages/addTeacher', { layout: 'main' });
+    }
+
+    async UpdateTeacher(req, res) {
+        res.render('pages/updateTeacher', { layout: 'main' });
+    }
+
+    
 }
 
 module.exports = new TeacherQuery();

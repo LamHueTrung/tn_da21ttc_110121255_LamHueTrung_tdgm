@@ -1,0 +1,86 @@
+<div class="card shadow mb-4" id="page-top">
+    <div class="card-header py-3">
+        <a href="/users/addTeacher" class="btn btn-darks">Thêm giảng viên</a>
+    </div>
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Danh sách giảng viên</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>Số điện thoại</th>
+                        <th>Phòng ban</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each teachers}}
+                    <tr>
+                        <td>{{this.name}}</td>
+                        <td>{{this.email}}</td>
+                        <td>{{this.phone}}</td>
+                        <td>{{this.department}}</td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <img width="30px" src="/img/dotsMenu.png" alt="">
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" href="/users/updateTeacher/{{this._id}}"><i class="fa-regular fa-pen-to-square"></i> Chỉnh sửa</a>
+                                    <a class="dropdown-item" onclick="confirmDelete('{{this._id}}')"><i class="fa-regular fa-trash-can"></i> Xoá</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Confirm Delete user
+    function confirmDelete(idUser) {
+        const messages = {
+            delete: 'Xóa giảng viên dùng này?'
+        };
+
+        Swal.fire({
+            title: messages['delete'],
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Hủy',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/api/teacher/delete/${idUser}`, { method: 'DELETE' })
+                    .then(response => response.ok ? response.json() : Promise.reject('Lỗi khi thực hiện hành động'))
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: `Giảng viên đã được xóa !`,
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(() => { if (data.success) location.reload(); });
+                        } else {
+                            Swal.fire({
+                                title: 'Không thể thực hiện hành động!',
+                                text: data.message || 'Đã xảy ra lỗi không xác định.',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire({ title: 'Có lỗi xảy ra!', icon: 'error', confirmButtonText: 'OK' })
+                        console.log(error);
+                    });
+            }
+        });
+    }
+</script>

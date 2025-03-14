@@ -183,6 +183,8 @@ const messages = {
         getAllError: "Lỗi khi lấy danh sách giảng viên.",
         getByIdSuccess: "Lấy thông tin giảng viên thành công.",
         getByIdError: "Lỗi khi lấy thông tin giảng viên.",
+        teacherNameExists: "Tên giảng viên đã tồn tại.",
+        teacherEmailExists: "Email giảng viên đã tồn tại.",
     },
     
     borrowRequest: {

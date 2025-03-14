@@ -45,12 +45,38 @@ class ImportTeachers {
                 console.log("🔍 Dấu phân cách phát hiện:", separator);
 
                 const rows = [];
+                let headerChecked = false;
 
                 // Đọc file CSV với dấu phân cách đã phát hiện
                 await new Promise((resolve, reject) => {
                     fs.createReadStream(filePath)
                         .pipe(csvParser({ separator, mapHeaders: ({ header }) => header.trim().replace(/^﻿/, "") }))
-                        .on("data", (row) => rows.push(row))
+                        .on("data", (row) => {
+                            if (!headerChecked) {
+                                // Kiểm tra xem file có đủ các cột cần thiết
+                                const requiredHeaders = ['name', 'email', 'phone', 'department'];
+                                const headers = Object.keys(row);
+                                const extraHeaders = headers.filter(header => !requiredHeaders.includes(header));
+                                
+                                // Kiểm tra thiếu cột
+                                if (requiredHeaders.some(header => !headers.includes(header))) {
+                                    errors.add({
+                                        row: row,
+                                        error: "Định dạng file không đúng, thiếu cột bắt buộc."
+                                    });
+                                }
+
+                                // Kiểm tra cột thừa
+                                if (extraHeaders.length > 0) {
+                                    errors.add({
+                                        row: row,
+                                        error: `Định dạng file không đúng, có cột thừa: ${extraHeaders.join(", ")}`
+                                    });
+                                }
+                                headerChecked = true;
+                            }
+                            rows.push(row);
+                        })
                         .on("end", resolve)
                         .on("error", reject);
                 });
@@ -105,7 +131,12 @@ class ImportTeachers {
 
                 // Xóa file CSV sau khi xử lý xong
                 fs.unlinkSync(filePath);
-
+                if (errors.size > 0) {
+                    return res.status(400).json({
+                        success: false,
+                        errors: Array.from(errors) // Trả về các lỗi về định dạng file
+                    });
+                }
                 return res.status(200).json({
                     success: true,
                     message: messages.teacher.importSuccess,

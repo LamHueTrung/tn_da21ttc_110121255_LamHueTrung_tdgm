@@ -58,6 +58,28 @@ class UpdateTeacher {
 
             const { name, email, phone, department } = req.body;
 
+            // Kiểm tra nếu tên hoặc email giảng viên đã tồn tại trong CSDL (ngoài giảng viên hiện tại)
+            const existingTeacherByName = await Teacher.findOne({ name });
+            const existingTeacherByEmail = await Teacher.findOne({ email });
+
+            if (existingTeacherByName && existingTeacherByName._id.toString() !== teacherId) {
+                return res.status(400).json({
+                    success: false,
+                    errors: {
+                        name: messages.teacher.teacherNameExists
+                    }
+                });
+            }
+
+            if (existingTeacherByEmail && existingTeacherByEmail._id.toString() !== teacherId) {
+                return res.status(400).json({
+                    success: false,
+                    errors: {
+                        email: messages.teacher.teacherEmailExists
+                    }
+                });
+            }
+
             // Cập nhật thông tin, nếu có giá trị mới thì cập nhật, nếu không thì giữ nguyên
             teacher.name = name || teacher.name;
             teacher.email = email || teacher.email;
