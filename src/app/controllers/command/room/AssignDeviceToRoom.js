@@ -1,6 +1,7 @@
 const Room = require("../../../model/Room");
 const DeviceItem = require("../../../model/DeviceItem");
 const messages = require("../../../Extesions/messCost");
+const Validator = require("../../../Extesions/validator");
 
 class AssignDeviceToRoom {
     /**
@@ -20,10 +21,18 @@ class AssignDeviceToRoom {
                 });
             }
 
-            if (!deviceId || !quantity || quantity <= 0) {
+            if( Validator.notNull(deviceId, 'ID thiết bị') 
+                || Validator.notNull(roomId,'ID phòng')) {
                 return res.status(400).json({
                     success: false,
                     message: messages.assignDevice.invalidRequest
+                });
+            }
+            
+            if(Validator.greaterThan(quantity, 0, 'Số lượng mượn')) {
+                return res.status(400).json({
+                    success: false,
+                    message: Validator.greaterThan(quantity, 0, 'Số lượng mượn')
                 });
             }
 
@@ -33,7 +42,7 @@ class AssignDeviceToRoom {
                 status: { $in: ["Mới", "Hoạt động"] }
             }).limit(quantity);
 
-            if (availableDeviceItems.length < quantity) {
+            if (Validator.greaterThan(availableDeviceItems.length, quantity, 'Số lượng thiết bị mượn')) {
                 return res.status(400).json({
                     success: false,
                     message: messages.assignDevice.notEnoughDevices

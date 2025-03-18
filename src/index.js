@@ -75,6 +75,9 @@ app.engine('hbs', handlebars.engine({
     },
     isInProcess: function(status) {
       return status === 'in_progress'; 
+    },
+    increment: function(value) {
+      return value + 1; 
     }
 }
 }));

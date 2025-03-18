@@ -10,6 +10,7 @@
             <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Họ tên</th>
                         <th>Email</th>
                         <th>Số điện thoại</th>
@@ -20,6 +21,7 @@
                 <tbody>
                     {{#each teachers}}
                     <tr>
+                        <td>{{increment @index}}</td>
                         <td>{{this.name}}</td>
                         <td>{{this.email}}</td>
                         <td>{{this.phone}}</td>

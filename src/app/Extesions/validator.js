@@ -37,7 +37,7 @@ class Validator {
   static greaterThan(value, minValue, fieldName) {
     const numericValue = parseFloat(value);
     const numericMinValue = parseFloat(minValue);
-    if (numericValue <= numericMinValue) {
+    if (numericValue < numericMinValue) {
       return messages.validation.greaterThan(fieldName, numericMinValue); // Trả về thông báo lỗi nếu giá trị nhỏ hơn hoặc bằng minValue
     }
     return null; // Trả về null nếu giá trị hợp lệ

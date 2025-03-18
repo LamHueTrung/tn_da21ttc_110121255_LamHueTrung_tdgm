@@ -41,6 +41,7 @@
             <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Trạng thái</th>
                         <th>Phòng</th>
                         <th>Vị trí</th>
@@ -49,6 +50,7 @@
                 <tbody>
                     {{#each device.device_items}}
                     <tr>
+                        <td>{{increment @index}}</td>
                         <td class="{{#if (eq this.status 'Mới')}}text-primary{{else}}{{#if (eq this.status 'Hoạt động')}}text-success{{else}}{{#if (eq this.status 'Đang sử dụng')}}text-warning{{else}}{{#if (or (eq this.status 'Hỏng') (eq this.status 'Bảo trì'))}}text-danger{{/if}}{{/if}}{{/if}}{{/if}}">
                             {{this.status}}
                         </td>

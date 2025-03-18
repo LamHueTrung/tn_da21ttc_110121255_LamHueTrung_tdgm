@@ -1,6 +1,6 @@
 <div class="card shadow mb-4" id="page-top">
     <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Add Devices to Room: RM101</h6>
+        <h6 id="roomName" class="m-0 font-weight-bold text-primary"></h6>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -8,60 +8,131 @@
                 <thead>
                     <tr>
                         <th></th>
-                        <th>Device Name</th>
-                        <th>Category</th>
-                        <th>Quantity</th>
+                        <th>Số lượng mượn</th>
+                        <th>Tên thiết bị</th>
+                        <th>Loại thiết bị</th>
+                        <th>Số lượng có thể mượn</th>
+                        <th>Hình ảnh</th>
                     </tr>
                 </thead>
                 <tbody id="deviceList">
-                    <!-- Dữ liệu demo: Danh sách thiết bị chưa thuộc phòng nào -->
-                    <tr>
-                        <td><input type="checkbox" class="device-checkbox" data-id="D001" data-name="Projector"></td>
-                        <td>Projector</td>
-                        <td>Presentation</td>
-                        <td>2</td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" class="device-checkbox" data-id="D002" data-name="Laptop"></td>
-                        <td>Laptop</td>
-                        <td>Workstation</td>
-                        <td>5</td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" class="device-checkbox" data-id="D003" data-name="Speaker"></td>
-                        <td>Speaker</td>
-                        <td>Audio</td>
-                        <td>3</td>
-                    </tr>
-                    <tr>
-                        <td><input type="checkbox" class="device-checkbox" data-id="D004" data-name="Whiteboard"></td>
-                        <td>Whiteboard</td>
-                        <td>Teaching Aid</td>
-                        <td>1</td>
-                    </tr>
+                    {{#each devices}}
+                        <tr>
+                            <td>
+                                <input style="width: 38px;height: 25px;" type="checkbox" class="device-checkbox" 
+                                data-id="{{this._id}}" 
+                                data-name="{{ this.name}}"
+                                data-quantity=""
+                                ></td>
+                            <td>
+                                <input style="width: 70px;" type="number">
+                            </td>
+                            <td>{{ this.name}}</td>
+                            <td>{{ this.category}}</td>
+                            <td>{{ this.available_quantity }}</td>
+                            <td> <img style="width: 50px;" src="{{this.images}}" alt=""></td>
+                        </tr>
+                    {{/each}}
                 </tbody>
             </table>
         </div>
-        <button id="confirmAddDevice" class="btn btn-primary">Add Selected Devices</button>
-        <button type="button" onclick="javascript:history.back()" class="btn btn-secondary">Back</button>
+        <button id="confirmAddDevice" class="btn btn-primary">Thêm thiết bị</button>
+        <button type="button" onclick="javascript:history.back()" class="btn btn-secondary">Quay lại</button>
     </div>
 </div>
 
 <script>
-document.getElementById("confirmAddDevice").addEventListener("click", function () {
-    let selectedDevices = [];
-    document.querySelectorAll(".device-checkbox:checked").forEach((checkbox) => {
-        selectedDevices.push({
-            id: checkbox.dataset.id,
-            name: checkbox.dataset.name
+    document.addEventListener("DOMContentLoaded", function () {
+        window.roomId = window.location.pathname.split('/').pop();
+        window.nameRoom = "";
+
+        // Lấy thông tin phòng
+        fetch(`/api/room/getbyid/${roomId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.room) {
+                    window.nameRoom = data.room.name;
+                    document.getElementById("roomName").textContent = `Thêm thiết bị vào phòng: ${data.room.name}`;
+                } else {
+                    Swal.fire('Lỗi', 'Không thể tải thông tin phòng', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire('Lỗi', 'Có lỗi xảy ra khi tải dữ liệu phòng', 'error');
+            });
+
+        // Cập nhật data-quantity khi nhập số lượng
+        document.querySelectorAll("tbody tr").forEach(row => {
+            let quantityInput = row.querySelector("input[type='number']");
+            let checkbox = row.querySelector(".device-checkbox");
+
+            if (quantityInput && checkbox) {
+                quantityInput.addEventListener("input", function () {
+                    checkbox.dataset.quantity = this.value; // Lưu giá trị vào checkbox
+                });
+            }
+        });
+
+        // Xử lý sự kiện khi bấm "Thêm thiết bị"
+        document.getElementById("confirmAddDevice").addEventListener("click", async function () {
+            let selectedDevices = [];
+            document.querySelectorAll(".device-checkbox:checked").forEach((checkbox) => {
+                let quantity = checkbox.dataset.quantity || 0; // Mặc định là 0 nếu không có giá trị
+                selectedDevices.push({
+                    id: checkbox.dataset.id,
+                    name: checkbox.dataset.name,
+                    quantity: parseInt(quantity, 10)
+                });
+            });
+
+            if (selectedDevices.length === 0) {
+                Swal.fire("Lỗi", "Chưa có thiết bị được chọn!", "error");
+                return;
+            }
+
+            try {
+                for (const d of selectedDevices) {
+                    const response = await fetch(`/api/room/${roomId}/assign-devices`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            deviceId: d.id,
+                            quantity: d.quantity
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (!data.success) {
+                        Swal.fire({
+                            title: "Lỗi!",
+                            text: data.message,
+                            icon: "error",
+                            confirmButtonText: "OK"
+                        });
+                        return;
+                    }
+                }
+
+                // Nếu tất cả thiết bị được thêm thành công
+                Swal.fire({
+                    title: "Thành công!",
+                    text: `Thiết bị đã được thêm vào phòng ${nameRoom} thành công!`,
+                    icon: "success",
+                    confirmButtonText: "OK"
+                }).then(() => {
+                    window.location.href = `/deviceToRoom/viewDevices/${roomId}`;
+                });
+
+            } catch (error) {
+                console.error("Error:", error);
+                Swal.fire('Lỗi', 'Có lỗi xảy ra, vui lòng thử lại', 'error');
+            }
         });
     });
 
-    if (selectedDevices.length === 0) {
-        Swal.fire("Error", "Please select at least one device!", "error");
-        return;
-    }
 
-    Swal.fire("Success!", `Devices ${selectedDevices.map(d => d.name).join(", ")} added to Room RM101`, "success");
-});
 </script>

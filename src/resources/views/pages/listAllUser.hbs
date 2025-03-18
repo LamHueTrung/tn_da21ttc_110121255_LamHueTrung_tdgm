@@ -7,6 +7,7 @@
             <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Trạng thái</th>
                         <th>Tài khoản</th>
                         <th>Họ tên</th>
@@ -16,9 +17,8 @@
                 </thead>
                 <tbody>
                     {{#each accounts}}
-                    <script>
-                    </script>
                     <tr>
+                        <td>{{increment @index}}</td>
                         <td style="color: {{#if this.isDeleted}} red {{else}} green {{/if}}">
                             {{#if this.isDeleted}} Vô hiệu hóa {{else}} Đang hoạt động {{/if}}
                         </td>

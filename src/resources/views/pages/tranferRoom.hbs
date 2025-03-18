@@ -1,0 +1,100 @@
+<div class="card shadow mb-4" id="page-top">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Danh sách phòng</h6>
+    </div>
+    <div class="card-header py-3">
+        <div class="text-danger" id="Error"></div>
+    </div>
+    
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Tên phòng</th>
+                        <th>Vị trí</th>
+                        <th>Số lượng thiết bị</th>
+                        <th>Sức chứa (Người)</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="roomList">
+                    {{#each rooms}}
+                    <tr>
+                        <td>{{this.name}}</td>
+                        <td>{{#if this.location.name }} {{this.location.name}} {{else}} Victory {{/if}}</td>
+                        <td>{{#if this.deviceItems.length}} {{this.deviceItems.length}} {{else}} 0 {{/if}}</td>
+                        <td>{{#if this.capacity }} {{this.capacity}} {{else}} 10000 {{/if}}</td>
+                        <td>
+                            <a onclick="confirmTranfer('{{this._id}}')" class="btn btn-warning">Chuyển</a>
+                        </td>
+                    </tr>
+                    {{/each }}
+                </tbody>
+            </table>
+
+            <button type="button" onclick="javascript:history.back()" class="btn btn-secondary">Quay lại</button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    window.deviceItemId = window.location.pathname.split('/').pop(); 
+});
+
+async function confirmTranfer(roomId) { 
+    Swal.fire({
+        title: "Chuyển phòng",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Đồng ý',
+        cancelButtonText: 'Hủy',
+    }).then(async (result) => {  // Thêm async vào đây
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch("/api/room/move-device", {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json" // Cần thêm header nếu gửi JSON
+                    },
+                    body: JSON.stringify({  // Chuyển body thành JSON
+                        deviceItemId: window.deviceItemId, // Lấy từ phạm vi toàn cục
+                        toRoomId: roomId
+                    })
+                });
+
+                const data = await response.json();
+
+                document.querySelectorAll(".text-danger").forEach(el => el.innerText = "");
+
+                if (!data.success) {
+                    Swal.fire({
+                        title: "Thất bại!",
+                        text: data.message || "Có lỗi xảy ra!",
+                        icon: "error",
+                        confirmButtonText: "OK"
+                    });
+                } else {
+                    Swal.fire({
+                        title: "Thành công!",
+                        text: "Thiết bị đã được chuyển thành công!",
+                        icon: "success",
+                        confirmButtonText: "OK"
+                    }).then(() => {
+                        window.location.href = `/deviceToRoom/viewDevices/${roomId}`;
+                    });
+                }
+            } catch (error) { 
+                console.error("Lỗi khi gọi API:", error);
+                Swal.fire({
+                    title: "Lỗi hệ thống!",
+                    text: "Không thể kết nối đến server.",
+                    icon: "error",
+                    confirmButtonText: "OK"
+                });
+            }
+        }
+    });
+}
+</script>

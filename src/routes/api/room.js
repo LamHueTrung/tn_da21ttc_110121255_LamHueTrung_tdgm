@@ -34,12 +34,12 @@ router.get("/:roomId/devices", (req, res) => {
 });
 
 // Xóa thiết bị khỏi phòng
-router.post("/:roomId/remove-device", (req, res) => {
+router.put("/:roomId/remove-device", (req, res) => {
   RemoveDeviceFromRoom.Handle(req, res);
 });
 
 // Cập nhật phòng của thiết bị (Chuyển thiết bị sang phòng khác)
-router.post("/move-device", (req, res) => {
+router.put("/move-device", (req, res) => {
   UpdateDeviceRoom.Handle(req, res);
 });
 

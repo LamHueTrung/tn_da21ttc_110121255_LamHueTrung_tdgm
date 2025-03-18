@@ -7,7 +7,7 @@ const DeleteDeviceCommand = require('../../app/controllers/command/device/Delete
 const DeviceManagerQuery = require('../../app/controllers/query/DeivceMangerQuery');
 const upload = require('../../app/Extesions/uploadDevice');
 
-//Route add user
+//Route thêm thiết bị
 router.post('/create', upload, (req, res) => {
     CreateDeviceCommand.Handle(req, res);
 });

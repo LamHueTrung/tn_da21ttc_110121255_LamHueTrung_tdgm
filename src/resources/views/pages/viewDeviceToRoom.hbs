@@ -1,6 +1,7 @@
 <div class="card shadow mb-4" id="page-top">
     <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Devices in Room: RM101</h6>
+        <h6 class="m-0 font-weight-bold text-primary">Thiết bị thuộc phòng: {{room.name}}</h6>
+        <input id="RoomId" type="hidden" value="{{room._id}}">
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -8,109 +9,90 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Device Name</th>
-                        <th>Category</th>
-                        <th>Quantity</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>Trạng thái</th>
+                        <th>Tên thiết bị</th>
+                        <th>Loại thiết bị</th>
+                        <th>Ngày thêm vào phòng</th>
+                        <th>Thao tác</th>
                     </tr>
                 </thead>
                 <tbody id="deviceList">
-                    <!-- Dữ liệu demo: Danh sách thiết bị trong phòng RM101 -->
+                    {{#each room.devices}}
                     <tr>
-                        <td>1</td>
-                        <td>Projector</td>
-                        <td>Presentation</td>
-                        <td>2</td>
-                        <td><span class="text-success">Available</span></td>
+                        <td>{{increment @index}}</td>
+                        <td class="{{#if (eq this.status 'Mới')}}text-primary{{else}}{{#if (eq this.status 'Hoạt động')}}text-success{{else}}{{#if (eq this.status 'Đang sử dụng')}}text-warning{{else}}{{#if (or (eq this.status 'Hỏng') (eq this.status 'Bảo trì'))}}text-danger{{/if}}{{/if}}{{/if}}{{/if}}">
+                        {{ this.status}}
+                        </td>
+                        <td>{{this.device.name}}</td>
+                        <td>{{this.device.category}}</td>
+                        <td>{{formatDate this.created_at}}</td>
                         <td>
-                            <button class="btn btn-sm btn-warning" onclick="transferDevice('Projector', 'RM101')">Transfer</button>
-                            <button class="btn btn-sm btn-danger" onclick="removeDevice('Projector', 'RM101')">Remove</button>
+                            <div class="btn-group">
+                                <button class="btn btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <img width="30px" src="/img/dotsMenu.png" alt="">
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    
+                                    <a class="dropdown-item" href="/deviceToRoom/viewRoomTranfer/{{this._id}}"><i class="fa-regular fa-pen-to-square"></i> Chuyển phòng</a>
+                                    <a class="dropdown-item" onclick="confirmDelete('{{this._id}}')"><i class="fa-regular fa-trash-can"></i> Xoá</a>
+                                </div>
+                            </div>
                         </td>
                     </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Laptop</td>
-                        <td>Workstation</td>
-                        <td>3</td>
-                        <td><span class="text-danger">In Use</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-warning" onclick="transferDevice('Laptop', 'RM101')">Transfer</button>
-                            <button class="btn btn-sm btn-danger" onclick="removeDevice('Laptop', 'RM101')">Remove</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>Speaker</td>
-                        <td>Audio</td>
-                        <td>1</td>
-                        <td><span class="text-success">Available</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-warning" onclick="transferDevice('Speaker', 'RM101')">Transfer</button>
-                            <button class="btn btn-sm btn-danger" onclick="removeDevice('Speaker', 'RM101')">Remove</button>
-                        </td>
-                    </tr>
+                    {{/each}}
                 </tbody>
             </table>
         </div>
 
         <div class="d-flex justify-content-between mt-3">
-            <a href="/deviceManager/homeRoom" class="btn btn-secondary">Back</a>
+            <a href="/deviceToRoom/home" class="btn btn-secondary">Quay lại</a>
         </div>
     </div>
 </div>
-
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    // Xóa thiết bị khỏi phòng (Chỉ xóa trên giao diện, không kết nối API)
-    window.removeDevice = function (deviceName, roomCode) {
+    document.addEventListener("DOMContentLoaded", function () {
+        window.roomId = window.location.pathname.split('/').pop(); 
+    });
+    function confirmDelete(deviceItemId) {
+        console.log(deviceItemId);
         Swal.fire({
-            title: "Remove Device",
-            text: `Are you sure you want to remove "${deviceName}" from ${roomCode}?`,
-            icon: "warning",
+            title: "Xoá thiết bị này ra khỏi phòng?",
+            icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: "Yes, remove it!",
-            cancelButtonText: "Cancel"
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Hủy',
         }).then((result) => {
             if (result.isConfirmed) {
-                document.querySelectorAll("#deviceList tr").forEach(row => {
-                    if (row.children[1].textContent === deviceName) row.remove();
-                });
-                Swal.fire("Removed!", `The device "${deviceName}" has been removed from ${roomCode}.`, "success");
+                fetch(`/api/room/${window.roomId}/remove-device`, { 
+                    method: 'PUT',
+                    headers: {
+                        "Content-Type": "application/json" // Thêm header JSON
+                    },
+                    body: JSON.stringify({ deviceItemId }) // Chuyển body thành JSON
+                })
+                    .then(response => response.ok ? response.json() : Promise.reject('Lỗi khi thực hiện hành động'))
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: `Thiết bị đã được xoá khỏi phòng !`,
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(() => { if (data.success) location.reload(); });
+                        } else {
+                            Swal.fire({
+                                title: 'Không thể thực hiện hành động!',
+                                text: data.message || 'Đã xảy ra lỗi không xác định.',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire({ title: 'Có lỗi xảy ra!', icon: 'error', confirmButtonText: 'OK' })
+                        console.log(error);
+                    });
             }
         });
-    };
-
-    // Chuyển thiết bị sang phòng khác (Chỉ cập nhật giao diện, không kết nối API)
-    window.transferDevice = function (deviceName, currentRoom) {
-        Swal.fire({
-            title: "Transfer Device",
-            html: `
-                <label for="destinationRoom">Select destination room:</label>
-                <select id="destinationRoom" class="swal2-input">
-                    <option value="RM102">Room 102</option>
-                    <option value="RM103">Room 103</option>
-                    <option value="RM104">Room 104</option>
-                </select>
-            `,
-            showCancelButton: true,
-            confirmButtonText: "Transfer",
-            cancelButtonText: "Cancel",
-            preConfirm: () => {
-                const destinationRoom = document.getElementById("destinationRoom").value;
-                if (!destinationRoom || destinationRoom === currentRoom) {
-                    Swal.showValidationMessage("Please select a valid destination room.");
-                }
-                return destinationRoom;
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.querySelectorAll("#deviceList tr").forEach(row => {
-                    if (row.children[1].textContent === deviceName) row.remove();
-                });
-                Swal.fire("Transferred!", `The device "${deviceName}" has been moved to ${result.value}.`, "success");
-            }
-        });
-    };
-});
+    }
 </script>
+

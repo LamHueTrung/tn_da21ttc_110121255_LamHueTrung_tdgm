@@ -48,6 +48,7 @@
                 <label class="form-label">Tải file (CSV)</label>
                 <input type="file" class="form-control" name="file" id="file" accept=".csv">
                 <div class="text-danger" id="fileError"></div>
+                <div class="text-danger" id="rowError"></div>
             </div>
 
             <div class="d-flex" style="float: right;">
@@ -184,11 +185,20 @@ document.addEventListener("DOMContentLoaded", function () {
                     data.errors.forEach(error => {
                         if (error.error === "Định dạng file không đúng, thiếu cột bắt buộc.") {
                             document.getElementById("fileError").innerText = "Lỗi: Thiếu các cột bắt buộc: name, email, phone, department.";
-                        }
-                        if (error.error.includes("có cột thừa")) {
+                        } else if (error.error === "Định dạng file không đúng, cột thừa.") {
                             document.getElementById("fileError").innerText = "Lỗi: Có cột thừa trong file CSV.";
+                        } else if (error.error.name) {
+                            console.log(error.error.name);
+                            document.getElementById("fileError").innerText = `Lỗi: Tên giảng viên: ${error.error.name}` ;
+                        } else if (error.error.email) {
+                            document.getElementById("fileError").innerText = `Lỗi: Email: ${error.error.email}` ;
+                        } else if (error.error.phone) {
+                            document.getElementById("fileError").innerText = `Lỗi: Số điện thoại: ${error.error.phone}` ;
+                        } else if (error.error.department) {
+                            document.getElementById("fileError").innerText = `Lỗi: Chuyên ngành: ${error.error.department}` ;
                         }
-                        // Thêm các lỗi khác nếu cần
+                            document.getElementById("rowError").innerText = JSON.stringify(error.row, null, 2);
+                            
                     });
                 }
             } else {

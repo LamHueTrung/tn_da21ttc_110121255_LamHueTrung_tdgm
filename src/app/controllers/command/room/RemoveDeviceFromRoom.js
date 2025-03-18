@@ -13,7 +13,9 @@ class RemoveDeviceFromRoom {
     Handle = async (req, res) => {
         const { roomId } = req.params;
         const { deviceItemId } = req.body; // Nhận ID của thiết bị cần xóa
-
+        
+        console.log("roomId: ", roomId);
+        console.log("deviceItemId: ", req.body);
         try {
             // Kiểm tra xem phòng có tồn tại không
             const room = await Room.findById(roomId);

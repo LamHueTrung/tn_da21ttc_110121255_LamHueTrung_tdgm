@@ -1,10 +1,10 @@
 <div class="card shadow mb-4" id="page-top">
     <div class="card-header py-3">
-        <a href="#" class="btn btn-darks" id="addRoomBtn">Add Room</a>
-        <a href="#" class="btn btn-darks" id="importRoomsBtn">Import Rooms</a>
+        <a href="#" class="btn btn-darks" onclick="DangPhatTrien()" id="addRoomBtn">Thêm phòng thủ công</a>
+        <a href="#" class="btn btn-darks" id="importRoomsBtn">Thêm bằng file</a>
     </div>
     <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Room Management</h6>
+        <h6 class="m-0 font-weight-bold text-primary">Danh sách phòng</h6>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -12,115 +12,369 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Room Code</th>
-                        <th>Room Name</th>
-                        <th>Devices</th>
-                        <th>Actions</th>
+                        <th>Tên phòng</th>
+                        <th>Vị trí</th>
+                        <th>Số lượng thiết bị</th>
+                        <th>Sức chứa (Người)</th>
+                        <th>Thao tác</th>
                     </tr>
                 </thead>
                 <tbody id="roomList">
-                    <!-- Dữ liệu demo -->
+                    {{#each rooms}}
                     <tr>
-                        <td>1</td>
-                        <td>RM101</td>
-                        <td>Room 101</td>
-                        <td><a href="/deviceToRoom/viewDevices/RM101">View Devices</a></td>
+                        <td>{{increment @index}}</td>
+                        <td>{{this.name}}</td>
+                        <td>{{this.location.name}}</td>
+                        <td>{{#if this.deviceItems.length}} {{this.deviceItems.length}} {{else}} 0 {{/if}}</td>
+                        <td>{{this.capacity}}</td>
                         <td>
-                            <a href="/deviceToRoom/addDevices/RM101" class="btn btn-sm btn-primary">Add Device</a>
-                            <button class="btn btn-sm btn-danger" onclick="deleteRoom('RM101')">Delete</button>
+                            <div class="btn-group">
+                                <button class="btn btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <img width="30px" src="/img/dotsMenu.png" alt="">
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" href="/deviceToRoom/viewDevices/{{this._id}}"><i class="fa-brands fa-openid"></i> Xem thiết bị</a>
+
+                                    <a class="dropdown-item" href="/deviceToRoom/addDevices/{{this._id}}"><i class="fa-solid fa-plus"></i> Thêm thiết bị</a>
+
+                                    <a class="dropdown-item" onclick="updateRoom('{{this._id}}')"><i class="fa-regular fa-pen-to-square"></i> Sửa phòng</a>
+
+                                    <a class="dropdown-item" onclick="deleteRoom('{{this._id}}', {{this.deviceItems.length}})"><i class="fa-regular fa-trash-can"></i> Xoá phòng</a>
+                                </div>
+                            </div>
                         </td>
                     </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>RM102</td>
-                        <td>Room 102</td>
-                        <td><a href="/deviceToRoom/viewDevices/RM102">View Devices</a></td>
-                        <td>
-                            <a href="/deviceToRoom/addDevice/RM102" class="btn btn-sm btn-primary">Add Device</a>
-                            <button class="btn btn-sm btn-danger" onclick="deleteRoom('RM102')">Delete</button>
-                        </td>
-                    </tr>
+                    {{/each }}
                 </tbody>
             </table>
 
-            <button type="button" onclick="javascript:history.back()" class="btn btn-secondary">Back</button>
+            <button type="button" onclick="javascript:history.back()" class="btn btn-secondary">Quay lại</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal chỉnh sửa phòng -->
+<style>
+    /* Tạo nền mờ cho modal */
+.modal-content {
+    border-radius: 12px;
+    box-shadow: 14px 15px 4px rgba(0, 0, 0, 0.2);
+    background: #ffffff;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Header modal */
+.modal-header {
+    background: #010101;
+    color: white;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    padding: 15px;
+}
+
+/* Nút đóng modal */
+.modal-header .close {
+    color: white;
+    font-size: 24px;
+    opacity: 0.8;
+    transition: 0.3s;
+}
+
+.modal-header .close:hover {
+    opacity: 1;
+}
+
+/* Nút đóng modal */
+.modal-header .close {
+    color: white;
+    font-size: 24px;
+    opacity: 0.8;
+    transition: 0.3s;
+}
+
+.modal-header .close:hover {
+    opacity: 1;
+}
+
+/* Căn chỉnh nội dung trong modal */
+.modal-body {
+    padding: 20px;
+}
+
+/* Input styling */
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    transition: 0.3s;
+}
+
+
+/* Label styling */
+.form-group label {
+    font-weight: bold;
+    color: #333;
+}
+
+</style>
+<div class="modal fade" id="editRoomModal" tabindex="-1" role="dialog" aria-labelledby="editRoomModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editRoomModalLabel">Chỉnh sửa phòng</h5>
+                <button type="button" class="btn-close close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editRoomForm">
+                    <input type="hidden" id="roomId">
+                    
+                    <div class="form-group">
+                        <label for="roomName">Tên phòng</label>
+                        <input type="text" class="form-control" id="roomName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="roomLocation">Vị trí</label>
+                        <input type="text" class="form-control" id="roomLocation" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="roomCapacity">Sức chứa</label>
+                        <input type="number" class="form-control" id="roomCapacity" required min="1">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-system btn-submit">Lưu </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // Thêm phòng thủ công
-    document.getElementById("addRoomBtn").addEventListener("click", function () {
-        Swal.fire({
-            title: "Add New Room",
-            html: `
-                <input type="text" id="roomCode" class="swal2-input" placeholder="Room Code">
-                <input type="text" id="roomName" class="swal2-input" placeholder="Room Name">
-            `,
-            showCancelButton: true,
-            confirmButtonText: "Add",
-            preConfirm: () => {
-                const roomCode = document.getElementById("roomCode").value;
-                const roomName = document.getElementById("roomName").value;
-                if (!roomCode || !roomName) {
-                    Swal.showValidationMessage("Please enter both Room Code and Room Name");
-                }
-                return { roomCode, roomName };
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const roomTable = document.getElementById("roomList");
-                const newRow = `<tr>
-                    <td>${roomTable.rows.length + 1}</td>
-                    <td>${result.value.roomCode}</td>
-                    <td>${result.value.roomName}</td>
-                    <td><a href="/deviceManager/viewDevices/${result.value.roomCode}">View Devices</a></td>
-                    <td>
-                        <a href="/deviceManager/addDevice/${result.value.roomCode}" class="btn btn-sm btn-primary">Add Device</a>
-                        <a href="/deviceManager/transferDevice/${result.value.roomCode}" class="btn btn-sm btn-warning">Transfer Device</a>
-                        <button class="btn btn-sm btn-danger" onclick="deleteRoom('${result.value.roomCode}')">Delete</button>
-                    </td>
-                </tr>`;
-                roomTable.insertAdjacentHTML("beforeend", newRow);
-                Swal.fire("Success!", "Room added successfully!", "success");
-            }
-        });
-    });
-
-    // Import phòng từ file CSV/Excel
-    document.getElementById("importRoomsBtn").addEventListener("click", function () {
-        Swal.fire({
-            title: "Upload Room List",
-            text: "Please upload a CSV/Excel file containing room data.",
+    document.getElementById("importRoomsBtn").addEventListener("click", async function () {
+        const { value: file } = await Swal.fire({
+            title: "Thêm phòng",
+            text: "Hãy tải tệp tin CSV chứa thông tin phòng để thêm vào hệ thống.",
             input: "file",
             inputAttributes: { accept: ".csv, .xlsx" },
             showCancelButton: true,
             confirmButtonText: "Upload",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.fire("Success!", "Rooms imported successfully!", "success");
-            }
         });
+
+        if (file) {
+            console.log("File đã chọn:", file);
+
+            try {
+                const formData = new FormData();
+                formData.append("file", file);
+
+                const response = await fetch("/api/room/import", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                const data = await response.json();
+                console.log("Response data:", data);
+
+                // Kiểm tra nếu import không thành công
+                if (!data.success) {
+                    let errorMessage = "Có lỗi xảy ra trong quá trình nhập tệp.";
+                    
+                    if (data.message ) {
+                        errorMessage = data.message;
+
+                        await Swal.fire({
+                        title: "Lỗi khi nhập tệp!",
+                        text: errorMessage,
+                        icon: "error",
+                        confirmButtonText: "OK"
+                        });
+                    }
+
+                } else {
+                    if (data.errors && data.errors.length > 0) {
+                        let errorMessages = data.errors.map(error => {
+                            let errorDetails = [];
+
+                            if (error.error.name) {
+                                errorDetails.push(`<b>Tên phòng</b>: ${error.error.name}`);
+                            }
+                            if (error.error.location) {
+                                errorDetails.push(`<b>Địa điểm</b>: ${error.error.location}`);
+                            }
+                            if (error.error.capacity) {
+                                errorDetails.push(`<b>Sức chứa</b>: ${error.error.capacity}`);
+                            }
+                            if (error.row) { // Sử dụng error.row thay vì error.error.row
+                                errorDetails.push(`<b>Dòng lỗi</b>: ${JSON.stringify(error.row)}`);
+                            }
+
+                            return errorDetails.join("<br>");
+                        }).join("<hr>"); // Dùng <hr> để phân cách giữa các lỗi
+
+                        await Swal.fire({
+                            title: "Lỗi khi nhập tệp!",
+                            html: errorMessages, // Chỉ truyền một giá trị html hợp lệ
+                            icon: "error",
+                            confirmButtonText: "OK"
+                        });
+                    } else {
+                        await Swal.fire({
+                            title: "Thành công!",
+                            text: "Tệp tin đã được tải lên thành công!",
+                            icon: "success",
+                            confirmButtonText: "OK"
+                        });
+
+                        window.location.href = "/deviceToRoom/home"; // Điều hướng sau khi thành công
+                    }
+
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                Swal.fire('Lỗi', 'Có lỗi xảy ra, vui lòng thử lại', 'error');
+            }
+        }
     });
 
     // Xóa phòng
-    window.deleteRoom = function (roomCode) {
+    window.deleteRoom = function (roomId, deviceItemsCount) {
         Swal.fire({
-            title: "Delete Room",
-            text: `Are you sure you want to delete ${roomCode}?`,
+            title: "Bạn muốn xoá phòng này?",
             icon: "warning",
             showCancelButton: true,
-            confirmButtonText: "Yes, delete it!",
-            cancelButtonText: "Cancel"
+            confirmButtonText: "Đồng ý",
+            cancelButtonText: "Huỷ"
         }).then((result) => {
-            if (result.isConfirmed) {
-                document.querySelectorAll("#roomList tr").forEach(row => {
-                    if (row.children[1].textContent === roomCode) row.remove();
-                });
-                Swal.fire("Deleted!", "Room has been deleted.", "success");
+            if(deviceItemsCount > 0) {
+                Swal.fire({
+                    title: "Phòng này đang chứa thiết bị!",
+                    text: "Bạn muốn tiếp tục xoá?",
+                    icon: "warning",
+                    confirmButtonText: "Đồng ý",
+                    showCancelButton: true,
+                    cancelButtonText: "Huỷ"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/api/room/delete/${roomId}`, { method: 'DELETE' })
+                            .then(response => response.ok ? response.json() : Promise.reject('Lỗi khi thực hiện hành động'))
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        title: `Phòng đã được xoá!`,
+                                        icon: 'success',
+                                        confirmButtonText: 'OK'
+                                    }).then(() => { if (data.success) location.reload(); });
+                                } else {
+                                    Swal.fire({
+                                        title: 'Không thể thực hiện hành động!',
+                                        text: data.message || 'Đã xảy ra lỗi không xác định.',
+                                        icon: 'error',
+                                        confirmButtonText: 'OK'
+                                    });
+                                }
+                            })
+                            .catch(error => Swal.fire({ title: 'Có lỗi xảy ra!', icon: 'error', confirmButtonText: 'OK' }));
+                    }
+                })
+            } else {
+                if (result.isConfirmed) {
+                    fetch(`/api/room/delete/${roomId}`, { method: 'DELETE' })
+                        .then(response => response.ok ? response.json() : Promise.reject('Lỗi khi thực hiện hành động'))
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    title: `Phòng đã được xoá!`,
+                                    icon: 'success',
+                                    confirmButtonText: 'OK'
+                                }).then(() => { if (data.success) location.reload(); });
+                            } else {
+                                Swal.fire({
+                                    title: 'Không thể thực hiện hành động!',
+                                    text: data.message || 'Đã xảy ra lỗi không xác định.',
+                                    icon: 'error',
+                                    confirmButtonText: 'OK'
+                                });
+                            }
+                        })
+                        .catch(error => Swal.fire({ title: 'Có lỗi xảy ra!', icon: 'error', confirmButtonText: 'OK' }));
+                }
             }
         });
     };
+
+    window.updateRoom = async function (roomId) {
+        try {
+            const response = await fetch(`/api/room/getById/${roomId}`);
+            const room = await response.json();
+            
+            console.log("Room:", room);
+            if (!response.ok || !room) {
+                Swal.fire("Lỗi", "Không thể tải dữ liệu phòng!", "error");
+                return;
+            }
+
+            // Đổ dữ liệu vào form
+            document.getElementById("roomId").value = room.room._id;
+            document.getElementById("roomName").value = room.room.name;
+            document.getElementById("roomLocation").value = room.room.location.name;
+            document.getElementById("roomCapacity").value = room.room.capacity;
+
+            // Hiển thị modal
+            $("#editRoomModal").modal("show");
+        } catch (error) {
+            console.error("Lỗi khi lấy thông tin phòng:", error);
+            Swal.fire("Lỗi", "Có lỗi xảy ra, vui lòng thử lại!", "error");
+        }
+    };
+
+    // Xử lý khi submit form cập nhật phòng
+    document.getElementById("editRoomForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const roomId = document.getElementById("roomId").value;
+        const updatedRoom = {
+            name: document.getElementById("roomName").value,
+            location: document.getElementById("roomLocation").value,
+            capacity: parseInt(document.getElementById("roomCapacity").value, 10),
+        };
+
+        try {
+            const response = await fetch(`/api/room/update/${roomId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedRoom),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                Swal.fire("Thành công!", "Thông tin phòng đã được cập nhật.", "success").then(() => {
+                    $("#editRoomModal").modal("hide");
+                    location.reload();
+                });
+            } else {
+                Swal.fire("Lỗi", data.message || "Không thể cập nhật phòng.", "error");
+            }
+        } catch (error) {
+            console.error("Lỗi cập nhật phòng:", error);
+            Swal.fire("Lỗi", "Có lỗi xảy ra, vui lòng thử lại!", "error");
+        }
+    });
 });
+</script>
+
+<script>
+    function DangPhatTrien() {
+        Swal.fire({
+            title: 'Tính năng đang phát triển!',
+            text: 'Huệ Trung sẽ sớm cập nhật tính năng này.',
+            icon: 'info',
+            confirmButtonText: 'Đóng'
+        });
+        return false; // Ngăn form submit hoặc hành động mặc định
+    }
 </script>
