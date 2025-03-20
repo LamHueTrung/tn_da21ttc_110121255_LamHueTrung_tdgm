@@ -12,7 +12,7 @@ class DeviceToRoomQuery {
                 .populate("location", "name description")
                 .lean();
             
-            return res.render("pages/deviceToRoom", { 
+            return res.status(200).render("pages/deviceToRoom", { 
                 layout: "main",
                 success: true,
                 message: messages.room.getAllSuccess,
@@ -75,7 +75,7 @@ class DeviceToRoomQuery {
                 .populate("location", "name description")
                 .lean();
             
-            return res.render("pages/tranferRoom", { 
+            return res.status(200).render("pages/tranferRoom", { 
                 layout: "main",
                 success: true,
                 message: messages.room.getAllSuccess,
@@ -117,7 +117,7 @@ class DeviceToRoomQuery {
                 }
             }
             
-            return res.render("pages/addDeviceToRoom", { 
+            return res.status(200).render("pages/addDeviceToRoom", { 
                 layout: "main",
                 success: true,
                 message: messages.device.getAvailableSuccess,

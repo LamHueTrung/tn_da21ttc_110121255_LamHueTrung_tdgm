@@ -13,7 +13,7 @@ class TeacherQuery {
 
             const total = await Teacher.countDocuments();
 
-            return res.render('pages/listAllTeacher', { 
+            return res.status(200).render('pages/listAllTeacher', { 
                 layout: 'main',
                 success: true,
                 message: messages.teacher.getAllSuccess,
@@ -101,11 +101,11 @@ class TeacherQuery {
     }
 
     async AddTeacher(req, res) {
-        res.render('pages/addTeacher', { layout: 'main' });
+        res.status(200).render('pages/addTeacher', { layout: 'main' });
     }
 
     async UpdateTeacher(req, res) {
-        res.render('pages/updateTeacher', { layout: 'main' });
+        res.status(200).render('pages/updateTeacher', { layout: 'main' });
     }
 
     

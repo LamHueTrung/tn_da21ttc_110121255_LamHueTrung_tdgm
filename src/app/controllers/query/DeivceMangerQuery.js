@@ -59,11 +59,11 @@ class DeviceManagerQuery {
     }
 
     async AddDevice(req, res, next) {
-        res.render("pages/addDevice", { layout: "main" });
+        res.status(200).render("pages/addDevice", { layout: "main" });
     }
 
     async UpdateDevice(req, res, next) {
-        res.render("pages/updateDevice", { layout: "main" });
+        res.status(200).render("pages/updateDevice", { layout: "main" });
     }
     
     /**

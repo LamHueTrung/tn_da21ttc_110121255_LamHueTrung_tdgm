@@ -32,7 +32,7 @@ function Route(app) {
     app.use('/statistic', statisticRouter);
     app.use('/reward', rewardManagersRouter);
     app.use('/deviceToRoom', authenticateToken, deviceToRoomsRouter);
-    app.use('/borrowRepay', borrowRepaysRouter);
+    app.use('/borrowRepay', authenticateToken, borrowRepaysRouter);
     app.use('/deviceManger', authenticateToken,deviceManagersRouter);
     app.use('/users', authenticateToken, usersRouter);
     app.use('/', sitesRouter);

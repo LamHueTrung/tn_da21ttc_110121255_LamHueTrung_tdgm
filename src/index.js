@@ -78,6 +78,12 @@ app.engine('hbs', handlebars.engine({
     },
     increment: function(value) {
       return value + 1; 
+    }, 
+    getDeviceNames: function(devices) {
+      return devices.map(device => device.device.name).join(', ');
+    },
+    getTotalQuantity: function(devices) { 
+      return devices.reduce((total, device) => total + device.quantity, 0);
     }
 }
 }));

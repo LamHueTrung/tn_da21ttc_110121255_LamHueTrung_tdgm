@@ -13,7 +13,7 @@ class UserQuery {
      * @param {Function} next - Hàm tiếp theo trong chuỗi middleware
      */
     AddUser(req, res, next) {
-        res.render('pages/addUser', { layout: 'main'});
+        res.status(200).render('pages/addUser', { layout: 'main'});
     }
 
     /**
@@ -24,7 +24,7 @@ class UserQuery {
      * @param {Function} next - Hàm tiếp theo trong chuỗi middleware
      */
     UpdateUser(req, res, next) {
-        res.render('pages/updateUser', { layout: 'main'});
+        res.status(200).render('pages/updateUser', { layout: 'main'});
     }
     
     /**
@@ -48,7 +48,7 @@ class UserQuery {
             }));
 
             console.log(users);
-            res.render('pages/listAllUser', { 
+            res.status(200).render('pages/listAllUser', { 
                 layout: 'main',
                 accounts: accountData,
                 totalUsers,
@@ -129,7 +129,7 @@ class UserQuery {
      * @param {Function} next - Hàm tiếp theo trong chuỗi middleware
      */
     ProfileUser(req, res, next) {
-        res.render('pages/profile', { layout: 'main'});
+        res.status(200).render('pages/profile', { layout: 'main'});
     }
 }
 

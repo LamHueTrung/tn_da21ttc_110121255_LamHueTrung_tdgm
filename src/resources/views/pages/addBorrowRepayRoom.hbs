@@ -1,0 +1,153 @@
+<div class="row add-user mb-4">
+    <h1 class="title-add-user text-center mb-4">Tạo đơn mượn thiết bị</h1>
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+            <h3 class="mt-4">Danh sách phòng</h3>
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Tên phòng</th>
+                        <th>Vị trí</th>
+                        <th>Số lượng thiết bị</th>
+                        <th>Sức chứa (Người)</th>
+                    </tr>
+                </thead>
+                <tbody id="roomList">
+                    {{#each rooms}}
+                    <tr>
+                        <td>
+                            <input style="width: 38px;height: 25px;" type="checkbox" class="checkbox" 
+                            data-id="{{this._id}}" 
+                            data-name="{{ this.name}}"
+                            ></td>
+                        <td>{{this.name}}</td>
+                        <td>{{this.location.name}}</td>
+                        <td>{{#if this.deviceItems.length}} {{this.deviceItems.length}} {{else}} 0 {{/if}}</td>
+                        <td>{{this.capacity}}</td>
+                    </tr>
+                    {{/each }}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="d-flex mt-2" style="float: right;">
+            <button type="button" onclick="javascript:history.back()" class="btn btn-secondary btn-previou">Quay lại</button>
+            <button id="createOrderBtn" type="submit" class="btn btn-system btn-submit ml-2">Hoàn tất</button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const checkboxes = document.querySelectorAll(".checkbox");
+        const createOrderBtn = document.getElementById("createOrderBtn");
+
+        // Lấy dữ liệu từ localStorage (nếu có), nếu không thì gán mảng rỗng
+        let datas = JSON.parse(localStorage.getItem("data")) || [];
+        console.log("Dữ liệu ban đầu:", datas);
+
+        // Xử lý khi chọn checkbox
+        checkboxes.forEach((checkbox) => {
+            checkbox.addEventListener("change", function () {
+                const id = this.dataset.id;
+                const name = this.dataset.name;
+
+                if (this.checked) {
+                    if (!datas.some(data => data.roomId === id)) {
+                        datas.push({ roomId: id, nameRoom: name });
+                        localStorage.setItem("data", JSON.stringify(datas)); 
+                    }
+                } else {
+                    removeRoom(id);
+                }
+
+                console.log("Dữ liệu sau khi thay đổi:", datas);
+            });
+        });
+
+        function removeRoom(id) {
+            datas = datas.filter(data => data.roomId !== id);
+            localStorage.setItem("data", JSON.stringify(datas));
+        }
+
+        // Kiểm tra dữ liệu trước khi tiếp tục
+        createOrderBtn.addEventListener("click", function () {
+            if (datas.length === 2) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Chưa chọn phòng",
+                    text: "Vui lòng chọn ít nhất một phòng trước khi tiếp tục.",
+                    confirmButtonText: "OK"
+                });
+                return;
+            }
+
+            const storedData = JSON.parse(localStorage.getItem("data")) || [];
+            console.log("Dữ liệu từ localStorage:", storedData);
+
+            // Tách dữ liệu thành các phần riêng biệt
+            const teacher = storedData.find(item => item.teacherId);
+            const room = storedData.find(item => item.roomId);
+            const devices = storedData.filter(item => item.deviceId).map(device => ({
+                deviceId: device.deviceId,
+                quantity: device.quantity
+            }));
+
+            // Kiểm tra nếu thiếu dữ liệu bắt buộc
+            if (!teacher || !room || devices.length === 0) {
+                console.error("Dữ liệu không hợp lệ! Kiểm tra lại thông tin.");
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi dữ liệu",
+                    text: "Vui lòng chọn đầy đủ thông tin giáo viên, phòng và thiết bị.",
+                    confirmButtonText: "OK"
+                });
+                return;
+            }
+
+            // Tạo object theo cấu trúc API yêu cầu
+            const borrowOrder = {
+                teacherId: teacher.teacherId,
+                roomId: room.roomId,
+                devices: devices
+            };
+
+            console.log("Dữ liệu gửi đi:", borrowOrder);
+
+            // Gửi yêu cầu POST đến API
+            fetch("/api/borrowReturn/borrow", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(borrowOrder)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Kết quả trả về:", data);
+                Swal.fire({
+                    icon: "success",
+                    title: "Đã tạo đơn mượn",
+                    text: "Đơn mượn thiết bị đã được gửi thành công!",
+                    confirmButtonText: "OK"
+                });
+                // Xóa dữ liệu khỏi localStorage sau khi gửi
+                localStorage.removeItem("data");
+            })
+            .catch(error => {
+                console.error("Lỗi khi gửi yêu cầu:", error);
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi gửi đơn",
+                    text: "Có lỗi xảy ra khi gửi đơn mượn. Vui lòng thử lại!",
+                    confirmButtonText: "OK"
+                });
+                window.location.href = "/borrowRepay/home";
+            });
+        });
+    });
+</script>

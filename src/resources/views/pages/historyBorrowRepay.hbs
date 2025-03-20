@@ -1,9 +1,9 @@
 <div class="card shadow mb-4" id="page-top">
     <div class="card-header py-3">
-        <a href="/borrowRepay/addNew" class="btn btn-darks">Create Order</a>
+        <a href="/borrowRepay/addNew" class="btn btn-darks">Tạo đơn mượn thiết bị</a>
     </div>
     <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">History borrow repay</h6>
+        <h6 class="m-0 font-weight-bold text-primary">Danh sách mượn</h6>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -11,130 +11,196 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Order ID</th>
-                        <th>Type</th>
-                        <th>Status</th>
-                        <th>Name User</th>
-                        <th>Borrow Date</th>
-                        <th>Return Date</th>
-                        <th>Actions</th>
+                        <th>Trạng thái</th>
+                        <th>Tên thiết bị</th>
+                        <th>Số lượng</th>
+                        <th>Phòng</th>
+                        <th>Tên người mượn</th>
+                        <th>Ngày mượn</th>
+                        <th>Ngày trả</th>
+                        <th>Thao tác</th>
                     </tr>
                 </thead>
                 <tbody id="orderList">
-                    <!-- Dữ liệu demo -->
+                    {{#each borrowRequests }}
                     <tr>
-                        <td>1</td>
-                        <td>ORD12345</td>
-                        <td>Borrow</td>
-                        <td><span class="text-warning">Pending</span></td>
-                        <td>Nguyễn Văn A</td>
-                        <td>2024-02-20</td>
-                        <td>2024-02-25</td>
+                        <td>{{increment @index}}</td>
+                        <td>
+                            <span class="badge 
+                            {{#if (eq this.status "Đã trả")}}badge-success{{else}}badge-warning{{/if}}">
+                                {{this.status}}
+                            </span>
+                        </td>
+                        <td>{{ getDeviceNames this.devices }}</td>
+                        <td>{{ getTotalQuantity this.devices }}</td>
+                        <td>{{#if this.room}} {{this.room.name}} {{else}} Mượn cá nhân {{/if}}</td>
+                        <td>{{#if this.teacher}} {{this.teacher.name}} {{else}} N/A {{/if}}</td>
+                        <td>{{formatDate this.borrow_date}}</td>
+                        <td>{{#if this.return_date}} {{formatDate this.return_date}} {{else}} <span
+                                class="text-danger">Chưa trả</span> {{/if}}</td>
                         <td>
                             <div class="btn-group">
-                                <button class="btn btn-sm " type="button" id="dropdownMenuButton" data-toggle="dropdown">
+                                <button class="btn btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown">
                                     <img width="30px" src="/img/dotsMenu.png" alt="">
                                 </button>
                                 <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="#"><i class="fa-brands fa-openid"></i> View</a>
-                                    <a class="dropdown-item" onclick="confirmReturn('ORD12345')">
-                                        <i class="fa-regular fa-pen-to-square"></i> Confirm Return
+                                    <a class="dropdown-item view-details" onclick="ShowDetails('{{this._id}}')">
+                                        <i class="fa-brands fa-openid"></i> Xem chi tiết
                                     </a>
-                                    <a class="dropdown-item" onclick="confirmDelete('ORD12345')">
-                                        <i class="fa-regular fa-trash-can"></i> Cancel Order
+                                    {{#if (eq this.status "Đang mượn")}}
+                                    <a class="dropdown-item" onclick="ConfirmReturn('{{this._id}}')">
+                                        <i class="fa-regular fa-pen-to-square"></i> Trả thiết bị
                                     </a>
+                                    {{/if}}
                                 </div>
                             </div>
                         </td>
                     </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>ORD67890</td>
-                        <td>Repay</td>
-                        <td><span class="text-success">Completed</span></td>
-                        <td>Trần Thị B</td>
-                        <td>2024-02-15</td>
-                        <td>2024-02-20</td>
-                        <td>
-                            <div class="btn-group">
-                                <button class="btn btn-sm " type="button" id="dropdownMenuButton" data-toggle="dropdown">
-                                    <img width="30px" src="/img/dotsMenu.png" alt="">
-                                </button>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item" href="#"><i class="fa-brands fa-openid"></i> View</a>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
+                    {{/each}}
                 </tbody>
             </table>
             <button type="button" onclick="javascript:history.back()" class="btn btn-secondary">Back</button>
         </div>
     </div>
+
+    <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailModalLabel">Chi tiết đơn mượn</h5>
+                    <button type="button" class="btn-close close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                <div class="modal-body" id="modalContent">
+                    <!-- Nội dung chi tiết sẽ được cập nhật bằng JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    // Xác nhận trả thiết bị (Dữ liệu chỉ demo, không gọi API)
-    function confirmReturn(orderId) {
-        Swal.fire({
-            title: "Confirm Return",
-            text: "Are you sure you want to mark this order as returned?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Yes, confirm!",
-            cancelButtonText: "Cancel"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Cập nhật trạng thái trên giao diện (không gọi API)
-                const rows = document.querySelectorAll("#orderList tr");
-                rows.forEach(row => {
-                    if (row.children[1].textContent === orderId) {
-                        row.children[3].innerHTML = '<span class="text-success">Completed</span>';
-                    }
-                });
-
-                Swal.fire({
-                    title: "Return Confirmed",
-                    text: "The order has been successfully marked as returned.",
-                    icon: "success",
-                    confirmButtonText: "OK"
-                });
-            }
-        });
-    }
-
-    // Xác nhận hủy đơn (Dữ liệu chỉ demo, không gọi API)
-    function confirmDelete(orderId) {
-        Swal.fire({
-            title: "Cancel Order",
-            text: "Are you sure you want to cancel this order?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Yes, cancel it!",
-            cancelButtonText: "No"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Xóa đơn khỏi giao diện (không gọi API)
-                const rows = document.querySelectorAll("#orderList tr");
-                rows.forEach(row => {
-                    if (row.children[1].textContent === orderId) {
-                        row.remove();
-                    }
-                });
-
-                Swal.fire({
-                    title: "Order Canceled",
-                    text: "The order has been successfully canceled.",
-                    icon: "success",
-                    confirmButtonText: "OK"
-                });
-            }
-        });
-    }
-
-    // Gán sự kiện cho các nút
-    window.confirmReturn = confirmReturn;
-    window.confirmDelete = confirmDelete;
-});
+    document.addEventListener("DOMContentLoaded", function () {
+        let borrowRequests = {{ borrowRequests}};
+    });
 </script>
+
+<script>
+
+    function ConfirmReturn(orderId) {
+        Swal.fire({
+            title: "Trả thiết bị",
+            text: "Xác nhận đồng ý trả thiết bị?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Xác nhận",
+            cancelButtonText: "Hủy"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Gửi yêu cầu API để tạo tài khoản mới
+                fetch(`/api/borrowReturn/return/${orderId}`, {
+                    method: 'PUT',
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: "Xác nhận thành công!",
+                            icon: "success",
+                            confirmButtonText: "OK",
+                        }).then(() => {
+                            window.location.reload(); // Chuyển đến danh sách người dùng hoặc trang khác
+                        });
+                    } else {
+                        
+                        Swal.fire('Lỗi', 'Có lỗi xảy ra, vui lòng thử lại!', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire('Lỗi', 'Có lỗi xảy ra, vui lòng thử lại!', 'error');
+                });
+            }
+        });
+    }
+
+    function ShowDetails(id) {
+        fetch(`/api/borrowReturn/getbyid/${id}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                if (data.success && data.borrowRequest) {
+                    const request = data.borrowRequest;
+
+                    // Lấy thông tin giáo viên
+                    let teacherInfo = request.teacher
+                        ? `<p><strong>Người mượn:</strong> ${request.teacher.name}</p>
+                        <p><strong>Email:</strong> ${request.teacher.email}</p>
+                        <p><strong>SĐT:</strong> ${request.teacher.phone}</p>
+                        <p><strong>Khoa:</strong> ${request.teacher.department}</p>`
+                        : `<p><strong>Người mượn:</strong> <span class="text-danger">Không có thông tin</span></p>`;
+
+                    // Lấy thông tin phòng học
+                    let roomInfo = request.room
+                        ? `<p><strong>Phòng:</strong> ${request.room.name}</p>
+                        <p><strong>Vị trí:</strong> ${request.room.location || "Không xác định"}</p>`
+                        : `<p><strong>Phòng:</strong> Mượn cá nhân</p>`;
+
+                    // Ngày mượn & ngày trả
+                    let borrowDate = request.borrow_date ? formatDate(request.borrow_date) : "Không xác định";
+                    let returnDate = request.return_date
+                        ? formatDate(request.return_date)
+                        : '<span class="text-danger">Chưa trả</span>';
+
+                    // Danh sách thiết bị từ `devices`
+                    let deviceList = request.devices
+                        ? request.devices.map(d => `<li>${d.device.name} - ${d.quantity} cái</li>`).join("")
+                        : `<li>Không có thiết bị</li>`;
+
+                    // Danh sách thiết bị chi tiết từ `deviceItems`
+                    let deviceItemsList = request.deviceItems
+                        ? request.deviceItems.map(d => `
+                            <li>
+                                <strong>${d.device.name}</strong> - 
+                                <span class="text-info">${d.status}</span>
+                            </li>`).join("")
+                        : `<li>Không có thông tin thiết bị chi tiết</li>`;
+
+                    // Tổng hợp HTML hiển thị
+                    let detailsHtml = `
+                        ${teacherInfo}
+                        ${roomInfo}
+                        <p><strong>Ngày mượn:</strong> ${borrowDate}</p>
+                        <p><strong>Ngày trả:</strong> ${returnDate}</p>
+                        <h5>Danh sách thiết bị mượn:</h5>
+                        <ul>${deviceList}</ul>
+                        <h5>Chi tiết thiết bị:</h5>
+                        <ul>${deviceItemsList}</ul>
+                    `;
+
+                    document.getElementById("modalContent").innerHTML = detailsHtml;
+                    $("#detailModal").modal("show");
+                } else {
+                    Swal.fire('Lỗi', 'Không thể tải thông tin chi tiết', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire('Lỗi', 'Có lỗi xảy ra khi tải dữ liệu', 'error');
+            });
+    }
+
+    // Hàm định dạng ngày
+    function formatDate(dateStr) {
+        let date = new Date(dateStr);
+        return date.toLocaleDateString("vi-VN", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
+        });
+    }
+
+</script>
+

@@ -1,0 +1,98 @@
+<div class="row add-user mb-4">
+    <h1 class="title-add-user text-center mb-4">Tạo đơn mượn thiết bị</h1>
+
+    <div class="card-body">
+       
+        <div class="table-responsive">
+            <h3 class="mt-4">Danh sách giảng viên</h3>
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>Số điện thoại</th>
+                        <th>Phòng ban</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each teachers}}
+                    <tr>
+                        <td>
+                            <input style="width: 38px;height: 25px;" type="checkbox" class="checkbox" 
+                            data-id="{{this._id}}" 
+                            data-name="{{ this.name}}"
+                            ></td>
+                        <td>{{this.name}}</td>
+                        <td>{{this.email}}</td>
+                        <td>{{this.phone}}</td>
+                        <td>{{this.department}}</td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <img width="30px" src="/img/dotsMenu.png" alt="">
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item" href="/users/updateTeacher/{{this._id}}"><i class="fa-regular fa-pen-to-square"></i> Chỉnh sửa</a>
+                                    <a class="dropdown-item" onclick="confirmDelete('{{this._id}}')"><i class="fa-regular fa-trash-can"></i> Xoá</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex mt-2" style="float: right;">
+            <button type="button" onclick="javascript:history.back()" class="btn btn-secondary btn-previou">Quay lại</button>
+            <button id="createOrderBtn" type="submit" class="btn btn-system btn-submit ml-2">Tiếp tục</button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const checkboxes = document.querySelectorAll(".checkbox");
+        const createOrderBtn = document.getElementById("createOrderBtn");
+
+        let datas = JSON.parse(localStorage.getItem("data")) || [];
+
+        checkboxes.forEach((checkbox) => {
+            checkbox.addEventListener("change", function () {
+                const id = this.dataset.id;
+                const name = this.dataset.name;
+
+                if (this.checked) {
+                    if (!datas.some(data => data.teacherId === id)) {
+                        datas.push({ teacherId: id, nameTeacher: name });
+                    }
+                } else {
+                    removeTeacher(id);
+                }
+
+                console.log(datas);
+            });
+        });
+
+        function removeTeacher(id) {
+            datas = datas.filter(data => data.teacherId !== id);
+        }
+
+        createOrderBtn.addEventListener("click", function () {
+            if (datas.length === 1) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Chưa chọn giảng viên",
+                    text: "Vui lòng chọn ít nhất một giảng viên trước khi tiếp tục.",
+                });
+                return;
+            }
+
+            localStorage.setItem("data", JSON.stringify(datas));
+            window.location.href = "/borrowRepay/addNewChoiceRoom";
+        });
+    });
+</script>

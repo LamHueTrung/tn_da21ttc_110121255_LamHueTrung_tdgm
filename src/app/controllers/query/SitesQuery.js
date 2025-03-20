@@ -4,10 +4,10 @@ class SitesQuery {
     
     // Render login page
     login(req, res) {
-        res.render('Login', { layout: 'Login'});
+        res.status(200).render('Login', { layout: 'Login'});
     }
     async Index(req, res, next) {
-        res.render('pages/main', { layout: 'main'});
+        res.status(200).render('pages/main', { layout: 'main'});
     }
 
 };
