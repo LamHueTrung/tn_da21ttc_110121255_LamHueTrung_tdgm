@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Location = require("./Location");
 
 const roomSchema = new mongoose.Schema({
     name: {
@@ -37,6 +38,20 @@ const roomSchema = new mongoose.Schema({
         default: Date.now
     }
 });
+
+roomSchema.statics.ensureMainWarehouse = async function () {
+    let mainWarehouse = await this.findOne({ name: 'Kho chính' });
+    if (!mainWarehouse) {
+        const location = await Location.ensureMainWarehouse(); // 🛠 await ở đây
+        mainWarehouse = await this.create({
+            name: 'Kho chính',
+            description: 'Kho mặc định cho thiết bị',
+            location: location._id // ✅ Lấy _id sau khi đã await
+        });
+    }
+
+    return mainWarehouse;
+};
 
 // Middleware cập nhật `updated_at`
 roomSchema.pre('save', function (next) {

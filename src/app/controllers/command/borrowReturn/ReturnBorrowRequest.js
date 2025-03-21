@@ -28,15 +28,16 @@ class ReturnBorrowRequest {
             }
 
             // Lấy "Kho chính"
-            const mainWarehouse = await Location.ensureMainWarehouse();
-
+            const mainWarehouse = await Room.ensureMainWarehouse();
+            
             for (const itemId of borrowRequest.deviceItems) {
                 const item = await DeviceItem.findById(itemId);
                 if (!item) continue;
 
                 // Cập nhật trạng thái `DeviceItem`
-                item.status = "Hoạt động";
+                item.status = "Mới";
                 item.room = mainWarehouse._id;  // ✅ Gán về "Kho chính" thay vì `null`
+                item.location = mainWarehouse.location;  // ✅ Gán về "Kho chính" thay vì `null`
                 item.borrowedBy = null;
                 await item.save();
 

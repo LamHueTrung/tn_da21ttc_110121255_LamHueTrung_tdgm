@@ -71,13 +71,11 @@ class CreateDevice {
                     errors: { name: messages.createDevice.deviceExist },
                 });
             }
+            
+            // Lấy "Kho chính"
+            const mainWarehouse = await Room.ensureMainWarehouse();
 
-            // Kiểm tra hoặc tạo `Room` nếu chưa tồn tại
-            let deviceRoom = await Room.findOne({ name: room });
-            if (!deviceRoom) {
-                deviceRoom = await Room.create({ name: room, description: "Phòng mới được tạo" });
-            }
-
+            console.log(mainWarehouse);
             // Lưu ảnh vào thư mục tạm
             let tempImagePaths = [];
             if (req.files && req.files.length > 0) {
@@ -101,7 +99,8 @@ class CreateDevice {
                 const newDeviceItem = new DeviceItem({
                     device: newDevice._id,
                     status: 'Mới',
-                    room: deviceRoom._id // 🔥 Cập nhật thành `room`
+                    room: mainWarehouse._id, // 🔥 Cập nhật thành `room`
+                    location: mainWarehouse.location // 🔥 Cập nhật thành `mainWarehouse`
                 });
                 await newDeviceItem.save();
                 createdDeviceItems.push(newDeviceItem);
@@ -127,12 +126,12 @@ class CreateDevice {
                     category: newDevice.category,
                     status: newDevice.status,
                     quantity: newDevice.quantity,
-                    room: deviceRoom.name,
+                    room: mainWarehouse.name,
                     images: newDevice.images,
                     deviceItems: createdDeviceItems.map(item => ({
                         id: item._id,
                         status: item.status,
-                        room: deviceRoom.name
+                        room: mainWarehouse.name
                     }))
                 }
             });

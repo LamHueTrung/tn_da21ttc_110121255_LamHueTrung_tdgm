@@ -137,6 +137,7 @@
                 });
                 // Xóa dữ liệu khỏi localStorage sau khi gửi
                 localStorage.removeItem("data");
+                window.location.href = "/borrowRepay/home";
             })
             .catch(error => {
                 console.error("Lỗi khi gửi yêu cầu:", error);

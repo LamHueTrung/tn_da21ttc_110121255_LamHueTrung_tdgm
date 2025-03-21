@@ -1,4 +1,3 @@
-const jwt = require('jsonwebtoken');
 const Device = require("../../model/Device");
 const DeviceItem = require("../../model/DeviceItem");
 const Teacher = require("../../model/Teacher");

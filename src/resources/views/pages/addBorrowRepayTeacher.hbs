@@ -13,7 +13,6 @@
                         <th>Email</th>
                         <th>Số điện thoại</th>
                         <th>Phòng ban</th>
-                        <th>Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -28,17 +27,6 @@
                         <td>{{this.email}}</td>
                         <td>{{this.phone}}</td>
                         <td>{{this.department}}</td>
-                        <td>
-                            <div class="btn-group">
-                                <button class="btn btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <img width="30px" src="/img/dotsMenu.png" alt="">
-                                </button>
-                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                    <a class="dropdown-item" href="/users/updateTeacher/{{this._id}}"><i class="fa-regular fa-pen-to-square"></i> Chỉnh sửa</a>
-                                    <a class="dropdown-item" onclick="confirmDelete('{{this._id}}')"><i class="fa-regular fa-trash-can"></i> Xoá</a>
-                                </div>
-                            </div>
-                        </td>
                     </tr>
                     {{/each}}
                 </tbody>
@@ -47,7 +35,8 @@
 
         <div class="d-flex mt-2" style="float: right;">
             <button type="button" onclick="javascript:history.back()" class="btn btn-secondary btn-previou">Quay lại</button>
-            <button id="createOrderBtn" type="submit" class="btn btn-system btn-submit ml-2">Tiếp tục</button>
+            <button id="createOrderBtn" type="submit" class="btn btn-system btn-submit ml-2">Tiếp tục chọn phòng</button>
+            <button id="createOrderBtn" type="submit" class="btn btn-system btn-submit ml-2">Hoàn tất mượn cá nhân</button>
         </div>
 
     </div>
