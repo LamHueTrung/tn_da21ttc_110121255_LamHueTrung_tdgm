@@ -202,6 +202,48 @@ const messages = {
         invalidDeviceReturn: "Thiết bị không hợp lệ để trả.",
         alreadyReturned: "Tất cả thiết bị trong đơn này đã được trả.",
         
+    },
+
+    createGift: {
+        giftExist: 'Quà tặng đã tồn tại.',
+        giftCreateSuccess: 'Quà tặng đã được tạo.',
+        createError: 'Lỗi khi kiểm tra hoặc tạo quà tặng.',
+        locationNotFound: 'Kho quà tặng không tồn tại.',
+    },
+
+    gift: {
+        giftNotFound: 'Quà tặng không tồn tại.',
+        giftUpdateSuccess: 'Quà tặng đã được cập nhật.',
+        giftUpdateError: 'Lỗi khi cập nhật quà tặng.',
+        giftDeleteSuccess: 'Quà tặng đã được xóa.',
+        giftDeleteError: 'Lỗi khi xóa quà tặng.',
+        getAllSuccess: 'Lấy danh sách quà tặng thành công.',
+        getAllError: 'Lỗi khi lấy danh sách quà tặng.',
+        getByIdSuccess: 'Lấy thông tin quà tặng thành công.',
+        getByIdError: 'Lỗi khi lấy thông tin quà tặng.',
+        invalidGift: 'Quà tặng không hợp lệ.',
+        noFile: 'Không có file nào được tải lên.',
+        emptyFile: 'File không chứa dữ liệu.',
+        importSuccess: 'Danh sách quà tặng đã được import thành công.',
+        importError: 'Lỗi khi import danh sách quà tặng.',
+        notFound: 'Không tìm thấy quà tặng.',   
+        updateSuccess: 'Quà tặng đã được cập nhật.',   
+        updateError: 'Lỗi khi cập nhật quà tặng.',
+    },
+    
+    getGift: {
+        getAllSuccess: 'Lấy danh sách quà tặng thành công.',
+        getAllError: 'Lỗi khi lấy danh sách quà tặng.',
+        giftNotFound: 'Không tìm thấy quà tặng.',
+        getByIdSuccess: 'Lấy thông tin chi tiết quà tặng thành công.',
+        getByIdError: 'Lỗi khi lấy thông tin chi tiết quà tặng.',
+    },
+
+    importRewards: {
+        noFile: 'Không có file nào được tải lên.',
+        emptyFile: 'File không chứa dữ liệu.',
+        success: 'Danh sách quà tặng đã được import thành công.',
+        error: 'Lỗi khi import danh sách quà tặng.',
     }
 };
 

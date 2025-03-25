@@ -1,0 +1,51 @@
+<div class="row" id="page-top">
+    <div class="col-md-4 text-center">
+        <!-- Kiểm tra nếu có hình ảnh -->
+        {{#if gift.images.length}}
+            <img id="profileAvatar" class="rounded-square img-thumbnail" src="{{gift.images}}" alt="Gift Image" />
+        {{else}}
+            <img id="profileAvatar" class="rounded-square img-thumbnail" src="/uploads/rewards/default.png" alt="No Image Available" />
+        {{/if}}
+        <p class="text-muted" id="giftCategory">{{gift.category}}</p>
+    </div>
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Thông tin chi tiết quà tặng</h4>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <strong>Tên quà tặng:</strong> <span>{{gift.name}}</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Loại quà tặng:</strong> <span>{{gift.category}}</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Mô tả:</strong> <span>{{gift.description}}</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Tổng số lượng:</strong> <span>{{gift.quantity_in_stock}}</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Giá trị:</strong> <span>{{currency gift.price}}</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Ngày nhập:</strong> <span>{{formatDate gift.created_at}}</span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Ngày cập nhật:</strong> <span>{{formatDate gift.updated_at}}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-right mt-4">
+        <button type="button" onclick="javascript:history.back()" class="btn btn-secondary btn-previou">Quay lại</button>
+    </div>
+</div>
+
+<script>
+    // Bạn có thể thêm bất kỳ logic JavaScript bổ sung nào nếu cần
+</script>

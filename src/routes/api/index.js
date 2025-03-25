@@ -5,6 +5,7 @@ const deviceRoute = require("./device");
 const roomRoute = require("./room");
 const teacherRoute = require("./teacher");
 const statisticRoute = require("./statistic");
+const rewardRoute = require("./reward");
 const Login = require("../../app/controllers/command/user/Login");
 const borrowReturnRoute = require("./borrowReturn");
 const authenticateToken = require("../../app/middleware/authenticateTokenAdmin");
@@ -60,5 +61,9 @@ router.use("/teacher", authenticateToken, teacherRoute);
 
 // Statistic route
 router.use("/statistics", authenticateToken, statisticRoute);
+
+// Reward route
+router.use("/reward", authenticateToken, rewardRoute);
+
 
 module.exports = router;

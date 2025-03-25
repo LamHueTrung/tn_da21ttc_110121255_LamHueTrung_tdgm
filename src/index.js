@@ -84,7 +84,10 @@ app.engine('hbs', handlebars.engine({
     },
     getTotalQuantity: function(devices) { 
       return devices.reduce((total, device) => total + device.quantity, 0);
-    }
+    },
+    currency: function(value) {
+      return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+    },
 }
 }));
 app.set('view engine', 'hbs');

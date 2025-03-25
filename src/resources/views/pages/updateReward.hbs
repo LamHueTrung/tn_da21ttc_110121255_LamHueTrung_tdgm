@@ -1,0 +1,134 @@
+<div class="row add-user mb-4">
+    <h1 class="title-add-user text-center mb-4">Chỉnh sửa thông tin quà tặng</h1>
+
+    <!-- Form chỉnh sửa quà tặng -->
+    <div id="manualForm">
+        <form id="updateGiftForm" enctype="multipart/form-data" class="col-md-6 offset-md-3">
+            <div class="mb-3">
+                <label class="form-label">Tên quà tặng</label>
+                <input type="text" class="form-control" name="name" id="name" placeholder="Example: Áo thun sự kiện">
+                <div id="nameError" class="text-danger"></div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Mô tả</label>
+                <textarea class="form-control" name="description" id="description" placeholder="Ví dụ: Áo cotton 100% dùng trong các sự kiện nội bộ"></textarea>
+                <div id="descriptionError" class="text-danger"></div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Loại quà tặng</label>
+                <select class="form-control" name="category" id="category">
+                    <option value="Học viên">Học viên</option>
+                    <option value="Đối tác">Đối tác</option>
+                    <option value="Khác">Khác</option>
+                </select>
+                <div id="categoryError" class="text-danger"></div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Tổng số lượng</label>
+                <input type="number" class="form-control" name="quantity_in_stock" id="quantity_in_stock" placeholder="Ví dụ: 100">
+                <div id="quantity_in_stockError" class="text-danger"></div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Giá</label>
+                <input type="number" class="form-control" name="price" id="price" placeholder="Nhập giá quà tặng" min="0" step="0.01">
+                <div class="text-danger" id="priceError"></div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Ảnh quà tặng</label>
+                <input type="file" class="form-control" name="images" id="images">
+                <div id="imgGiftError" class="text-danger"></div>
+            </div>
+
+            <div class="d-flex" style="float: right;">
+                <button type="submit" class="btn btn-system btn-submit">Lưu thay đổi</button>
+                <button type="button" onclick="javascript:history.back()" class="btn btn-secondary btn-previou">Quay lại</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Lấy ID quà tặng từ URL (ví dụ: /updateGift/:id)
+    const giftId = window.location.pathname.split('/').pop(); // Lấy ID từ URL
+
+    // Gửi yêu cầu GET để lấy thông tin quà tặng
+    fetch(`/api/reward/getById/${giftId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.gift) {
+                // Điền giá trị vào form với dữ liệu quà tặng
+                document.getElementById("name").value = data.gift.name;
+                document.getElementById("description").value = data.gift.description;
+                document.getElementById("quantity_in_stock").value = data.gift.quantity_in_stock;
+                document.getElementById("category").value = data.gift.category;
+                document.getElementById("price").value = data.gift.price;
+
+                // Nếu có ảnh, điền vào input ảnh quà tặng
+                if (data.gift.images && data.gift.images[0]) {
+                    const imgInput = document.getElementById("images");
+                    imgInput.setAttribute("data-default-image", data.gift.images[0]); // Để lưu trữ giá trị ảnh cũ
+                }
+            } else {
+                Swal.fire('Lỗi', 'Không thể tải thông tin quà tặng', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Lỗi', 'Có lỗi xảy ra khi tải dữ liệu quà tặng', 'error');
+        });
+
+    // Xử lý submit form khi chỉnh sửa thông tin quà tặng
+    document.getElementById("updateGiftForm").addEventListener("submit", function (event) {
+        event.preventDefault(); // Ngăn chặn gửi form theo phương thức POST
+
+        const formData = new FormData(this); // Lấy dữ liệu từ form
+
+        // Thêm ID quà tặng vào formData để biết quà tặng nào đang được chỉnh sửa
+        formData.append('giftId', giftId);
+
+        // Gửi yêu cầu API để chỉnh sửa thông tin quà tặng
+        fetch(`/api/reward/update/${giftId}`, {
+            method: 'PUT',
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: "Chỉnh sửa thành công!",
+                    text: data.message,
+                    icon: "success",
+                    timer: 2000,
+                    showConfirmButton: false,
+                }).then(() => {
+                    window.location.href = '/reward/home'; // Chuyển đến danh sách quà tặng hoặc trang khác
+                });
+            } else {
+                // Hiển thị lỗi từ API
+                if (data.errors) {
+                    // Hiển thị lỗi từng trường
+                    document.getElementById("nameError").textContent = data.errors.name || "";
+                    document.getElementById("descriptionError").textContent = data.errors.description || "";
+                    document.getElementById("quantity_in_stockError").textContent = data.errors.quantity_in_stock || "";
+                    document.getElementById("categoryError").textContent = data.errors.category || "";
+                    document.getElementById("imgGiftError").textContent = data.errors.imgGift || "";
+                    document.getElementById("priceError").textContent = data.errors.price || "";
+                    
+                }
+                console.log(data);
+                Swal.fire('Lỗi', data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Lỗi', 'Có lỗi xảy ra, vui lòng thử lại', 'error');
+        });
+    });
+});
+</script>

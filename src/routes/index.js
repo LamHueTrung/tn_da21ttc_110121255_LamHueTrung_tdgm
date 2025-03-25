@@ -30,7 +30,7 @@ function Route(app) {
     
     app.use('/api', apiRoute);
     app.use('/statistic', authenticateToken, statisticRouter);
-    app.use('/reward', rewardManagersRouter);
+    app.use('/reward', authenticateToken, rewardManagersRouter);
     app.use('/deviceToRoom', authenticateToken, deviceToRoomsRouter);
     app.use('/borrowRepay', authenticateToken, borrowRepaysRouter);
     app.use('/deviceManger', authenticateToken,deviceManagersRouter);
