@@ -2,6 +2,8 @@ const Gift = require("../../model/Gift");
 const DeviceItem = require("../../model/DeviceItem");
 const Location = require("../../model/Location");
 const messages = require("../../Extesions/messCost");
+const Order = require("../../model/Order"); // Import model Order
+const Teacher = require("../../model/Teacher");
 
 class GiftManagerQuery {
     /**
@@ -168,7 +170,35 @@ class GiftManagerQuery {
     }
     
     async ListRequestReward(req, res, next) {
-        res.status(200).render('pages/listRequestReward', { layout: 'main'});
+        try {
+            // Lấy tất cả đơn yêu cầu quà tặng từ MongoDB
+            const orders = await Order.find()
+                .populate('teacher', 'name email') // Tìm thông tin giáo viên
+                .populate('gift', 'name category price') // Tìm thông tin quà tặng
+                .lean(); // Sử dụng lean để trả về đối tượng thuần (plain object)
+
+            if (!orders || orders.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: "No orders found."
+                });
+            }
+
+            // Trả về kết quả
+            return res.status(200).render('pages/listRequestReward', { 
+                layout: 'main',
+                success: true,
+                orders: orders
+            });
+        } catch (error) {
+            console.error("Error fetching orders:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Error fetching orders.",
+                error: error.message
+            });
+        }
+        
     }
 
     async ViewGift(req, res, next) {
@@ -220,6 +250,69 @@ class GiftManagerQuery {
     
     async UpdateGift(req, res, next) {
         res.status(200).render("pages/updateReward", { layout: "main" });
+    }
+
+    // API GET để lấy tất cả đơn yêu cầu
+    async getAllOrders(req, res) {
+        try {
+            // Lấy tất cả đơn yêu cầu quà tặng từ MongoDB
+            const orders = await Order.find()
+                .populate('teacher', 'name email') // Tìm thông tin giáo viên
+                .populate('gift', 'name category price') // Tìm thông tin quà tặng
+                .lean(); // Sử dụng lean để trả về đối tượng thuần (plain object)
+
+            if (!orders || orders.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: "No orders found."
+                });
+            }
+
+            // Trả về kết quả
+            return res.status(200).json({
+                success: true,
+                orders: orders
+            });
+        } catch (error) {
+            console.error("Error fetching orders:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Error fetching orders.",
+                error: error.message
+            });
+        }
+    }
+
+    // API GET đơn yêu cầu theo ID
+    async getOrderById(req, res) {
+        const { orderId } = req.params;
+
+        try {
+            // Truy vấn đơn yêu cầu theo ID
+            const order = await Order.findById(orderId)
+                .populate('teacher', 'name email') // Tìm thông tin giáo viên
+                .populate('gift', 'name category price') // Tìm thông tin quà tặng
+                .lean(); // Sử dụng lean để trả về đối tượng thuần (plain object)
+
+            if (!order) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Order not found."
+                });
+            }
+
+            return res.status(200).json({
+                success: true,
+                order
+            });
+        } catch (error) {
+            console.error("Error fetching order:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Error fetching order.",
+                error: error.message
+            });
+        }
     }
 }
 

@@ -5,6 +5,7 @@ const CreateDeviceCommand = require('../../app/controllers/command/device/Create
 const UpdateDeviceCommand = require('../../app/controllers/command/device/UpdateDevice');
 const DeleteDeviceCommand = require('../../app/controllers/command/device/DeleteDevice');
 const DeviceManagerQuery = require('../../app/controllers/query/DeivceMangerQuery');
+const ImportDeviceCommand = require('../../app/controllers/command/device/ImportDevice');
 const upload = require('../../app/Extesions/uploadDevice');
 
 //Route thêm thiết bị
@@ -46,5 +47,10 @@ router.get('/getAll', (req, res) => {
 router.get('/getById/:deviceId', (req, res) => {
     DeviceManagerQuery.GetDeviceById(req, res);
 });
+
+
+router.post("/import", (req, res) => {
+    ImportDeviceCommand.Handle(req, res);
+  });
 
 module.exports = router;

@@ -38,10 +38,11 @@
     "express-handlebars": "^8.0.1",
     "express-session": "^1.18.1",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.8.0",
+    "mongoose": "^8.13.0",
     "multer": "^1.4.5-lts.1",
     "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0"
+    "passport-google-oauth20": "^2.0.0",
+    "pdf-parse": "^1.1.1"
   },
   "devDependencies": {
     "husky": "^9.1.6",

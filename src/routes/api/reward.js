@@ -7,6 +7,8 @@ const ImportRewardCommand = require("../../app/controllers/command/reward/Import
 const UpdateGiftCommand = require("../../app/controllers/command/reward/UpdateGift");
 const DeleteGiftCommand = require("../../app/controllers/command/reward/DeleteGift");
 const GiftManagerQuery = require("../../app/controllers/query/GiftManagerQuery");
+const OrderImportCommand = require("../../app/controllers/command/reward/ImportOrder");
+const ApproveOrderCommand = require("../../app/controllers/command/reward/ApproveOrder");
 
 router.post("/create", upload, (req, res) => {
   CreateRewardCommand.Handle(req, res);
@@ -58,5 +60,13 @@ router.delete("/delete/:giftId", (req, res) => DeleteGiftCommand.Handle(req, res
 router.get("/getAll", GiftManagerQuery.GetAllGifts); 
 
 router.get("/getById/:giftId", GiftManagerQuery.GetGiftById);
+
+router.post("/order/upload", (req, res) => {
+  OrderImportCommand.Handle(req, res);
+});
+
+router.get("/order/getAll", GiftManagerQuery.getAllOrders); 
+router.get("/order/getById/:orderId", GiftManagerQuery.getOrderById); 
+router.put("/order/approve/:orderId", ApproveOrderCommand.approve);
 
 module.exports = router;

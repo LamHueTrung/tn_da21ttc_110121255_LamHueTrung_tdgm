@@ -4,6 +4,8 @@ const Teacher = require("../../model/Teacher");
 const Room = require("../../model/Room");
 const messages = require("../../Extesions/messCost");
 const BorrowRequest = require("../../model/BorrowRequest");
+const Gift = require("../../model/Gift");
+const Order = require("../../model/Order");
 const mongoose = require("mongoose");
 
 class StatisticQuery {
@@ -443,6 +445,128 @@ class StatisticQuery {
             });
         }
     }
+
+    //Thống kê quà tặng
+    async giftSummaryByCategory(req, res) {
+        try {
+            const result = await Gift.aggregate([
+                {
+                    $group: {
+                        _id: "$category",
+                        total: { $sum: "$quantity_in_stock" }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        category: "$_id",
+                        total: 1
+                    }
+                }
+            ]);
+            res.json({ success: true, data: result });
+        } catch (err) {
+            res.status(500).json({ success: false, message: "Lỗi thống kê theo loại quà tặng", error: err.message });
+        }
+    }
+    
+    async giftStock(req, res) {
+        try {
+            const result = await Gift.find({}, "name quantity_in_stock").sort({ quantity_in_stock: -1 });
+            res.json({ success: true, data: result });
+        } catch (err) {
+            res.status(500).json({ success: false, message: "Lỗi thống kê tồn kho", error: err.message });
+        }
+    }
+    
+    async mostRequestedGifts(req, res) {
+        try {
+            const result = await Order.aggregate([
+                {
+                    $group: {
+                        _id: "$gift",
+                        totalRequested: { $sum: "$quantity" }
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "gifts",
+                        localField: "_id",
+                        foreignField: "_id",
+                        as: "gift"
+                    }
+                },
+                { $unwind: "$gift" },
+                {
+                    $project: {
+                        _id: 0,
+                        name: "$gift.name",
+                        category: "$gift.category",
+                        totalRequested: 1
+                    }
+                },
+                { $sort: { totalRequested: -1 } },
+                { $limit: 10 }
+            ]);
+            res.json({ success: true, data: result });
+        } catch (err) {
+            res.status(500).json({ success: false, message: "Lỗi thống kê yêu cầu quà tặng", error: err.message });
+        }
+    }
+    
+    async rewardRequestByMonth(req, res) {
+        try {
+            const result = await Order.aggregate([
+                {
+                    $group: {
+                        _id: {
+                            $dateToString: { format: "%Y-%m", date: "$created_at" }
+                        },
+                        total: { $sum: "$quantity" }
+                    }
+                },
+                { $sort: { _id: 1 } }
+            ]);
+            res.json({ success: true, data: result });
+        } catch (err) {
+            res.status(500).json({ success: false, message: "Lỗi thống kê theo tháng", error: err.message });
+        }
+    }
+    
+    async mostActiveTeachers(req, res) {
+        try {
+            const result = await Order.aggregate([
+                {
+                    $group: {
+                        _id: "$teacher",
+                        totalRequested: { $sum: "$quantity" }
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "teachers",
+                        localField: "_id",
+                        foreignField: "_id",
+                        as: "teacher"
+                    }
+                },
+                { $unwind: "$teacher" },
+                {
+                    $project: {
+                        name: "$teacher.name",
+                        email: "$teacher.email",
+                        totalRequested: 1
+                    }
+                },
+                { $sort: { totalRequested: -1 } },
+                { $limit: 10 }
+            ]);
+            res.json({ success: true, data: result });
+        } catch (err) {
+            res.status(500).json({ success: false, message: "Lỗi thống kê giáo viên yêu cầu", error: err.message });
+        }
+    }
+    
 };
 
 module.exports = new StatisticQuery;

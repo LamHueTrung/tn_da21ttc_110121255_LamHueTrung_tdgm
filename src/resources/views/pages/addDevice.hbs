@@ -56,58 +56,20 @@
 
     <!-- Form thêm bằng file -->
     <div id="fileForm" style="display: none;">
-        <form action="/admin/user/importUsers" method="POST" enctype="multipart/form-data" class="col-md-6 offset-md-3">
+        <form id="importDeviceForm" enctype="multipart/form-data" class="col-md-6 offset-md-3">
             <div class="mb-3">
-                <label class="form-label">Upload File (CSV, Excel)</label>
-                <input type="file" class="form-control" name="userFile" id="userFile" accept=".csv, .xlsx">
+                <label class="form-label">Tải file (CSV)</label>
+                <input type="file" class="form-control" name="file" id="file" accept=".csv">
+                <div class="text-danger" id="fileError"></div>
+                <div class="text-danger" id="rowError"></div>
             </div>
 
             <div class="d-flex" style="float: right;">
-                <button type="submit" class="btn btn-system btn-submit">Upload</button>
-                <button type="button" onclick="javascript:history.back()" class="btn btn-secondary btn-previou">Back</button>
+                <button type="submit" class="btn btn-system btn-submit">Tải lên</button>
+                <button type="button" onclick="javascript:history.back()" class="btn btn-secondary btn-previou">Quay lại</button>
             </div>
-
         </form>
 
-        <!-- Danh sách file đã tải lên -->
-        <h3 class="mt-4">Uploaded Files</h3>
-        <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Status</th>
-                        <th>Name</th>
-                        <th>Category</th>
-                        <th>Quantity</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{#each accounts}}
-                    <tr>
-                        <td style="color: {{#if this.isDeleted}} red {{else}} green {{/if}}">
-                            {{#if this.isDeleted}} Vô hiệu hóa {{else}} Đang hoạt động {{/if}}
-                        </td>
-                        <td>{{#if (eq this.role "sub_admin")}}SUB ADMIN{{else}}USER{{/if}}</td>
-                        <td>{{this.profile.fullName}}</td>
-                        <td>{{this.username}}</td>
-                        <td>
-                            {{#if this.passwordDecrypted}}
-                            <span class="password-hidden" id="password-{{@index}}">********</span>
-                            <span class="password-visible" id="password-visible-{{@index}}" style="display: none;">{{this.passwordDecrypted}}</span>
-                            <button type="button" onclick="togglePassword({{@index}})" class="btn btn-sm btn-outline-primary">Xem mật khẩu</button>
-                            {{else}}
-                                <span>Bảo mật Google</span>
-                            {{/if}}
-                        </td>
-                    </tr>
-                    {{/each}}
-                </tbody>
-            </table>
-            <button type="button" onclick="javascript:history.back()" class="btn btn-secondary btn-previou">Back</button>
-        </div>
-    </div>
     </div>
 </div>
 
@@ -163,6 +125,48 @@ document.addEventListener("DOMContentLoaded", function () {
                     confirmButtonText: "OK"
                 }).then(() => {
                     window.location.href = "/deviceManger/home";
+                });
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            Swal.fire('Lỗi', 'Có lỗi xảy ra, vui lòng thử lại', 'error');
+        }
+    });
+
+    document.getElementById("importDeviceForm").addEventListener("submit", async function (event) {
+        event.preventDefault();  // Ngăn chặn form gửi theo mặc định
+        const formData = new FormData(this);  // Lấy dữ liệu từ form
+
+        try {
+            // Gửi yêu cầu POST với dữ liệu form
+            const response = await fetch("/api/device/import", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            console.log(data);
+            // Xóa tất cả lỗi cũ
+            document.querySelectorAll(".text-danger").forEach(el => el.innerText = "");
+
+            // Kiểm tra nếu không thành công
+            if (!data.success) {
+                // Hiển thị lỗi nếu có
+                if (data.errors && data.errors.length > 0) {
+                    // Lặp qua các lỗi và hiển thị
+                    data.errors.forEach(error => {
+                        document.getElementById("rowError").innerText = JSON.stringify(error.row, null, 2);
+                    });
+                }
+            } else {
+                Swal.fire({
+                    title: "Thành công!",
+                    text: "Tệp tin đã được tải lên thành công!",
+                    icon: "success",
+                    confirmButtonText: "OK"
+                }).then(() => {
+                    window.location.href = "/deviceManger/home";  // Điều hướng sau khi thành công
                 });
             }
         } catch (error) {

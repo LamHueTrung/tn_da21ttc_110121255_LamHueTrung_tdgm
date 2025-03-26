@@ -1,17 +1,53 @@
 <div class="card shadow mb-4">
     <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Gift Reward Statistics</h6>
+        <h6 class="m-0 font-weight-bold text-primary">Thống kê quà tặng</h6>
     </div>
     <div class="card-body">
-        <div class="row">
+        <div class="row mb-4">
             <!-- Biểu đồ kho quà thưởng -->
-            <div class="col-lg-6">
+            <div class="col-lg-6 mb-4">
                 <canvas id="giftStockChart"></canvas>
             </div>
 
-            <!-- Biểu đồ nhập xuất kho quà tặng -->
-            <div class="col-lg-6">
+            <!-- Biểu đồ yêu cầu theo tháng -->
+            <div class="col-lg-6 mb-4">
                 <canvas id="giftTransactionChart"></canvas>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Bảng top quà tặng được yêu cầu -->
+            <div class="col-lg-6">
+                <h6 class="font-weight-bold text-secondary mb-3">Top quà tặng được yêu cầu nhiều nhất</h6>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Tên quà tặng</th>
+                            <th>Danh mục</th>
+                            <th>Số lượt yêu cầu</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topGiftsTableBody">
+                        <!-- Dữ liệu sẽ được thêm bằng JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Bảng top giáo viên yêu cầu -->
+            <div class="col-lg-6">
+                <h6 class="font-weight-bold text-secondary mb-3">Top giáo viên yêu cầu quà</h6>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Họ tên</th>
+                            <th>Email</th>
+                            <th>Tổng số yêu cầu</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topTeachersTableBody">
+                        <!-- Dữ liệu sẽ được thêm bằng JS -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -19,45 +55,83 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    // Biểu đồ kho quà tặng
+document.addEventListener("DOMContentLoaded", async function () {
+    // Lấy dữ liệu tồn kho quà tặng
+    const stockRes = await fetch("/api/statistics/reward/gift-stock");
+    const stockData = await stockRes.json();
+
+    const stockLabels = stockData.data.map(g => g.name);
+    const stockValues = stockData.data.map(g => g.quantity_in_stock);
+
     new Chart(document.getElementById("giftStockChart"), {
         type: "bar",
         data: {
-            labels: ["Notebooks", "Trophies", "Gift Cards"],
+            labels: stockLabels,
             datasets: [{
-                label: "Stock Quantity",
-                data: [80, 40, 120], // Dữ liệu demo
-                backgroundColor: "#dc3545"
+                label: "Tồn kho",
+                data: stockValues,
+                backgroundColor: "#28a745"
             }]
         },
         options: {
-            title: { display: true, text: "Gift Inventory Overview" },
-            responsive: true
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: "Biểu đồ tồn kho quà tặng"
+                }
+            }
         }
     });
 
-    // Biểu đồ nhập xuất kho quà tặng
+    // Lấy dữ liệu yêu cầu theo tháng
+    const monthRes = await fetch("/api/statistics/reward/request-by-month");
+    const monthData = await monthRes.json();
+
     new Chart(document.getElementById("giftTransactionChart"), {
         type: "line",
         data: {
-            labels: ["Jan", "Feb", "Mar", "Apr", "May"],
+            labels: monthData.data.map(d => d._id),
             datasets: [{
-                label: "Imported",
-                data: [30, 50, 40, 60, 45], // Dữ liệu demo
-                borderColor: "#17a2b8",
-                fill: false
-            }, {
-                label: "Exported",
-                data: [20, 40, 35, 50, 38], // Dữ liệu demo
-                borderColor: "#dc3545",
+                label: "Số lượng yêu cầu",
+                data: monthData.data.map(d => d.total),
+                borderColor: "#007bff",
                 fill: false
             }]
         },
         options: {
-            title: { display: true, text: "Gift Import/Export Over Time" },
-            responsive: true
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: "Biểu đồ số lượng yêu cầu theo tháng"
+                }
+            }
         }
     });
+
+    // Bảng Top quà tặng
+    const topGiftRes = await fetch("/api/statistics/reward/top-requested");
+    const topGiftData = await topGiftRes.json();
+    const topGiftBody = document.getElementById("topGiftsTableBody");
+    topGiftBody.innerHTML = topGiftData.data.map(gift => `
+        <tr>
+            <td>${gift.name}</td>
+            <td>${gift.category}</td>
+            <td>${gift.totalRequested}</td>
+        </tr>
+    `).join("");
+
+    // Bảng Top giáo viên
+    const topTeacherRes = await fetch("/api/statistics/reward/top-teachers");
+    const topTeacherData = await topTeacherRes.json();
+    const topTeacherBody = document.getElementById("topTeachersTableBody");
+    topTeacherBody.innerHTML = topTeacherData.data.map(t => `
+        <tr>
+            <td>${t.name}</td>
+            <td>${t.email}</td>
+            <td>${t.totalRequested}</td>
+        </tr>
+    `).join("");
 });
 </script>

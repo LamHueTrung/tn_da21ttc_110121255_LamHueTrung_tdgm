@@ -88,6 +88,9 @@ app.engine('hbs', handlebars.engine({
     currency: function(value) {
       return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
     },
+    sum: function(a, b) {
+      return a + b;
+    }
 }
 }));
 app.set('view engine', 'hbs');

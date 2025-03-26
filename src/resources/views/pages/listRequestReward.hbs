@@ -1,9 +1,10 @@
 <div class="card shadow mb-4" id="page-top">
     <div class="card-header py-3">
-        <button class="btn btn-darks" id="importPdfBtn">Import Request (PDF)</button>
+        <!-- Nút thêm đơn yêu cầu -->
+        <button class="btn btn-darks" data-bs-toggle="modal" data-bs-target="#addOrderModal">Thêm đơn yêu cầu</button>
     </div>
     <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">List of Imported Request Forms</h6>
+        <h6 class="m-0 font-weight-bold text-primary">Danh sách đơn yêu cầu quà tặng</h6>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -11,115 +12,181 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Requester</th>
-                        <th>File Name</th>
-                        <th>Uploaded Date</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>Người yêu cầu</th>
+                        <th>Quà tặng</th>
+                        <th>Số lượng</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Dữ liệu demo -->
+                    {{#each orders}}
                     <tr>
-                        <td>1</td>
-                        <td>John Doe</td>
-                        <td>request_JohnDoe.pdf</td>
-                        <td>2024-02-26</td>
-                        <td><span class="text-warning">Pending</span></td>
+                        <td>{{increment @index}}</td>
+                        <td>{{this.teacher.name}}</td>
+                        <td>{{this.gift.name}}</td>
+                        <td>{{this.quantity}}</td>
+                        <td style="color: {{#if (eq this.status "Chưa duyệt")}}red{{else}}green{{/if}};">
+                            {{this.status}}
+                        </td>
                         <td>
-                            <a href="/uploads/request_JohnDoe.pdf" target="_blank" class="btn btn-sm btn-primary">View</a>
-                            <button class="btn btn-sm btn-success" onclick="confirmApprove('1')">Approve</button>
-                            <button class="btn btn-sm btn-danger" onclick="confirmReject('1')">Reject</button>
+                            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#viewOrderModal" onclick="viewOrderDetails('{{this._id}}')">Xem</button>
+                            <button class="btn btn-success btn-sm" onclick="approveOrder('{{this._id}}')">Duyệt đơn</button>
                         </td>
                     </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Jane Smith</td>
-                        <td>request_JaneSmith.pdf</td>
-                        <td>2024-02-25</td>
-                        <td><span class="text-success">Approved</span></td>
-                        <td>
-                            <a href="/uploads/request_JaneSmith.pdf" target="_blank" class="btn btn-sm btn-primary">View</a>
-                        </td>
-                    </tr>
+                    {{/each}}
                 </tbody>
             </table>
         </div>
-        <button type="button" onclick="javascript:history.back()" class="btn btn-secondary">Back</button>
     </div>
 </div>
 
-<!-- Form upload PDF -->
-<div id="uploadForm" style="display: none;" class="col-md-6 offset-md-3 mt-4">
-    <form action="/reward/request/uploadPDF" method="POST" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label class="form-label">Upload Request Form (PDF)</label>
-            <input type="file" class="form-control" name="requestPDF" id="requestPDF" accept=".pdf">
+<!-- Modal Thêm Đơn Yêu Cầu -->
+<div class="modal fade" id="addOrderModal" tabindex="-1" aria-labelledby="addOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addOrderModalLabel">Thêm đơn yêu cầu quà tặng từ PDF</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addOrderForm" enctype="multipart/form-data">
+                    <!-- File PDF -->
+                    <div class="mb-3">
+                        <label for="pdfFile" class="form-label">Tải file PDF</label>
+                        <input type="file" class="form-control" id="pdfFile" name="pdfFile" accept=".pdf" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary">Tải lên và tạo đơn</button>
+                    </div>
+                </form>
+            </div>
         </div>
-
-        <div class="d-flex justify-content-end">
-            <button type="submit" class="btn btn-system btn-submit">Upload</button>
-            <button type="button" class="btn btn-secondary ml-2" id="cancelUpload">Cancel</button>
-        </div>
-    </form>
+    </div>
 </div>
 
+<!-- Modal để hiển thị chi tiết đơn yêu cầu -->
+<div class="modal fade" id="viewOrderModal" tabindex="-1" aria-labelledby="viewOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewOrderModalLabel">Chi tiết đơn yêu cầu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="orderDetails">
+                    <!-- Thông tin đơn yêu cầu sẽ được hiển thị ở đây -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    // Lấy phần tử bằng ID
-    const importPdfBtn = document.getElementById("importPdfBtn");
-    const exportPdfBtn = document.getElementById("exportPdfBtn");
-    const uploadForm = document.getElementById("uploadForm");
-    const cancelUpload = document.getElementById("cancelUpload");
-    
-    // Ẩn form tải lên ban đầu
-    uploadForm.style.display = "none";
+    function approveOrder(orderId) {
+        Swal.fire({
+            title: 'Bạn có chắc muốn duyệt đơn này?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Duyệt',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/api/reward/order/approve/${orderId}`, {
+                    method: 'PUT'
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire('Đã duyệt!', data.message, 'success').then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('Lỗi!', data.message, 'error');
+                    }
+                });
+            }
+        });
+    }
 
-    // Khi bấm "Import Request (PDF)" thì hiển thị form tải lên
-    importPdfBtn.addEventListener("click", function() {
-        uploadForm.style.display = "block";
-    });
+    // Chức năng Xem chi tiết đơn yêu cầu
+    function viewOrderDetails(orderId) {
+        fetch(`/api/reward/order/getById/${orderId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Cập nhật modal với thông tin chi tiết đơn yêu cầu
+                    const order = data.order;
+                    const orderDetails = `
+                        <h5><strong>Người yêu cầu:</strong> ${order.teacher.name}</h5>
+                        <p><strong>Email:</strong> ${order.teacher.email}</p>
+                        <h5><strong>Quà tặng:</strong> ${order.gift.name}</h5>
+                        <p><strong>Danh mục:</strong> ${order.gift.category}</p>
+                        <p><strong>Giá:</strong> ${order.gift.price} VND</p>
+                        <p><strong>Số lượng:</strong> ${order.quantity}</p>
+                        <p><strong>Trạng thái:</strong> ${order.status}</p>
+                    `;
+                    document.getElementById("orderDetails").innerHTML = orderDetails;
+                } else {
+                    Swal.fire({
+                        title: 'Lỗi!',
+                        text: 'Không tìm thấy đơn yêu cầu!',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Lỗi!',
+                    text: 'Đã có lỗi xảy ra khi tải chi tiết đơn yêu cầu!',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            });
+    }
 
-    // Khi bấm "Cancel" thì ẩn form tải lên
-    cancelUpload.addEventListener("click", function() {
-        uploadForm.style.display = "none";
-    });
+    // Xử lý form tải lên file PDF và tạo đơn yêu cầu
+    document.getElementById('addOrderForm').addEventListener('submit', function (event) {
+        event.preventDefault();
 
-    // Khi bấm "Export Approved Requests (PDF)"
-    exportPdfBtn.addEventListener("click", function () {
-        Swal.fire("Success!", "Approved request list exported as PDF!", "success");
-    });
-});
+        const formData = new FormData(this);
 
-// Duyệt đơn đề nghị
-window.confirmApprove = function (requestId) {
-    Swal.fire({
-        title: "Approve Request",
-        text: "Are you sure you want to approve this request?",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Yes, approve it!",
-        cancelButtonText: "Cancel"
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire("Approved!", "The request has been approved.", "success");
-        }
+        fetch('/api/reward/order/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: 'Thành công!',
+                    text: 'Đơn yêu cầu đã được tạo thành công!',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    location.reload(); // Tải lại trang để hiển thị đơn mới
+                });
+            } else {
+                Swal.fire({
+                    title: 'Lỗi!',
+                    text: 'Có lỗi xảy ra khi tạo đơn yêu cầu!',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'Lỗi!',
+                text: 'Đã có lỗi xảy ra!',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        });
     });
-};
-
-// Từ chối đơn đề nghị
-window.confirmReject = function (requestId) {
-    Swal.fire({
-        title: "Reject Request",
-        text: "Are you sure you want to reject this request?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Yes, reject it!",
-        cancelButtonText: "Cancel"
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire("Rejected!", "The request has been rejected.", "error");
-        }
-    });
-};
 </script>
