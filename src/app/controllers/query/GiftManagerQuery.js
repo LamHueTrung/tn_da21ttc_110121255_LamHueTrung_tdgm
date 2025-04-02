@@ -177,13 +177,6 @@ class GiftManagerQuery {
                 .populate('gift', 'name category price') // Tìm thông tin quà tặng
                 .lean(); // Sử dụng lean để trả về đối tượng thuần (plain object)
 
-            if (!orders || orders.length === 0) {
-                return res.status(404).json({
-                    success: false,
-                    message: "No orders found."
-                });
-            }
-
             // Trả về kết quả
             return res.status(200).render('pages/listRequestReward', { 
                 layout: 'main',
