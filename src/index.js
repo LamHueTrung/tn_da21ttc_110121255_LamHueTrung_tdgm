@@ -5,6 +5,7 @@ const handlebars = require('express-handlebars');
 const route = require('./routes');
 const connectDB = require('./app/database'); 
 const CreateAdmin = require('./app/controllers/command/user/CreateAdmin');
+const setupSwagger = require('../src/app/Extesions/swagger');
 
 const app = express();
 const port = 3000;
@@ -96,6 +97,7 @@ app.engine('hbs', handlebars.engine({
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'resources/views'));
 
+setupSwagger(app);   
 
 // Route
 route(app);

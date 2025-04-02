@@ -54,6 +54,8 @@ class CreateBorrowRequest {
                         message: messages.borrowRequest.roomNotFound
                     });
                 }
+            } else {
+                room = null;
             }
 
             let personalLocation = null;

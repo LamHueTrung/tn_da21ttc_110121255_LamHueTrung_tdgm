@@ -1,24 +1,77 @@
 const express = require("express");
 const router = express.Router();
+
 const userRoute = require("./user");
 const deviceRoute = require("./device");
 const roomRoute = require("./room");
 const teacherRoute = require("./teacher");
 const statisticRoute = require("./statistic");
 const rewardRoute = require("./reward");
-const Login = require("../../app/controllers/command/user/Login");
 const borrowReturnRoute = require("./borrowReturn");
+
+const Login = require("../../app/controllers/command/user/Login");
 const authenticateToken = require("../../app/middleware/authenticateTokenAdmin");
 
-//Route login user
+/**
+ * @swagger
+ * tags:
+ *   - name: Users
+ *     description: API for managing users
+ *   - name: Devices
+ *     description: API for managing devices
+ *   - name: Rooms
+ *     description: API for managing rooms
+ *   - name: Teachers
+ *     description: API for managing teachers
+ *   - name: Borrow and Return
+ *     description: API for managing borrow and return operations
+ *   - name: Statistics
+ *     description: API for managing statistics
+ *   - name: Rewards
+ *     description: API for managing rewards
+ */
+
+/**
+ * @swagger
+ * /api/login:
+ *   post:
+ *     summary: Login to the system
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *       400:
+ *         description: Invalid credentials
+ */
 router.use("/login", (req, res) => {
   Login.Handle(req, res);
 });
 
-// Đăng xuất (xóa token khỏi session hoặc cookie)
+/**
+ * @swagger
+ * /api/logout:
+ *   post:
+ *     summary: Logout from the system
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ *       500:
+ *         description: Error occurred during logout
+ */
 router.post("/logout", (req, res) => {
   try {
-    // Xóa token khỏi session
     req.session.destroy((err) => {
       if (err) {
         return res.status(500).json({
@@ -27,8 +80,7 @@ router.post("/logout", (req, res) => {
         });
       }
 
-      // Hoặc nếu sử dụng cookie để lưu trữ JWT
-      res.clearCookie('token'); // Xóa cookie chứa token (nếu sử dụng cookie)
+      res.clearCookie("token");
 
       return res.status(200).json({
         success: true,
@@ -44,26 +96,19 @@ router.post("/logout", (req, res) => {
   }
 });
 
-//User route
+
 router.use("/user", authenticateToken, userRoute);
 
-// Deivce route
 router.use("/device", authenticateToken, deviceRoute);
 
-// Room route
 router.use("/room", authenticateToken, roomRoute);
 
-// Borrow and return route
 router.use("/borrowReturn", authenticateToken, borrowReturnRoute);
 
-// Teacher route
 router.use("/teacher", authenticateToken, teacherRoute);
 
-// Statistic route
 router.use("/statistics", authenticateToken, statisticRoute);
 
-// Reward route
 router.use("/reward", authenticateToken, rewardRoute);
-
 
 module.exports = router;
