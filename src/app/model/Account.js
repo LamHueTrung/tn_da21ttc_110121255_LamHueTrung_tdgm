@@ -11,7 +11,7 @@ const profileSchema = new mongoose.Schema({
 const accountSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true, trim: true },
     password: { type: String, required: true },
-    role: { type: String, enum: ['system_admin', 'sub_admin'], required: true },
+    role: { type: String, enum: ['system_admin', 'device_manager', 'gift_manager'], required: true },
     profile: profileSchema,
     isDeleted: { type: Boolean, default: false }
 }, { timestamps: true });

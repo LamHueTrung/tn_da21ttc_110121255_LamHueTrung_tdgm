@@ -14,7 +14,7 @@ class CreateUser {
      * @returns {Object} errors - Đối tượng chứa các lỗi nếu có
      */
     Validate(req) {
-        const { userName, fullName, birthday, numberPhone, address } = req.body;
+        const { userName, fullName, birthday, numberPhone, address, role } = req.body;
 
         let errors = {};
 
@@ -24,6 +24,10 @@ class CreateUser {
             Validator.maxLength(userName, 50, 'User name') ||
             Validator.containsVietnamese(userName);
         if (userNameError) errors.userName = userNameError;
+
+        const roleError = Validator.notEmpty(role, 'Quyền hạn')
+        Validator.isEnum(role, ['system_admin', 'device_manager', 'gift_manager'], 'Quyền hạn');
+        if (roleError) errors.role = roleError;
 
         const fullNameError =
             Validator.notEmpty(fullName, 'Họ và tên') ||
@@ -63,7 +67,7 @@ class CreateUser {
             return res.status(400).json({ success: false, errors });
         }
 
-        const { userName, fullName, birthday, numberPhone, address } = req.body;
+        const { userName, fullName, birthday, numberPhone, address, role } = req.body;
 
         try {
             // Kiểm tra xem username đã tồn tại chưa
@@ -83,7 +87,7 @@ class CreateUser {
             const newAccount = new Acounts({
                 username: userName,
                 password: encryptedPassword,
-                role: 'sub_admin',
+                role: role,
                 profile: {
                     fullName: fullName,
                     birthDate: birthday ? new Date(birthday) : null,

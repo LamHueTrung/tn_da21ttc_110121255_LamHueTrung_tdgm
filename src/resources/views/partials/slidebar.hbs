@@ -27,7 +27,7 @@
     </div>
 
     <!-- Nav Item - Pages Collapse Menu -->
-    <li class="nav-item">
+    <li class="nav-item" id="userManagement">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUser"
             aria-expanded="true" aria-controls="collapseTwo">
             <i class="fas fa-fw fa-user"></i>
@@ -43,7 +43,7 @@
         </div>
     </li>
 
-    <li class="nav-item">
+    <li class="nav-item" id="deviceManagement">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#listAllCourse"
             aria-expanded="true" aria-controls="collapseTwo">
             <i class="fa-regular fa-hard-drive"></i>
@@ -52,14 +52,14 @@
         <div id="listAllCourse" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Chức năng:</h6>
-                <a class="collapse-item" href="/deviceManger/home" >Quản lý thiết bị</a>
+                <a class="collapse-item" href="/deviceManger/home">Quản lý thiết bị</a>
                 <a class="collapse-item" href="/deviceToRoom/home">Quản lý theo phòng</a>
                 <a class="collapse-item" href="/borrowRepay/home">Quản lý mượn/trả</a>
             </div>
         </div>
     </li>
 
-    <li class="nav-item">
+    <li class="nav-item" id="giftManagement">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseBlog"
             aria-expanded="true" aria-controls="collapseBlog">
             <i class="fa-solid fa-gift"></i>
@@ -68,8 +68,8 @@
         <div id="collapseBlog" class="collapse" aria-labelledby="headingBlog" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Chức năng:</h6>
-                <a class="collapse-item" href="/reward/home" >Quản lý quà tặng</a>
-                <a class="collapse-item" href="/reward/listRequestReward" >Quản lý đơn yêu cầu</a>
+                <a class="collapse-item" href="/reward/home">Quản lý quà tặng</a>
+                <a class="collapse-item" href="/reward/listRequestReward">Quản lý đơn yêu cầu</a>
             </div>
         </div>
     </li>
@@ -81,17 +81,17 @@
         Thống kê
     </div>
 
-    <li class="nav-item">
+    <li class="nav-item" id="borrowReturnStats">
         <a class="nav-link" href="/statistic/borrowReturn">
             <i class="fa-solid fa-clock-rotate-left"></i>
             <span>Mượn trả</span></a>
     </li>
-    <li class="nav-item">
+    <li class="nav-item" id="deviceStats">
         <a class="nav-link" href="/statistic/device">
             <i class="fa-regular fa-hard-drive"></i>
             <span>Thiết bị</span></a>
     </li>
-    <li class="nav-item">
+    <li class="nav-item" id="rewardStats">
         <a class="nav-link" href="/statistic/reward">
             <i class="fa-solid fa-gift"></i>
             <span>Quà tặng</span></a>
@@ -106,52 +106,10 @@
             <span>Thông tin cá nhân</span></a>
     </li>
     <li class="nav-item">
-    <a class="nav-link" onclick="handleLogout()">
-        <i class="fas fa-fw fa-cogs"></i>
-        <span>Đăng xuất</span>
-    </a>
-    <script>
-        function handleLogout() {
-            Swal.fire({
-                title: 'Bạn muốn đăng xuất?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Đồng ý',
-                cancelButtonText: 'Hủy',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Gọi API đăng xuất
-                    fetch('http://localhost:3000/api/logout', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'same-origin' // Đảm bảo rằng cookies/session sẽ được gửi cùng yêu cầu
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) { 
-                            // Đăng xuất thành công, chuyển hướng về trang đăng nhập
-                            Swal.fire({
-                                title: 'Đăng xuất thành công!',
-                                icon: 'success',
-                                timer: 2000,
-                                showConfirmButton: false,
-                            }).then(() => {
-                                window.location.href = '/'; 
-                            });
-                        } else {
-                            Swal.fire('Lỗi', 'Đăng xuất thất bại', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        Swal.fire('Lỗi', 'Đăng xuất thất bại', 'error');
-                    });
-                }
-            });
-        }
-    </script>
+        <a class="nav-link" onclick="handleLogout()">
+            <i class="fas fa-fw fa-cogs"></i>
+            <span>Đăng xuất</span>
+        </a>
     </li>
 
     <!-- Sidebar Toggler (Sidebar) -->
@@ -162,13 +120,95 @@
 </ul>
 
 <script>
-    function DangPhatTrien() {
-        Swal.fire({
-            title: 'Tính năng đang phát triển!',
-            text: 'Huệ Trung sẽ sớm cập nhật tính năng này.',
-            icon: 'info',
-            confirmButtonText: 'Đóng'
-        });
-        return false; // Ngăn form submit hoặc hành động mặc định
-    }
+document.addEventListener("DOMContentLoaded", function () {
+    // Gửi yêu cầu để lấy thông tin người dùng hiện tại
+    fetch('/api/user/me', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionStorage.getItem('token') || ''}` // Lấy token từ sessionStorage
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.user) {
+            const role = data.user.role;
+
+            // Phân quyền hiển thị sidebar
+            if (role === 'admin') {
+                // Admin thấy tất cả
+                // Không cần ẩn gì cả
+            } else if (role === 'device_manager') {
+                // Chỉ thấy mục Thiết bị, Thống kê thiết bị, Thống kê mượn trả, Thông tin cá nhân, Đăng xuất
+                document.getElementById('userManagement').style.display = 'none';
+                document.getElementById('giftManagement').style.display = 'none';
+                document.getElementById('rewardStats').style.display = 'none';
+            } else if (role === 'gift_manager') {
+                // Chỉ thấy mục Quà tặng, Thống kê quà tặng, Thông tin cá nhân, Đăng xuất
+                document.getElementById('userManagement').style.display = 'none';
+                document.getElementById('deviceManagement').style.display = 'none';
+                document.getElementById('borrowReturnStats').style.display = 'none';
+                document.getElementById('deviceStats').style.display = 'none';
+            }
+        } else {
+            Swal.fire('Lỗi', 'Không thể lấy thông tin người dùng', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching user role:', error);
+        Swal.fire('Lỗi', 'Có lỗi xảy ra khi lấy thông tin người dùng', 'error');
+    });
+});
+
+function handleLogout() {
+    Swal.fire({
+        title: 'Bạn muốn đăng xuất?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Đồng ý',
+        cancelButtonText: 'Hủy',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('http://localhost:3000/api/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    sessionStorage.removeItem('token'); // Xóa token
+                    Swal.fire({
+                        title: 'Đăng xuất thành công!',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false,
+                    }).then(() => {
+                        window.location.href = '/';
+                    });
+                } else {
+                    Swal.fire('Lỗi', 'Đăng xuất thất bại', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire('Lỗi', 'Đăng xuất thất bại', 'error');
+            });
+        }
+    });
+}
+
+function DangPhatTrien() {
+    Swal.fire({
+        title: 'Tính năng đang phát triển!',
+        text: 'Huệ Trung sẽ sớm cập nhật tính năng này.',
+        icon: 'info',
+        confirmButtonText: 'Đóng'
+    });
+    return false;
+}
 </script>
+```

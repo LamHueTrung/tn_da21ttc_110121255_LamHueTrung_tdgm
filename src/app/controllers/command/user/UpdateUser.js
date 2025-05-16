@@ -62,6 +62,7 @@ class UpdateUser {
             birthday = currentData.profile.birthDate,
             numberPhone = currentData.profile.phone,
             address = currentData.profile.address,
+            role = currentData.role,
         } = req.body;
 
         let errors = {
@@ -74,6 +75,10 @@ class UpdateUser {
 
         const fullNameError = Validator.maxLength(fullName, 50, 'Họ và tên');
         if (fullNameError) errors.fullName = fullNameError;
+
+        const roleError = Validator.notEmpty(role, 'Quyền hạn')
+        Validator.isEnum(role, ['system_admin', 'device_manager', 'gift_manager'], 'Quyền hạn');
+        if (roleError) errors.role = roleError;
 
         const birthdayError = Validator.isDate(birthday, 'Ngày sinh');
         if (birthdayError) errors.birthday = birthdayError;
@@ -111,12 +116,12 @@ class UpdateUser {
             }
 
             // Lấy dữ liệu cần cập nhật từ request
-            const { userName, fullName, birthday, address, numberPhone } = req.body;
+            const { userName, fullName, birthday, address, numberPhone, role } = req.body;
 
             // Tạo dữ liệu cập nhật, giữ nguyên dữ liệu cũ nếu không có giá trị mới
             const updatedData = {
                 username: userName,
-                role: currentUser.role,
+                role: role,
                 profile: {
                     fullName: fullName || currentUser.profile.fullName,
                     birthDate: birthday ? new Date(birthday) : currentUser.profile.birthDate,

@@ -3,6 +3,7 @@ const router = express.Router();
 const CreateUserCommand = require('../../app/controllers/command/user/CreateUser');
 const UpdateUserCommand = require('../../app/controllers/command/user/UpdateUser');
 const DeleteUserCommand = require('../../app/controllers/command/user/DeleteUser');
+const userController = require('../../app/controllers/command/user/Login');
 const GetUserQuery = require('../../app/controllers/query/UserQuery');
 const upload = require('../../app/Extesions/uploadAvatar');
 
@@ -256,5 +257,7 @@ router.get('/getAll', (req, res) => {
 router.get('/getById/:id', (req, res) => {
   GetUserQuery.getUserById(req, res);
 });
+
+router.get('/me', userController.getCurrentUser);
 
 module.exports = router;
