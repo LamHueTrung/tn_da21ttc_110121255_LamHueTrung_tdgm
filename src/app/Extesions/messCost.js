@@ -125,7 +125,10 @@ const messages = {
     },
 
     location: { 
-        defaultDescription: "Mô tả mặc định của tòa nhà."
+        defaultDescription: "Mô tả mặc định của tòa nhà.",
+        locationNotFound: "Không tìm thấy tòa nhà.",
+        getAllSuccess: "Lấy danh sách tòa nhà thành công.",
+        getAllError: "Lỗi khi lấy danh sách tòa nhà.",
     },
 
     room: {
@@ -141,7 +144,11 @@ const messages = {
         getDevicesSuccess: "Lấy danh sách thiết bị trong phòng thành công.",
         getDevicesError: "Lỗi khi lấy danh sách thiết bị trong phòng.",
         deleteSuccess: "Phòng đã được xóa thành công và thiết bị được chuyển về kho chính.",
-        deleteError: "Lỗi khi xóa phòng học."
+        deleteError: "Lỗi khi xóa phòng học.",
+        roomExist: 'Phòng đã tồn tại',
+        invalidLocation: 'Tòa nhà không hợp lệ',
+        roomCreateSuccess: 'Tạo phòng thành công',
+        createError: 'Lỗi khi tạo phòng'
     },
     assignDevice: {
         invalidRequest: "Yêu cầu không hợp lệ.",

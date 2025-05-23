@@ -170,7 +170,7 @@ function handleLogout() {
         cancelButtonText: 'Hủy',
     }).then((result) => {
         if (result.isConfirmed) {
-            fetch('http://localhost:3000/api/logout', {
+            fetch('/api/logout', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -211,4 +211,3 @@ function DangPhatTrien() {
     return false;
 }
 </script>
-```

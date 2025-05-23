@@ -5,8 +5,9 @@ const DeviceToRoomQuery = require("../../app/controllers/query/DeviceToRoomQuery
 const AssignDeviceToRoom = require("../../app/controllers/command/room/AssignDeviceToRoom");
 const RemoveDeviceFromRoom = require("../../app/controllers/command/room/RemoveDeviceFromRoom");
 const UpdateDeviceRoom = require("../../app/controllers/command/room/UpdateDeviceRoom");
-const UpdateRoom = require("../../app/controllers/command/room/UpdateRoom");
-const DeleteRoom = require("../../app/controllers/command/room/DeleteRoom");
+const UpdateRoomCommand = require("../../app/controllers/command/room/UpdateRoom");
+const DeleteRoomCommand = require("../../app/controllers/command/room/DeleteRoom");
+const CreateRoomCommand = require("../../app/controllers/command/room/CreateRoom");
 
 /**
  * @swagger
@@ -45,6 +46,13 @@ router.post("/import", (req, res) => {
   ImportRoomsCommand.Handle(req, res);
 });
 
+router.post("/create", (req, res) => { 
+  CreateRoomCommand.Handle(req, res); 
+});
+
+router.get("/locations", (req, res) => {
+  DeviceToRoomQuery.GetAllLocations(req, res);
+});
 /**
  * @swagger
  * /room/getAll:
@@ -244,7 +252,7 @@ router.put("/move-device", (req, res) => {
  *         description: Internal server error
  */
 router.put("/update/:roomId", (req, res) => {
-  UpdateRoom.Handle(req, res);
+  UpdateRoomCommand.Handle(req, res);
 });
 
 /**
@@ -268,7 +276,7 @@ router.put("/update/:roomId", (req, res) => {
  *         description: Internal server error
  */
 router.delete("/delete/:roomId", (req, res) => {
-  DeleteRoom.Handle(req, res);
+  DeleteRoomCommand.Handle(req, res);
 });
 
 module.exports = router;

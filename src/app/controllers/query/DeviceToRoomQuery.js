@@ -1,7 +1,7 @@
 const Room = require("../../model/Room");
 const DeviceItem = require("../../model/DeviceItem");
 const Device = require("../../model/Device");
-
+const Location = require("../../model/Location");
 const messages = require("../../Extesions/messCost");
 
 class DeviceToRoomQuery {
@@ -139,7 +139,7 @@ class DeviceToRoomQuery {
      */
     async GetAllRooms(req, res) {
         try {
-            const rooms = await Room.find()
+            const rooms = await Room.find({name: { $ne: 'Kho chính' }})
                 .populate("location", "name description")
                 .lean();
             
@@ -251,6 +251,23 @@ class DeviceToRoomQuery {
             });
         }
     };
+
+    GetAllLocations = async (req, res) => {
+        try {
+            const locations = await Location.find().lean();
+            return res.status(200).json({
+                success: true,
+                message: messages.location.getAllSuccess,
+                locations
+            });
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: messages.location.getAllError,
+                error: error.message
+            });
+        }
+    }
 }
 
 module.exports = new DeviceToRoomQuery();
