@@ -251,6 +251,18 @@ const messages = {
         emptyFile: 'File không chứa dữ liệu.',
         success: 'Danh sách quà tặng đã được import thành công.',
         error: 'Lỗi khi import danh sách quà tặng.',
+    },
+    notification: {
+        Created: 'Thông báo đã được tạo thành công.',
+        CreateError: 'Lỗi khi tạo thông báo.',
+        NotFound: 'Không tìm thấy thông báo.',
+        GetAllSuccess: 'Lấy danh sách thông báo thành công.',
+        GetAllError: 'Lỗi khi lấy danh sách thông báo.',
+        UpdateSuccess: 'Thông báo đã được cập nhật thành công.',
+        UpdateError: 'Lỗi khi cập nhật thông báo.',
+        DeleteSuccess: 'Thông báo đã được xóa thành công.',
+        DeleteError: 'Lỗi khi xóa thông báo.',
+        FetchError: 'Lỗi khi lấy thông báo.',
     }
 };
 

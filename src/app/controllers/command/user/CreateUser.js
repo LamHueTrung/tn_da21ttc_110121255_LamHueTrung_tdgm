@@ -2,6 +2,7 @@ const Acounts = require('../../../model/Account');
 const Validator = require('../../../Extesions/validator');
 const messages = require('../../../Extesions/messCost');
 const CryptoService = require('../../../Extesions/cryptoService');
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 /**
  * Class CreateUser - Xử lý API tạo tài khoản mới
@@ -99,6 +100,14 @@ class CreateUser {
 
             await newAccount.save();
 
+            // Gửi thông báo đến người dùng
+            await sendNotification({
+                title: `Tài khoản "${newAccount.username}" đã được tạo thành công.`,
+                description: `Tài khoản "${newAccount.username}" đã được tạo.`,
+                url: `/users/profile/${newAccount._id}`,
+                role: `${newAccount.role}`,
+                type: "info"
+            });
             return res.status(201).json({
                 success: true,
                 message: messages.createUser.accountCreateSuccess,

@@ -2,6 +2,7 @@ const Room = require('../../../model/Room');
 const Location = require('../../../model/Location');
 const Validator = require('../../../Extesions/validator');
 const messages = require('../../../Extesions/messCost');
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 class CreateRoom {
     /**
@@ -99,6 +100,15 @@ class CreateRoom {
             // Lưu phòng vào database
             await newRoom.save();
 
+            // Gửi thông báo đến người dùng
+            await sendNotification({
+                title: `Phòng "${newRoom.name}" đã được tạo.`,
+                description: `Phòng "${newRoom.name}" tại tòa nhà "${location.name}" đã được tạo thành công.`,
+                url: `/deviceToRoom/home`,
+                role: 'device_manager',
+                type: 'info',
+            });
+            
             // Trả về phản hồi thành công
             res.status(201).json({
                 success: true,

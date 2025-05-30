@@ -1,6 +1,7 @@
 const Teacher = require("../../../model/Teacher");
 const BorrowRequest = require("../../../model/BorrowRequest");
 const messages = require("../../../Extesions/messCost");
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 class DeleteTeacher {
     /**
@@ -30,6 +31,14 @@ class DeleteTeacher {
             // Xóa giảng viên
             await Teacher.findByIdAndDelete(teacherId);
 
+            // Gửi thông báo đến người dùng
+            await sendNotification({
+                title: "Thông báo xóa giảng viên",
+                description: `Giảng viên ${teacher.name} đã được xóa thành công.`,
+                url: "/users/ListAllTeacher",
+                role: "system_admin",
+                type: "warning"
+            });
             return res.status(200).json({
                 success: true,
                 message: messages.teacher.deleteSuccess

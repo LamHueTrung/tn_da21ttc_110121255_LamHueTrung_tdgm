@@ -5,6 +5,7 @@ const Order = require("../../../model/Order");
 const Gift = require("../../../model/Gift");
 const Teacher = require("../../../model/Teacher");
 const upload = require("../../../Extesions/uploadFilePdf"); // Đảm bảo đúng tên
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 class ImportOrder {
   // API xử lý tải lên file PDF và tạo đơn yêu cầu
@@ -68,6 +69,16 @@ class ImportOrder {
 
         // Xóa file PDF sau khi xử lý
         fs.unlinkSync(filePath);
+
+        const teacher = await Teacher.findById(orderData.teacherId);
+        // Gửi thông báo đến người dùng
+        await sendNotification({
+          title: `Đơn yêu cầu mới từ ${teacher.name}`,
+          description: `Đơn yêu cầu quà tặng "${gift.name}" đã được tạo với số lượng ${orderData.quantity}.`,
+          url: `/reward/listRequestReward`,
+          role: "gift_manager",
+          type: "info",
+        });
 
         return res.status(201).json({
           success: true,

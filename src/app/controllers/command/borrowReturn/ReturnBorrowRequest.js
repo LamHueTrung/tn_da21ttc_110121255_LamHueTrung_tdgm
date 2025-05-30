@@ -4,6 +4,7 @@ const Device = require("../../../model/Device");
 const Location = require("../../../model/Location");
 const Room = require("../../../model/Room");
 const messages = require("../../../Extesions/messCost");
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 class ReturnBorrowRequest {
     Handle = async (req, res) => {
@@ -50,6 +51,15 @@ class ReturnBorrowRequest {
             borrowRequest.status = "Đã trả";
             borrowRequest.return_date = new Date();
             await borrowRequest.save();
+
+            // Gửi thông báo 
+            await sendNotification({
+                title: "Trả thiết bị",
+                description: `Đơn mượn thiết bị ${borrowRequest} xác nhận đã trả.`,
+                url: `/borrowRepay/home`,
+                role: "device_manager",
+                type: "success"
+            });
 
             return res.status(200).json({
                 success: true,

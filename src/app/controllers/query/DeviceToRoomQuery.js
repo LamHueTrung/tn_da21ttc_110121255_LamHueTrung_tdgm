@@ -9,6 +9,7 @@ class DeviceToRoomQuery {
     async Index(req, res, next) {
         try {
             const rooms = await Room.find({name: { $ne: 'Kho chính' }})
+                .sort({ updated_at: -1 })
                 .populate("location", "name description")
                 .lean();
             

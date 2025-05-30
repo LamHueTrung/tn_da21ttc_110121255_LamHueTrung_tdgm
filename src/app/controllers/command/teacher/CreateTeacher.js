@@ -1,6 +1,7 @@
 const Teacher = require("../../../model/Teacher");
 const Validator = require("../../../Extesions/validator");
 const messages = require("../../../Extesions/messCost");
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 class CreateTeacher {
     /**
@@ -57,6 +58,14 @@ class CreateTeacher {
             const newTeacher = new Teacher({ name, email, phone, department });
             await newTeacher.save();
 
+            // Gửi thông báo đến người dùng
+            await sendNotification({
+                title: "Thêm giảng viên mới",
+                description: `Giảng viên "${newTeacher.name}" đã được thêm thành công.`,
+                url: `/users/ListAllTeacher`,
+                role: "system_admin",
+                type: "info",
+            });
             return res.status(201).json({
                 success: true,
                 message: messages.teacher.createSuccess,

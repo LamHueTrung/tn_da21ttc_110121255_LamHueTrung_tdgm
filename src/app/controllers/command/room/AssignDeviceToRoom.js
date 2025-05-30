@@ -1,7 +1,9 @@
 const Room = require("../../../model/Room");
 const DeviceItem = require("../../../model/DeviceItem");
+const Device = require("../../../model/Device");
 const messages = require("../../../Extesions/messCost");
 const Validator = require("../../../Extesions/validator");
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 class AssignDeviceToRoom {
     /**
@@ -62,6 +64,16 @@ class AssignDeviceToRoom {
             // Thêm `DeviceItem` vào danh sách thiết bị trong phòng
             room.deviceItems.push(...updatedDeviceItemIds);
             await room.save();
+
+            const device = await Device.findById(deviceId);
+            // Gửi thông báo cho người dùng
+            await sendNotification({
+                title: "Phòng học cập nhật thiết bị",
+                description: `Thiết bị ${device.name} đã được thêm vào phòng học "${room.name}".`,
+                url: `/deviceToRoom/viewDevices/${room._id}`,
+                role: "device_manager",
+                type: "info"
+            });
 
             return res.status(200).json({
                 success: true,

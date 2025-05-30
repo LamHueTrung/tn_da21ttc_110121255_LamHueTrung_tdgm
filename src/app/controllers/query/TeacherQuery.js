@@ -9,7 +9,7 @@ class TeacherQuery {
     async ListAllTeacher(req, res, next) {
         try {
 
-            const teachers = await Teacher.find().lean();
+            const teachers = await Teacher.find().sort({ updated_at: -1 }).lean();
 
             const total = await Teacher.countDocuments();
 

@@ -7,8 +7,7 @@ class DeviceManagerQuery {
     async Index(req, res, next) {
         try {
             // Lấy danh sách thiết bị
-            const devices = await Devices.find().lean();
-
+            const devices = await Devices.find().sort({ updated_at: -1 }).lean();
             // Lấy tổng số lượng `DeviceItem` theo thiết bị
             const deviceIds = devices.map((device) => device._id);
             const deviceItems = await DeviceItem.aggregate([
@@ -41,6 +40,7 @@ class DeviceManagerQuery {
                     rooms: relatedRooms
                 };
             });
+
             return res.status(200).render("pages/deviceManager", { 
                 layout: "main",
                 success: true,
@@ -72,7 +72,7 @@ class DeviceManagerQuery {
     async GetAllDevices(req, res) {
         try {
             // Lấy danh sách thiết bị
-            const devices = await Devices.find().lean();
+            const devices = await Devices.find().sort({ updated_at: -1 }).lean();
 
             // Lấy tổng số lượng `DeviceItem` theo thiết bị
             const deviceIds = devices.map((device) => device._id);

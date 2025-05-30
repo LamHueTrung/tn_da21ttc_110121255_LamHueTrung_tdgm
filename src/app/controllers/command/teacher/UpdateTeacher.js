@@ -1,6 +1,7 @@
 const Teacher = require("../../../model/Teacher");
 const Validator = require("../../../Extesions/validator");
 const messages = require("../../../Extesions/messCost");
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 class UpdateTeacher {
     /**
@@ -87,6 +88,15 @@ class UpdateTeacher {
             teacher.department = department || teacher.department;
 
             await teacher.save();
+
+            // Gửi thông báo thành công
+            await sendNotification({
+                title: "Cập nhật thông tin giảng viên thành công",
+                description: `Thông tin giảng viên "${teacher.name}" đã được cập nhật thành công.`,
+                url: `/users/ListAllTeacher`,
+                role: "system_admin",
+                type: "success",
+            });
 
             return res.status(200).json({
                 success: true,

@@ -39,6 +39,7 @@ class UserQuery {
     async ListAllUser(req, res, next) {
         try {
             const users = await Acounts.find({role: { $ne: 'system_admin' }})
+                .sort({ updatedAt: -1 })
                 .select("-password");
 
             const totalUsers = await Acounts.countDocuments();
@@ -73,6 +74,7 @@ class UserQuery {
             const limitNumber = parseInt(limit, 10);
 
             const users = await Acounts.find({})
+                .sort({ created_at: -1 })
                 .select("-password") // Loại bỏ trường `password`
                 .skip((pageNumber - 1) * limitNumber)
                 .limit(limitNumber);

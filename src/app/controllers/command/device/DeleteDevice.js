@@ -4,6 +4,7 @@ const Devices = require("../../../model/Device");
 const DeviceItem = require("../../../model/DeviceItem");
 const messages = require("../../../Extesions/messCost");
 const Room = require("../../../model/Room");
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 /**
  * Class DeleteDevice - Xử lý API xóa thiết bị
@@ -55,6 +56,15 @@ class DeleteDevice {
 
             // Xóa thiết bị khỏi database
             await Devices.findByIdAndDelete(deviceId);
+
+            // Gửi thông báo đến người dùng
+            await sendNotification({
+                title: `Thiết bị "${newDevice.name}" đã bị xoá.`,
+                description: `Thiết bị "${newDevice.name}" đã được xoá khỏi hệ thống.`,
+                url: "/deviceManger/home",
+                role: "device_manager",
+                type: "warning",
+            });
 
             return res.status(200).json({
                 success: true,

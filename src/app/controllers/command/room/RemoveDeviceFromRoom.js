@@ -3,6 +3,7 @@ const DeviceItem = require("../../../model/DeviceItem");
 const Device = require("../../../model/Device");
 const Location = require("../../../model/Location");
 const messages = require("../../../Extesions/messCost");
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 class RemoveDeviceFromRoom {
     /**
@@ -64,6 +65,15 @@ class RemoveDeviceFromRoom {
             device.total_quantity += 1; // Tăng số lượng thiết bị có sẵn
             await device.save();
 
+            // Gửi thông báo đến người dùng
+            await sendNotification({
+                title: `Thiết bị ${device.name} đã được xóa khỏi phòng ${room.name}`,
+                description: `Thiết bị ${device.name} đã được chuyển về kho chính và xóa khỏi phòng ${room.name}.`,
+                url: `/deviceToRoom/viewDevices/${room._id}`,
+                role: 'device_manager',
+                type: 'info',
+            });
+            
             return res.status(200).json({
                 success: true,
                 message: messages.device.removeSuccess,

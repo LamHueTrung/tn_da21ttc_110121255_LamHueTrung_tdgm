@@ -2,6 +2,7 @@ const Room = require("../../../model/Room");
 const Location = require("../../../model/Location");
 const Validator = require("../../../Extesions/validator");
 const messages = require("../../../Extesions/messCost");
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 class UpdateRoom {
     /**
@@ -72,6 +73,14 @@ class UpdateRoom {
             room.description = description || room.description;
             await room.save();
 
+            // Gửi thông báo đến người dùng
+            await sendNotification({
+                title: `Phòng học ${room.name} đã được cập nhật`,
+                description: `Thông tin phòng học ${room.name} đã được cập nhật thành công.`,
+                url: `/deviceToRoom/home`,
+                role: 'device_manager',
+                type: 'success',
+            });
             return res.status(200).json({
                 success: true,
                 message: messages.room.updateSuccess,

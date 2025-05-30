@@ -6,6 +6,7 @@ const Room = require("../../../model/Room");
 const Location = require("../../../model/Location");
 const messages = require("../../../Extesions/messCost");
 const Validator = require("../../../Extesions/validator");
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 class CreateBorrowRequest {
     Validate(req) {
@@ -114,6 +115,15 @@ class CreateBorrowRequest {
             });
 
             await newBorrowRequest.save();
+
+            // Gửi thông báo 
+            await sendNotification({
+                title: "Đơn mượn mới",
+                description: `Giảng viên ${teacher.name} đã mượn thiết bị cho phòng ${room.name}.`,
+                url: `/borrowRepay/home`,
+                role: "device_manager",
+                type: "info"
+            });
 
             return res.status(201).json({
                 success: true,

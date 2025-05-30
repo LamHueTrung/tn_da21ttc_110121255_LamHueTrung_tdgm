@@ -5,6 +5,7 @@ const CryptoService = require('../../../Extesions/cryptoService');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 class UpdateUser {
 
@@ -168,6 +169,16 @@ class UpdateUser {
                 req.session.isRestore = false;
                 return res.status(404).json({ success: false, message: messages.restoreUser.restoreError });
             }
+            
+            // Gửi thông báo đến người dùng
+            const user = await Acounts.findById(id);
+            await sendNotification({
+                title: "Tài khoản đã được khôi phục",
+                description: `Tài khoản "${user.profile.fullName}" đã được khôi phục.`,
+                url: "users/listUser",
+                role: user.role,
+                type: "success"
+            });
             
             return res.status(200).json({ success: true, message: messages.restoreUser.restoreSuccess });
         } catch (error) {

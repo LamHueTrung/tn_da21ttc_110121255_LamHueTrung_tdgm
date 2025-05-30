@@ -10,6 +10,7 @@ class BorrowRepayQuery {
     async Index(req, res, next) {
         try {
             const borrowRequests = await BorrowRequest.find()
+                .sort({ created_at: -1 })
                 .populate("teacher", "name email phone department")
                 .populate("room", "name location")
                 .populate({
@@ -207,6 +208,7 @@ class BorrowRepayQuery {
     async GetAll(req, res) {
         try {
             const borrowRequests = await BorrowRequest.find()
+                .sort({ createdAt: -1 })
                 .populate("teacher", "name email phone department")
                 .populate("room", "name location")
                 .populate({

@@ -1,5 +1,6 @@
 const Order = require("../../../model/Order");
 const Gift = require("../../../model/Gift");
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 class ApproveOrderController {
   // Duyệt đơn yêu cầu
@@ -33,6 +34,14 @@ class ApproveOrderController {
       order.updated_at = Date.now();
       await order.save();
 
+      // 6. Gửi thông báo đến người dùng
+      await sendNotification({
+        title: `Đơn yêu cầu quà tặng đã được duyệt`,
+        description: `Đơn yêu cầu quà tặng "${gift.name}" của bạn đã được duyệt.`,
+        url: `/reward/listRequestReward`,
+        role: 'gift_manager',
+        type: 'success',
+      });
       return res.status(200).json({
         success: true,
         message: "Đơn yêu cầu đã được duyệt thành công.",

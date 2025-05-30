@@ -3,6 +3,7 @@ const DeviceItem = require("../../../model/DeviceItem");
 const Device = require("../../../model/Device");
 const Location = require("../../../model/Location");
 const messages = require("../../../Extesions/messCost");
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 class DeleteRoom {
     /**
@@ -62,6 +63,15 @@ class DeleteRoom {
                 });
             }
 
+            // Gửi thông báo cho người dùng
+            await sendNotification({
+                title: "Phòng học đã bị xóa",
+                description: `Phòng học "${room.name}" đã bị xóa thành công.`,
+                url: `/deviceToRoom/home`,
+                role: "device_manager",
+                type: "warning"
+            });
+            
             return res.status(200).json({
                 success: true,
                 message: messages.room.deleteSuccess

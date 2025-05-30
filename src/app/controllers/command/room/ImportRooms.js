@@ -5,6 +5,7 @@ const Location = require("../../../model/Location");
 const Validator = require("../../../Extesions/validator");
 const messages = require("../../../Extesions/messCost");
 const upload = require("../../../Extesions/uploadFile");
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 async function detectSeparator(filePath) {
     return new Promise((resolve, reject) => {
@@ -99,6 +100,16 @@ class ImportRooms {
 
                 fs.unlinkSync(filePath);
 
+                // Gửi thông báo cho người dùng
+                if (roomsToInsert.length > 0) {
+                    await sendNotification({
+                        title: `Đã thêm ${roomsToInsert.length} phòng học mới`,
+                        description: `Các phòng học mới đã được thêm thành công từ tệp CSV.`,
+                        url: `/deviceToRoom/home`,
+                        role: "device_manager",
+                        type: "info"
+                    });
+                }
                 return res.status(200).json({
                     success: true,
                     message: messages.importRooms.success,

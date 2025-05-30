@@ -7,6 +7,7 @@ const Room = require("../../../model/Room");
 const Validator = require("../../../Extesions/validator");
 const messages = require("../../../Extesions/messCost");
 const upload = require("../../../Extesions/uploadFile");
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 async function detectSeparator(filePath) {
     return new Promise((resolve, reject) => {
@@ -119,6 +120,17 @@ class ImportDevice {
 
                 fs.unlinkSync(filePath);
 
+                // Gửi thông báo cho người dùng
+                if (devicesToInsert.length > 0) {
+                    await sendNotification({
+                        title: `${devicesToInsert.length} Thiết bị mới`,
+                        description: `${devicesToInsert.length} thiết bị mới đã được thêm vào hệ thống.`,
+                        url: `/deviceManger/home`,
+                        role: "device_manager",
+                        type: "info"
+                    });
+                }
+                
                 return res.status(200).json({
                     success: true,
                     message: "Import thiết bị thành công!",

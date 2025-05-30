@@ -1,6 +1,7 @@
 const Gift = require('../../../model/Gift');
 const fs = require('fs');
 const path = require('path');
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 class DeleteGift {
     /**
@@ -30,6 +31,15 @@ class DeleteGift {
 
             // Xóa quà tặng khỏi cơ sở dữ liệu
             await Gift.findByIdAndDelete(giftId);
+
+            // Gửi thông báo đến người dùng
+            await sendNotification({
+                title: `Quà tặng "${gift.name}" đã bị xóa.`,
+                description: `Quà tặng "${gift.name}" đã được xóa khỏi hệ thống.`,
+                url: `/reward/home`, 
+                role: 'gift_manager',
+                type: 'warning',
+            });
 
             return res.status(200).json({
                 success: true,

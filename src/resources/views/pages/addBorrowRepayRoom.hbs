@@ -87,7 +87,6 @@
             }
 
             const storedData = JSON.parse(localStorage.getItem("data")) || [];
-            console.log("Dữ liệu từ localStorage:", storedData);
 
             // Tách dữ liệu thành các phần riêng biệt
             const teacher = storedData.find(item => item.teacherId);
@@ -116,8 +115,6 @@
                 devices: devices
             };
 
-            console.log("Dữ liệu gửi đi:", borrowOrder);
-
             // Gửi yêu cầu POST đến API
             fetch("/api/borrowReturn/borrow", {
                 method: "POST",
@@ -137,7 +134,31 @@
                 });
                 // Xóa dữ liệu khỏi localStorage sau khi gửi
                 localStorage.removeItem("data");
-                window.location.href = "/borrowRepay/home";
+                
+                {{!-- DataNotification = {
+                    description: "Đơn mượn thiết bị đã được gửi thành công",
+                    role: "device_manager",
+                    url: "/borrowRepay/home", 
+                    type: "info",
+                    title: "Đơn mượn mới"
+                };
+
+                fetch("/api/notification/create", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(DataNotification)
+                })
+                .then(() => {
+                    window.location.href = "/borrowRepay/home";
+                })
+                .catch(err => {
+                    console.error("Lỗi gửi thông báo:", err);
+                    window.location.href = "/borrowRepay/home";
+                }); --}}
+                    window.location.href = "/borrowRepay/home";
+
             })
             .catch(error => {
                 console.error("Lỗi khi gửi yêu cầu:", error);

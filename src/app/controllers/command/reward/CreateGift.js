@@ -3,6 +3,7 @@ const Gift = require('../../../model/Gift');
 const Location = require('../../../model/Location');
 const Validator = require('../../../Extesions/validator');
 const messages = require('../../../Extesions/messCost');
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 class CreateGift {
     Validate(req) {
@@ -86,6 +87,14 @@ class CreateGift {
             newGift.images = finalImagePaths;
             await newGift.save();
 
+            // Gửi thông báo cho người dùng
+            await sendNotification({
+                title: `Quà tặng "${newGift.name}" đã được tạo.`,
+                description: `Quà tặng "${newGift.name}" đã được thêm vào hệ thống.`,
+                url: `/reward/viewReward/${newGift._id}`,
+                role: "gift_manager",
+                type: "info"
+            });
             res.status(201).json({
                 success: true,
                 message: messages.createGift.giftCreateSuccess,

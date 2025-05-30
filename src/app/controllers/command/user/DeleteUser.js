@@ -1,5 +1,6 @@
 const messages = require('../../../Extesions/messCost');
 const Acounts = require('../../../model/Account');
+const { sendNotification } = require("../../../Extesions/notificationService");
 const fs = require('fs');
 const path = require('path');
 
@@ -25,6 +26,16 @@ class DeleteUser {
                 return res.status(404).json({ success: false, message: messages.deleteUser.softDeleteError });
             }
             
+            // Gửi thông báo đến người dùng
+            const user = await Acounts.findById(id);
+            await sendNotification({
+                title: "Tài khoản đã bị vô hiệu hóa",
+                description: `Tài khoản "${user.profile.fullName}" đã được vô hiệu hóa.`,
+                url: "users/listUser",
+                role: user.role,
+                type: "warning"
+            });
+
             return res.status(200).json({ success: true, message: messages.deleteUser.softDeleteSuccess });
         } catch (error) {
             console.error(messages.deleteUser.softDeleteError, error);
@@ -61,6 +72,15 @@ class DeleteUser {
                 }
             }
 
+            // 🔹 Gửi thông báo đến người dùng
+            await sendNotification({
+                title: "Tài khoản đã bị xóa",
+                description: `Tài khoản "${user.profile.fullName}" đã được xóa vĩnh viễn.`,
+                url: "users/listUser", 
+                role: user.role,
+                type: "warning"
+            });
+            
             return res.status(200).json({ success: true, message: messages.deleteUser.deleteSuccess });
 
         } catch (error) {

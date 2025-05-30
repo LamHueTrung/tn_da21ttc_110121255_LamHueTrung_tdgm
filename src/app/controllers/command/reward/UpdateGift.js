@@ -3,7 +3,8 @@ const Gift = require('../../../model/Gift');
 const Location = require('../../../model/Location');
 const Validator = require('../../../Extesions/validator');
 const messages = require('../../../Extesions/messCost');
-const upload = require('../../../Extesions/uploadFile'); // Sử dụng extension upload ảnh
+const upload = require('../../../Extesions/uploadFile'); 
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 class UpdateGift {
     /**
@@ -98,6 +99,15 @@ class UpdateGift {
             // Lưu quà tặng đã cập nhật
             await gift.save();
 
+            // Gửi thông báo đến người dùng
+            await sendNotification({
+                title: `Quà tặng "${gift.name}" đã được cập nhật.`,
+                description: `Thông tin quà tặng "${gift.name}" đã được cập nhật thành công.`,
+                url: `/reward/viewReward/${gift._id}`,
+                role: 'gift_manager',
+                type: 'success',
+            });
+            
             return res.status(200).json({
                 success: true,
                 message: messages.gift.updateSuccess,

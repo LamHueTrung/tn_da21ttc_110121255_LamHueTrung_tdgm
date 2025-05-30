@@ -8,7 +8,9 @@ const teacherRoute = require("./teacher");
 const statisticRoute = require("./statistic");
 const rewardRoute = require("./reward");
 const borrowReturnRoute = require("./borrowReturn");
-
+const Notification = require("./notification");
+const NotificationUnprotected = require("./NotificationUnprotected");
+const Feedback = require("./feedback");
 const Login = require("../../app/controllers/command/user/Login");
 const authenticateToken = require("../../app/middleware/authenticateTokenAdmin");
 
@@ -111,4 +113,8 @@ router.use("/statistics", authenticateToken, statisticRoute);
 
 router.use("/reward", authenticateToken, rewardRoute);
 
+router.use("/notification", NotificationUnprotected);
+router.use("/notification", authenticateToken, Notification);
+
+router.use("/feedback", authenticateToken, Feedback);
 module.exports = router;

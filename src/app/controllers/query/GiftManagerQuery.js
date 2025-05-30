@@ -12,7 +12,7 @@ class GiftManagerQuery {
     async Index(req, res, next) {
         try {
             // Lấy danh sách quà tặng
-            const gifts = await Gift.find().lean();
+            const gifts = await Gift.find().sort({ updated_at: -1 }).lean();
 
             // Lấy tổng số lượng `DeviceItem` cho từng quà tặng
             const giftIds = gifts.map((gift) => gift._id);

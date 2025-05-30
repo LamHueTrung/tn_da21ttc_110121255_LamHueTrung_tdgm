@@ -5,6 +5,7 @@ const DeviceItem = require("../../../model/DeviceItem");
 const Validator = require("../../../Extesions/validator");
 const messages = require("../../../Extesions/messCost");
 const Room = require("../../../model/Room");
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 class UpdateDevice {
     /**
@@ -194,6 +195,16 @@ class UpdateDevice {
             }
 
             await device.save();
+
+            // Gửi thông báo đến người dùng
+            await sendNotification({
+                title: `Thiết bị "${device.name}" đã được cập nhật`,
+                description: `Thiết bị "${device.name}" có sự thay đổi.`,
+                url: `/deviceManger/viewDevice/${device._id}`,
+                role: "device_manager",
+                type: "success"
+            });
+
             return res.status(200).json({
                 success: true,
                 message: messages.updateDevice.deviceUpdateSuccess,

@@ -4,6 +4,7 @@ const Teacher = require("../../../model/Teacher");
 const Validator = require("../../../Extesions/validator");
 const messages = require("../../../Extesions/messCost");
 const upload = require("../../../Extesions/uploadFile");
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 /**
  * Tự động phát hiện dấu phân cách CSV (`,` hoặc `;`).
@@ -137,6 +138,16 @@ class ImportTeachers {
                         errors: Array.from(errors) // Trả về các lỗi về định dạng file
                     });
                 }
+
+                // Gửi thông báo thành công
+                await sendNotification({
+                    title: "Import giảng viên thành công",
+                    description: `Đã thêm ${teachersToInsert.length} giảng viên mới từ file CSV.`,
+                    url: `/users/ListAllTeacher`,
+                    role: "system_admin",
+                    type: "info",
+                });
+
                 return res.status(200).json({
                     success: true,
                     message: messages.teacher.importSuccess,

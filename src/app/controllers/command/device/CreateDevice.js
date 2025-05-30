@@ -5,6 +5,7 @@ const DeviceItem = require('../../../model/DeviceItem');
 const Validator = require('../../../Extesions/validator');
 const messages = require('../../../Extesions/messCost');
 const Room = require('../../../model/Room');
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 /**
  * Class CreateDevice - Xử lý API tạo thiết bị mới
@@ -117,6 +118,15 @@ class CreateDevice {
             // Cập nhật đường dẫn ảnh vào thiết bị
             newDevice.images = finalImagePaths;
             await newDevice.save();
+
+            // Gửi thông báo cho người dùng
+            await sendNotification({
+                title: "Thiết bị mới",
+                description: `Thiết bị "${newDevice.name}" đã được thêm vào hệ thống.`,
+                url: `/deviceManger/viewDevice/${newDevice._id}`,
+                role: "device_manager",
+                type: "info"
+            });
 
             return res.status(201).json({
                 success: true,

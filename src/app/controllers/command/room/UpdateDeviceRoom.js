@@ -1,6 +1,7 @@
 const Room = require("../../../model/Room");
 const DeviceItem = require("../../../model/DeviceItem");
 const messages = require("../../../Extesions/messCost");
+const { sendNotification } = require("../../../Extesions/notificationService");
 
 class UpdateDeviceRoom {
     /**
@@ -68,6 +69,14 @@ class UpdateDeviceRoom {
             deviceItem.location = toRoom.location;
             await deviceItem.save();
 
+            // Gửi thông báo đến người dùng
+            await sendNotification({
+                title: `Thiết bị ${deviceItem.name} đã được di chuyển`,
+                description: `Thiết bị ${deviceItem.name} đã được chuyển từ phòng ${fromRoom.name} sang phòng ${toRoom.name}.`,
+                url: `/deviceToRoom/viewDevices/${toRoom._id}`,
+                role: 'device_manager',
+                type: 'success',
+            });
             return res.status(200).json({
                 success: true,
                 message: messages.device.moveSuccess,
