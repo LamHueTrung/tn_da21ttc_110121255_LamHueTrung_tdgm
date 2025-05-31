@@ -14,7 +14,8 @@
                     <li class="list-group-item"><strong>Tài khoản: </strong><span id="userUsername"></span></li>
                     <li class="list-group-item"><strong>Ngày sinh: </strong><span id="userBirthDate"></span></li>
                     <li class="list-group-item"><strong>Số điện thoại: </strong><span id="userPhone"></span></li>
-                    <li class="list-group-item"><strong>Địa chỉnh: </strong><span id="userAddress"></span></li>
+                    <li class="list-group-item"><strong>Email: </strong><span id="email"></span></li>
+                    <li class="list-group-item"><strong>Địa chỉ: </strong><span id="userAddress"></span></li>
                     <li class="list-group-item"><strong>Trạng thái tài khoản: </strong><span id="userStatus"></span>
                     </li>
                     <li class="list-group-item"><strong>Thời gian tạo: </strong><span id="userCreatedAt"></span></li>
@@ -76,10 +77,11 @@
                     // Cập nhật các thông tin người dùng vào trang
                     document.getElementById("profileAvatar").src = data.user.profile.avatar || "/img/default-avatar.jpg";
                     document.getElementById("userUsername").textContent = data.user.username;
-                    document.getElementById("userRole").textContent = data.user.role === 'system_admin' ? 'Quản trị viên' : 'Giảng viên trực';
+                    document.getElementById("userRole").textContent = data.user.role === 'system_admin' ? 'Quản trị viên' : ('device_manager' ? 'Quản lý thiết bị' : ('gift_manager' ? 'Quản lý quà tặng' : 'Người dùng'));
                     document.getElementById("userFullName").textContent = data.user.profile.fullName;
                     document.getElementById("userBirthDate").textContent = new Date(data.user.profile.birthDate).toLocaleDateString();
                     document.getElementById("userPhone").textContent = data.user.profile.phone;
+                    document.getElementById("email").textContent = data.user.profile.email;
                     document.getElementById("userAddress").textContent = data.user.profile.address;
                     document.getElementById("userStatus").textContent = data.user.isDeleted ? 'Vô hiệu hoá' : 'Đang hoạt động';
                     document.getElementById("userCreatedAt").textContent = new Date(data.user.createdAt).toLocaleString();

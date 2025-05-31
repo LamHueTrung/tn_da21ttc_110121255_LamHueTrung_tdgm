@@ -36,6 +36,12 @@
                 <input type="text" class="form-control" name="numberPhone" id="numberPhone" placeholder="Examples: 076384xxxx">
                 <div id="numberPhoneError" class="text-danger"></div>
             </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" name="email" id="email" placeholder="Examples: example@gmail.com">
+                <div id="emailError" class="text-danger"></div>
+            </div>
 
             <div class="mb-3">
                 <label class="form-label">Địa chỉ</label>
@@ -94,6 +100,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.getElementById("fullNameError").textContent = data.errors.fullName || "";
                     document.getElementById("birthdayError").textContent = data.errors.birthday || "";
                     document.getElementById("numberPhoneError").textContent = data.errors.numberPhone || "";
+                    document.getElementById("emailError").textContent = data.errors.email || "";
                     document.getElementById("addressError").textContent = data.errors.address || "";
                     document.getElementById("avatarError").textContent = data.errors.avatar || "";
                 }

@@ -5,13 +5,14 @@ const profileSchema = new mongoose.Schema({
     birthDate: Date,
     avatar: { type: String, default: null },
     address: String,
-    phone: { type: String, match: [/^\d{10,15}$/, 'Số điện thoại không hợp lệ'] }
+    phone: { type: String, match: [/^\d{10,15}$/, 'Số điện thoại không hợp lệ'] },
+    email: { type: String, match: [/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/, 'Email không hợp lệ'] }
 });
 
 const accountSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true, trim: true },
     password: { type: String, required: true },
-    role: { type: String, enum: ['system_admin', 'device_manager', 'gift_manager'], required: true },
+    role: { type: String, enum: ['system_admin', 'device_manager', 'gift_manager', 'user'], required: true },
     profile: profileSchema,
     isDeleted: { type: Boolean, default: false }
 }, { timestamps: true });

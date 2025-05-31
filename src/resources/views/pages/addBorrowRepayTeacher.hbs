@@ -133,12 +133,14 @@
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json"
-                        },
+                        }, 
                         body: JSON.stringify(borrowOrder)
                     })
                     .then(response => response.json())
                     .then(data => {
+                        console.log("Kết quả trả về:", data);
                         if (data.success) {
+
                             Swal.fire({
                                 icon: "success",
                                 title: "Thành công!",

@@ -37,6 +37,12 @@
             </div>
 
             <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" name="email" id="email" placeholder="Examples: example@gmail.com">
+                <div id="emailError" class="text-danger"></div>
+            </div>
+
+            <div class="mb-3">
                 <label class="form-label">Địa chỉ</label>
                 <input type="text" class="form-control" name="address" id="address" placeholder="Examples: Trà Vinh">
                 <div id="addressError" class="text-danger"></div>
@@ -75,6 +81,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 document.getElementById("fullName").value = data.user.profile.fullName;
                 document.getElementById("birthday").value = new Date(data.user.profile.birthDate).toISOString().split('T')[0];
                 document.getElementById("numberPhone").value = data.user.profile.phone;
+                document.getElementById("email").value = data.user.profile.email;
                 document.getElementById("address").value = data.user.profile.address;
 
                 // Hiển thị ảnh đại diện nếu có
@@ -135,6 +142,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.getElementById("fullNameError").textContent = data.errors.fullName || "";
                     document.getElementById("birthdayError").textContent = data.errors.birthday || "";
                     document.getElementById("numberPhoneError").textContent = data.errors.numberPhone || "";
+                    document.getElementById("emailError").textContent = data.errors.email || "";
                     document.getElementById("addressError").textContent = data.errors.address || "";
                     document.getElementById("avatarError").textContent = data.errors.avatar || "";
                 }

@@ -39,7 +39,8 @@ class CreateAdmin {
                     birthDate: new Date('2003-08-01'),
                     avatar: '/img/systemAdmin.jpg',
                     address: 'Trà Vinh',
-                    phone: '0763849007'
+                    phone: '0763849007',
+                    email: 'lamhuetrung@gmail.com'
                 }
             });
     

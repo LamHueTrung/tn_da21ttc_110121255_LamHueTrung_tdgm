@@ -21,7 +21,7 @@ class CreateNotification {
                 const urlError = Validator.maxLength(url, 500, 'URL');
                 if (urlError) errors.url = urlError;
 
-                const typeError = Validator.isEnum(type, ['info', 'warning', 'alert'], 'Loại thông báo');
+                const typeError = Validator.isEnum(type, ['info', 'warning', 'success'], 'Loại thông báo');
                 if (typeError) errors.type = typeError;
 
                 const titleError =

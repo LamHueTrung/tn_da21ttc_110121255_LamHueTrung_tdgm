@@ -6,6 +6,9 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
 const { sendNotification } = require("../../../Extesions/notificationService");
+const sendEmail = require("../../../Extesions/sendEmail");
+const dotenv = require('dotenv');
+dotenv.config();
 
 class UpdateUser {
 
@@ -44,6 +47,51 @@ class UpdateUser {
             admin.password = CryptoService.encrypt(passwordNew);
             await admin.save();
 
+            // Gửi email thông báo thay đổi mật khẩu
+            await sendEmail({
+                to: admin.profile.email,
+                subject: 'HỆ THỐNG QUẢN LÝ THIẾT BỊ & QUÀ TẶNG - VICTORY',
+                html: `
+                <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #2a2a2a; margin: 40px auto; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                <!-- Header -->
+                <tr>
+                    <td align="center" bgcolor="#c0392b" style="padding: 30px 20px; border-bottom: 3px solid #e74c3c;">
+                        <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; letter-spacing: 1px;">Thông báo từ trung tâm Victory!</h1>
+                    </td>
+                </tr>
+                <!-- Main Content -->
+                <tr>
+                    <td style="padding: 30px 25px;">
+                        <h2 style="color: #e74c3c; font-size: 22px; margin-top: 0;">Chào ${admin.profile.fullName},</h2>
+                        <p style="font-size: 16px; line-height: 1.6; color: #cccccc; margin-bottom: 20px;">Tài khoản của bạn vừa thay đổi mật khẩu. Dưới đây là thông tin liên quan:</p>
+                        <table width="100%" border="0" cellspacing="0" cellpadding="8" style="background-color: #3a3a3a; border-radius: 6px; margin: 20px 0;">
+                            <tr>
+                                <td style="font-size: 16px; color: #e74c3c; font-weight: bold;">Mật khẩu cũ:</td>
+                                <td style="font-size: 16px; color: #ffffff;">${passwordOld}</td>
+                                <td style="font-size: 16px; color: #e74c3c; font-weight: bold;">Mật khẩu mới:</td>
+                                <td style="font-size: 16px; color: #ffffff;">${passwordNew}</td>
+                            </tr>
+                        </table>
+                        <p style="font-size: 16px; line-height: 1.6; color: #cccccc; margin-bottom: 20px;">Vui lòng đăng nhập với mật khẩu mới và tiếp tục.</p>
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 30px;">
+                            <tr>
+                                <td align="center">
+                                    <a href="${process.env.API_URL}" style="background-color: #e74c3c; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: bold; padding: 12px 30px; border-radius: 5px; display: inline-block; transition: background-color 0.3s ease;">Đăng nhập ngay</a>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <!-- Footer -->
+                <tr>
+                    <td align="center" style="padding: 20px; font-size: 12px; color: #999999; border-top: 1px solid #444444; background-color: #222222;">
+                        <p style="margin: 0;">© 2025 Lâm Huệ Trung. Đã đăng ký bản quyền.</p>
+                        <p style="margin: 5px 0 0;">Liên hệ: <a href="mailto:lamhuetrung@gmail.com" style="color: #e74c3c; text-decoration: none;">lamhuetrung@gmail.com</a> | Tel: +84 076 384 9007</p>
+                    </td>
+                </tr>
+            </table>
+                `
+            });
             return res.status(200).json({ success: true, message: admin });
 
         } catch (error) {
@@ -62,6 +110,7 @@ class UpdateUser {
             fullName = currentData.profile.fullName,
             birthday = currentData.profile.birthDate,
             numberPhone = currentData.profile.phone,
+            email = currentData.profile.email,
             address = currentData.profile.address,
             role = currentData.role,
         } = req.body;
@@ -70,6 +119,7 @@ class UpdateUser {
             fullName: '',
             birthday: '',
             numberPhone: '',
+            email: '',
             address: '',
             avatar: '',
         };
@@ -86,6 +136,9 @@ class UpdateUser {
 
         const numberPhoneError = Validator.isPhoneNumber(numberPhone);
         if (numberPhoneError) errors.numberPhone = numberPhoneError;
+
+        const emailError = Validator.isEmail(email, 'Email');
+        if (emailError) errors.email = emailError;
 
         if (req.file) {
             const avatarError = Validator.maxFileSize(req.file.size, 10, 'Ảnh đại diện');
@@ -117,7 +170,7 @@ class UpdateUser {
             }
 
             // Lấy dữ liệu cần cập nhật từ request
-            const { userName, fullName, birthday, address, numberPhone, role } = req.body;
+            const { userName, fullName, birthday, address, numberPhone, email, role } = req.body;
 
             // Tạo dữ liệu cập nhật, giữ nguyên dữ liệu cũ nếu không có giá trị mới
             const updatedData = {
@@ -129,6 +182,7 @@ class UpdateUser {
                     avatar: req.file ? '/avatars/' + req.file.filename : currentUser.profile.avatar,
                     address: address || currentUser.profile.address,
                     phone: numberPhone || currentUser.profile.phone,
+                    email: email || currentUser.profile.email
                 }
             };
 
@@ -175,11 +229,57 @@ class UpdateUser {
             await sendNotification({
                 title: "Tài khoản đã được khôi phục",
                 description: `Tài khoản "${user.profile.fullName}" đã được khôi phục.`,
-                url: "users/listUser",
+                url: "users/listAllUser",
                 role: user.role,
                 type: "success"
             });
             
+            // Gửi email thông báo
+            const roleName = user.role === 'system_admin' ? 'Quản trị viên hệ thống' : ('device_manager' ? 'Quản lý thiết bị' : (role === 'gift_manager' ? 'Quản lý quà tặng' : 'Người dùng'));
+
+            await sendEmail({
+                to: user.profile.email,
+                subject: 'HỆ THỐNG QUẢN LÝ THIẾT BỊ & QUÀ TẶNG - VICTORY',
+                html: `
+                <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #2a2a2a; margin: 40px auto; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                <!-- Header -->
+                <tr>
+                    <td align="center" bgcolor="#c0392b" style="padding: 30px 20px; border-bottom: 3px solid #e74c3c;">
+                        <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; letter-spacing: 1px;">Thông báo từ trung tâm Victory!</h1>
+                    </td>
+                </tr>
+                <!-- Main Content -->
+                <tr>
+                    <td style="padding: 30px 25px;">
+                        <h2 style="color: #e74c3c; font-size: 22px; margin-top: 0;">Chào ${user.profile.fullName},</h2>
+                        <p style="font-size: 16px; line-height: 1.6; color: #cccccc; margin-bottom: 20px;">Chúng tôi thông báo rằng tài khoản ${roleName} của bạn trên hệ thống quản lý thiết bị và quà tặng đã được khôi phục. Dưới đây là thông tin liên quan:</p>
+                        <table width="100%" border="0" cellspacing="0" cellpadding="8" style="background-color: #3a3a3a; border-radius: 6px; margin: 20px 0;">
+                            <tr>
+                                <td style="font-size: 16px; color: #e74c3c; font-weight: bold;">Tài khoản:</td>
+                                <td style="font-size: 16px; color: #ffffff;">${user.username}</td>
+                            </tr>
+                        </table>
+                        <p style="font-size: 16px; line-height: 1.6; color: #cccccc; margin-bottom: 20px;">Chúng tôi đã xem xét và quyết định khôi phục tài khoản của bạn, mọi chi tiết vui lòng liên hệ qua thông tin bên dưới.</p>
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 30px;">
+                            <tr>
+                                <td align="center">
+                                    <a href="mailto:lamhuetrung@gmail.com" style="background-color: #e74c3c; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: bold; padding: 12px 30px; border-radius: 5px; display: inline-block;">Liên hệ hỗ trợ</a>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <!-- Footer -->
+                <tr>
+                    <td align="center" style="padding: 20px; font-size: 12px; color: #999999; border-top: 1px solid #444444; background-color: #222222;">
+                        <p style="margin: 0;">© 2025 Lâm Huệ Trung. Đã đăng ký bản quyền.</p>
+                        <p style="margin: 5px 0 0;">Liên hệ: <a href="mailto:lamhuetrung@gmail.com" style="color: #e74c3c; text-decoration: none;">lamhuetrung@gmail.com</a> | Tel: +84 076 384 9007</p>
+                    </td>
+                </tr>
+            </table>
+                `
+            });
+
             return res.status(200).json({ success: true, message: messages.restoreUser.restoreSuccess });
         } catch (error) {
             console.error(messages.restoreUser.restoreError, error);
