@@ -35,7 +35,9 @@
                         </td>
                         <td>
                             <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#viewOrderModal" onclick="viewOrderDetails('{{this._id}}')">Xem</button>
+                            {{#if (eq this.status "Chưa duyệt")}}
                             <button class="btn btn-success btn-sm" onclick="approveOrder('{{this._id}}')">Duyệt đơn</button>
+                            {{/if}}
                         </td>
                     </tr>
                     {{/each}}
