@@ -15,6 +15,8 @@
                         <th>Người yêu cầu</th>
                         <th>Quà tặng</th>
                         <th>Số lượng</th>
+                        <th>Ngày yêu cầu</th>
+                        <th>Ngày ngày duyệt</th>
                         <th>Trạng thái</th>
                         <th>Thao tác</th>
                     </tr>
@@ -26,6 +28,8 @@
                         <td>{{this.teacher.name}}</td>
                         <td>{{this.gift.name}}</td>
                         <td>{{this.quantity}}</td>
+                        <td>{{formatDate this.created_at}}</td>
+                        <td>{{#if (eq this.status "Đã duyệt")}} {{formatDate this.updated_at}} {{else}} Đang chờ... {{/if}} </td>
                         <td style="color: {{#if (eq this.status "Chưa duyệt")}}red{{else}}green{{/if}};">
                             {{this.status}}
                         </td>
