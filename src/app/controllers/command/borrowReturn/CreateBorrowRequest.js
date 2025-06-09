@@ -39,6 +39,14 @@ class CreateBorrowRequest {
             return res.status(400).json({ success: false, errors });
         }
 
+        const IdAccount = req.user.id; 
+        if (!IdAccount) {
+            return res.status(401).json({
+                success: false,
+                message: messages.borrowRequest.accountNotFound
+            });
+        }
+        
         const { teacherId, roomId, devices } = req.body;
 
         try {
@@ -115,7 +123,8 @@ class CreateBorrowRequest {
                 teacher: teacher._id,
                 room: room ? room._id : null,
                 devices: devices.map(d => ({ device: d.deviceId, quantity: d.quantity })),
-                deviceItems: selectedDeviceItems
+                deviceItems: selectedDeviceItems,
+                IdAccount: IdAccount,
             });
 
             await newBorrowRequest.save();
@@ -169,8 +178,6 @@ class CreateBorrowRequest {
             const deviceQuantities = borrowRequest.devices?.length
                 ? borrowRequest.devices.map(device => device.quantity || '0').join(', ')
                 : '0';
-
-            console.log(deviceNames);
 
             // Gửi email
             await sendEmail({

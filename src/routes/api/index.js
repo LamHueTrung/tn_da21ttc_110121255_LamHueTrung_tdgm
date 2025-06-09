@@ -117,4 +117,5 @@ router.use("/notification", NotificationUnprotected);
 router.use("/notification", authenticateToken, Notification);
 
 router.use("/feedback", authenticateToken, Feedback);
+
 module.exports = router;

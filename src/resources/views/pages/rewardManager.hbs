@@ -14,6 +14,7 @@
                         <th>Danh mục</th>
                         <th>Số lượng trong kho</th>
                         <th>Ngày nhập</th>
+                        <th>Người nhập</th>
                         <th>Thao tác</th>
                     </tr>
                 </thead>
@@ -24,6 +25,7 @@
                         <td>{{ this.category }}</td>
                         <td>{{ this.quantity_in_stock }}</td>
                         <td>{{formatDate this.created_at }}</td>
+                        <td>{{ this.Account.profile.fullName }}</td>
                         <td>
                             <!-- Dropdown for gift actions -->
                             <div class="btn-group">

@@ -1,6 +1,12 @@
 const mongoose = require("mongoose");
+const Account = require("./Account");
 
 const teacherSchema = new mongoose.Schema({
+    // idAcount: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "Account",
+    //     required: true
+    // },
     name: {
         type: String,
         required: true,

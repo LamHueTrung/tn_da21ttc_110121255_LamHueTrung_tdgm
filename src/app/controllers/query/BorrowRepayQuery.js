@@ -4,6 +4,7 @@ const Teacher = require("../../model/Teacher");
 const Room = require("../../model/Room");
 const messages = require("../../Extesions/messCost");
 const BorrowRequest = require("../../model/BorrowRequest");
+const Account = require("../../model/Account");
 
 class BorrowRepayQuery {
     
@@ -12,6 +13,7 @@ class BorrowRepayQuery {
             const borrowRequests = await BorrowRequest.find()
                 .sort({ created_at: -1 })
                 .populate("teacher", "name email phone department")
+                .populate("IdAccount", "username email role profile")
                 .populate("room", "name location")
                 .populate({
                     path: "devices.device",
@@ -22,6 +24,7 @@ class BorrowRepayQuery {
                     populate: { path: "device", select: "name category" }
                 })
                 .lean();
+            
 
             return res.status(200).render('pages/historyBorrowRepay', { 
                 layout: 'main',

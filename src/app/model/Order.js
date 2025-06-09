@@ -3,6 +3,16 @@ const Teacher = require("./Teacher"); // Liên kết với model Teacher
 const Gift = require("./Gift"); // Liên kết với model Gift
 
 const orderSchema = new mongoose.Schema({
+    Account: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Account",
+        required: true
+    },
+    approved_by: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Account",
+        default: null 
+    },
     teacher: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Teacher",

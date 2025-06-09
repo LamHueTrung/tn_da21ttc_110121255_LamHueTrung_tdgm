@@ -1,12 +1,21 @@
 const Order = require("../../../model/Order");
 const Gift = require("../../../model/Gift");
 const { sendNotification } = require("../../../Extesions/notificationService");
+const messages = require("../../../Extesions/messCost");
 
 class ApproveOrderController {
   // Duyệt đơn yêu cầu
   async approve(req, res) {
     try {
       const { orderId } = req.params;
+
+      const IdAccount = req.user.id;
+      if (!IdAccount) {
+        return res.status(401).json({
+            success: false,
+            message: messages.borrowRequest.accountNotFound
+        });
+      }
 
       const order = await Order.findById(orderId).populate("gift");
       if (!order) {
@@ -26,6 +35,7 @@ class ApproveOrderController {
       await gift.save();
 
       order.status = "Đã duyệt";
+      order.approved_by = IdAccount; 
       order.updated_at = Date.now();
       await order.save();
 

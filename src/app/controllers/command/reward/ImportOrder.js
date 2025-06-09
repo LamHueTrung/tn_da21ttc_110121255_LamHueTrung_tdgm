@@ -6,6 +6,7 @@ const Gift = require("../../../model/Gift");
 const Teacher = require("../../../model/Teacher");
 const upload = require("../../../Extesions/uploadFilePdf"); // Đảm bảo đúng tên
 const { sendNotification } = require("../../../Extesions/notificationService");
+const messages = require("../../../Extesions/messCost");
 
 class ImportOrder {
   // API xử lý tải lên file PDF và tạo đơn yêu cầu
@@ -21,8 +22,16 @@ class ImportOrder {
           .json({ success: false, message: "No file uploaded." });
       }
 
-      const filePath = req.file.path;
+      const IdAccount = req.user.id; 
+        if (!IdAccount) {
+            return res.status(401).json({
+                success: false,
+                message: messages.borrowRequest.accountNotFound
+            });
+        }
 
+      const filePath = req.file.path;
+      
       try {
         // Đọc và trích xuất dữ liệu từ file PDF
         const dataBuffer = fs.readFileSync(filePath);
@@ -51,6 +60,7 @@ class ImportOrder {
 
         // Tạo đơn yêu cầu mới
         const order = new Order({
+          Account: IdAccount,
           teacher: orderData.teacherId,
           gift: orderData.giftId,
           quantity: orderData.quantity,
@@ -62,10 +72,10 @@ class ImportOrder {
 
         // Cập nhật số lượng quà tặng trong kho
         const gift = await Gift.findById(orderData.giftId);
-        if (gift) {
-          gift.quantity_in_stock -= orderData.quantity;
-          await gift.save();
-        }
+        // if (gift) {
+        //   gift.quantity_in_stock -= orderData.quantity;
+        //   await gift.save();
+        // }
 
         // Xóa file PDF sau khi xử lý
         fs.unlinkSync(filePath);

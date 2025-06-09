@@ -140,7 +140,7 @@ class LoginAdmin {
             const token = jwt.sign(
                 { id: admin._id, role: admin.role },
                 jwtSecretKey,
-                { expiresIn: '1h' }
+                { expiresIn: '5h' }
             );
             req.session.token = token;
             req.headers.authorization = token;

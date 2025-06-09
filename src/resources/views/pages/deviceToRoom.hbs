@@ -2,6 +2,7 @@
     <div class="card-header py-3">
         <a href="#" class="btn btn-darks" data-bs-toggle="modal" data-bs-target="#createRoomModal" id="addRoomBtn">Thêm phòng thủ công</a>
         <a href="#" class="btn btn-darks" id="importRoomsBtn">Thêm bằng file</a>
+        <a href="https://drive.google.com/uc?export=download&id=1O89UT6S9E3xHsiJ6w29mpIo0kd_KIS-J" class="btn btn-darks" id="importRoomsBtn">File Mẫu</a>
     </div>
     <div class="card-header py-3">
         <h6 class="m-0 font-weight-bold text-primary">Danh sách phòng</h6>
@@ -239,7 +240,7 @@ document.addEventListener("DOMContentLoaded", function () {
             input: "file",
             inputAttributes: { accept: ".csv, .xlsx" },
             showCancelButton: true,
-            confirmButtonText: "Upload",
+            confirmButtonText: "Tải lên",
         });
 
         if (file) {

@@ -4,7 +4,6 @@
     <div class="card-body">
         <div class="table-responsive">
             <h3 class="mt-4">Danh sách thiết bị</h3>
-            <!-- Bảng danh sách thiết bị có thể chọn -->
             <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                 <thead>
                     <tr>
@@ -18,134 +17,151 @@
                 </thead>
                 <tbody id="deviceList">
                     {{#each devices}}
-                        <tr>
-                            <td>
-                                <input style="width: 38px;height: 25px;" type="checkbox" class="checkbox" 
+                    <tr>
+                        <td>
+                            <input style="width: 38px;height: 25px;" type="checkbox" class="checkbox" 
                                 data-id="{{this._id}}" 
                                 data-name="{{ this.name}}"
                                 data-category="{{ this.category}}"
-                                data-quantity=""
-                                ></td>
-                            <td>
-                                <input style="width: 70px;" type="number">
-                            </td>
-                            <td>{{ this.name}}</td>
-                            <td>{{ this.category}}</td>
-                            <td>{{ this.available_quantity }}</td>
-                            <td> <img style="width: 50px;" src="{{this.images}}" alt=""></td>
-                        </tr>
+                                data-quantity="">
+                        </td>
+                        <td>
+                            <input style="width: 70px;" type="number">
+                        </td>
+                        <td>{{ this.name }}</td>
+                        <td>{{ this.category }}</td>
+                        <td>{{ this.available_quantity }}</td>
+                        <td><img style="width: 50px;" src="{{this.images}}" alt=""></td>
+                    </tr>
                     {{/each}}
                 </tbody>
             </table>
         </div>
-        
+
+        <!-- Tổng thiết bị đã chọn -->
+        <div id="summarySelected" class="mt-3">
+            <h5>Thiết bị đã chọn:</h5>
+            <ul id="selectedDevicesList"></ul>
+        </div>
+
         <div class="d-flex mt-2" style="float: right;">
             <button type="button" onclick="javascript:history.back()" class="btn btn-secondary btn-previou">Quay lại</button>
             <button id="createOrderBtn" type="submit" class="btn btn-system btn-submit ml-2">Tiếp tục chọn giảng viên</button>
         </div>
-
     </div>
 </div>
+
+<style>
+    .row-selected {
+        background-color: #e0f7fa !important;
+    }
+</style>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const checkboxes = document.querySelectorAll(".checkbox");
         const createOrderBtn = document.getElementById("createOrderBtn");
+        const deviceListRows = document.querySelectorAll("tbody tr");
+        const selectedDevicesList = document.getElementById("selectedDevicesList");
 
         let datas = [];
 
-        // Cập nhật data-quantity khi nhập số lượng
-        document.querySelectorAll("tbody tr").forEach(row => {
+        deviceListRows.forEach(row => {
             let quantityInput = row.querySelector("input[type='number']");
             let checkbox = row.querySelector(".checkbox");
             let availableQuantity = parseInt(row.querySelector("td:nth-child(5)").innerText);
 
-            if (quantityInput && checkbox) {
-                quantityInput.addEventListener("input", function () {
-                    let quantity = parseInt(this.value) || 0;
-                    checkbox.dataset.quantity = quantity;
+            quantityInput.addEventListener("input", function () {
+                let quantity = parseInt(this.value) || 0;
 
-                    // Kiểm tra nếu số lượng mượn vượt quá số lượng có thể mượn
-                    if (quantity > availableQuantity) {
-                        Swal.fire({
-                            icon: "warning",
-                            title: "Lỗi số lượng",
-                            text: `Số lượng mượn không thể lớn hơn ${availableQuantity}!`,
-                        });
-                        this.value = availableQuantity;
-                        checkbox.dataset.quantity = availableQuantity;
-                    }
-                });
-            }
-        });
-
-        // Xử lý khi chọn checkbox
-        checkboxes.forEach((checkbox) => {
-            checkbox.addEventListener("change", function () {
-                const deviceId = this.dataset.id;
-                const quantity = parseInt(this.dataset.quantity) || 0;
-
-                if (this.checked) {
-                    datas.push({ deviceId, quantity });
-                } else {
-                    removeDevice(deviceId);
+                if (quantity > availableQuantity) {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Lỗi số lượng",
+                        text: `Số lượng mượn không thể lớn hơn ${availableQuantity}!`,
+                    });
+                    this.value = availableQuantity;
+                    quantity = availableQuantity;
                 }
 
-                console.log(datas);
+                checkbox.dataset.quantity = quantity;
+
+                // Tự động check nếu nhập số > 0
+                checkbox.checked = quantity > 0;
+
+                updateDeviceList();
+            });
+
+            checkbox.addEventListener("change", function () {
+                updateDeviceList();
             });
         });
 
-        function removeDevice(id) {
-            datas = datas.filter(device => device.deviceId !== id);
+        function updateRowHighlight(checkbox) {
+            const row = checkbox.closest("tr");
+            if (checkbox.checked && parseInt(checkbox.dataset.quantity) > 0) {
+                row.classList.add("row-selected");
+            } else {
+                row.classList.remove("row-selected");
+            }
         }
 
-        // Xử lý khi nhấn "Tiếp tục"
-        createOrderBtn.addEventListener("click", function () {
-            let isValid = true;
-            let hasDeviceSelected = false;
-
+        function updateDeviceList() {
             datas = [];
+            selectedDevicesList.innerHTML = "";
+
             checkboxes.forEach((checkbox) => {
-                if (checkbox.checked) {
-                    hasDeviceSelected = true;
-                    let deviceId = checkbox.dataset.id;
-                    let quantity = parseInt(checkbox.dataset.quantity) || 0;
-                    let row = checkbox.closest("tr");
-                    let availableQuantity = parseInt(row.querySelector("td:nth-child(5)").innerText);
+                const quantity = parseInt(checkbox.dataset.quantity) || 0;
+                const deviceId = checkbox.dataset.id;
+                const deviceName = checkbox.dataset.name;
 
-                    // Kiểm tra số lượng hợp lệ
-                    if (quantity <= 0) {
-                        isValid = false;
-                        Swal.fire({
-                            icon: "error",
-                            title: "Lỗi số lượng",
-                            text: "Số lượng mượn phải lớn hơn 0!",
-                        });
-                        return;
-                    }
+                updateRowHighlight(checkbox);
 
-                    if (quantity > availableQuantity) {
-                        isValid = false;
-                        Swal.fire({
-                            icon: "error",
-                            title: "Lỗi số lượng",
-                            text: `Số lượng mượn không thể lớn hơn ${availableQuantity}!`,
-                        });
-                        return;
-                    }
-
+                if (checkbox.checked && quantity > 0) {
                     datas.push({ deviceId, quantity });
+
+                    const li = document.createElement("li");
+                    li.textContent = `${deviceName} - SL mượn: ${quantity}`;
+                    selectedDevicesList.appendChild(li);
                 }
             });
+        }
 
-            if (!hasDeviceSelected) {
+        createOrderBtn.addEventListener("click", function () {
+            let isValid = true;
+
+            if (datas.length === 0) {
                 Swal.fire({
                     icon: "error",
                     title: "Lỗi",
                     text: "Vui lòng chọn ít nhất một thiết bị!",
                 });
                 return;
+            }
+
+            for (const { deviceId, quantity } of datas) {
+                if (quantity <= 0) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Lỗi số lượng",
+                        text: "Số lượng mượn phải lớn hơn 0!",
+                    });
+                    isValid = false;
+                    break;
+                }
+
+                const row = document.querySelector(`input[data-id="${deviceId}"]`).closest("tr");
+                const availableQuantity = parseInt(row.querySelector("td:nth-child(5)").innerText);
+                if (quantity > availableQuantity) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Lỗi số lượng",
+                        text: `Số lượng mượn không thể lớn hơn ${availableQuantity}!`,
+                    });
+                    isValid = false;
+                    break;
+                }
             }
 
             if (isValid) {
@@ -155,4 +171,3 @@
         });
     });
 </script>
-

@@ -29,6 +29,14 @@ class ImportGiff {
             const errors = new Set();
             const processedGifts = new Set();
 
+            const IdAccount = req.user.id; 
+            if (!IdAccount) {
+                return res.status(401).json({
+                    success: false,
+                    message: messages.borrowRequest.accountNotFound
+                });
+            }
+
             try {
                 const separator = await detectSeparator(filePath);
                 const rows = [];
@@ -88,6 +96,7 @@ class ImportGiff {
                         const existingGift = await Gift.findOne({ name, location: mainLocation._id });
                         if (!existingGift) {
                             const gift = new Gift({
+                                Account: IdAccount,
                                 name,
                                 category,
                                 description,

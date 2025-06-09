@@ -43,6 +43,14 @@ class CreateGift {
             return res.status(400).json({ success: false, errors });
         }
 
+        const IdAccount = req.user.id; 
+        if (!IdAccount) {
+            return res.status(401).json({
+                success: false,
+                message: messages.borrowRequest.accountNotFound
+            });
+        }
+
         const { name, category, description, quantity, price } = req.body;
 
         try {
@@ -65,6 +73,7 @@ class CreateGift {
             }
 
             const newGift = new Gift({
+                Account: IdAccount,
                 name,
                 category,
                 description: description || "",

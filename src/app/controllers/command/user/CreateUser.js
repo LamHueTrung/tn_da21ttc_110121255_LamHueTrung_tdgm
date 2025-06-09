@@ -169,6 +169,7 @@ class CreateUser {
                 success: true,
                 message: messages.createUser.accountCreateSuccess,
                 user: {
+                    _id: newAccount._id,
                     username: newAccount.username,
                     role: newAccount.role,
                     profile: newAccount.profile

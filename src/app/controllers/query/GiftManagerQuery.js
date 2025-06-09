@@ -12,9 +12,8 @@ class GiftManagerQuery {
     async Index(req, res, next) {
         try {
             // Lấy danh sách quà tặng
-            const gifts = await Gift.find().sort({ updated_at: -1 }).lean();
+            const gifts = await Gift.find().populate("Account", "username email role profile").sort({ updated_at: -1 }).lean();
 
-            // Lấy tổng số lượng `DeviceItem` cho từng quà tặng
             const giftIds = gifts.map((gift) => gift._id);
             const giftItems = await DeviceItem.aggregate([
                 { $match: { gift: { $in: giftIds } } },
@@ -175,6 +174,8 @@ class GiftManagerQuery {
             const orders = await Order.find()
                 .populate('teacher', 'name email') // Tìm thông tin giáo viên
                 .populate('gift', 'name category price') // Tìm thông tin quà tặng
+                .populate('approved_by', 'username email profile') // Tìm thông tin người duyệt đơn
+                .populate("Account", "username email profile")
                 .lean(); // Sử dụng lean để trả về đối tượng thuần (plain object)
 
             // Trả về kết quả

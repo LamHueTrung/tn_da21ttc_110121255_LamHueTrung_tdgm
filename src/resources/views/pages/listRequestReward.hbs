@@ -2,6 +2,7 @@
     <div class="card-header py-3">
         <!-- Nút thêm đơn yêu cầu -->
         <button class="btn btn-darks" data-bs-toggle="modal" data-bs-target="#addOrderModal">Thêm đơn yêu cầu</button>
+        <a class="btn btn-darks" href="https://drive.google.com/uc?export=download&id=1zIAKEqZoSVJFt-WDKAh8P7w2629rgCWk">File mẫu đơn yêu cầu</a>
     </div>
     <div class="card-header py-3">
         <h6 class="m-0 font-weight-bold text-primary">Danh sách đơn yêu cầu quà tặng</h6>
@@ -13,10 +14,12 @@
                     <tr>
                         <th>#</th>
                         <th>Người yêu cầu</th>
+                        <th>Người tạo đơn</th>
                         <th>Quà tặng</th>
                         <th>Số lượng</th>
                         <th>Ngày yêu cầu</th>
-                        <th>Ngày ngày duyệt</th>
+                        <th>Người yêu cầu</th>
+                        <th>Người duyệt đơn</th>
                         <th>Trạng thái</th>
                         <th>Thao tác</th>
                     </tr>
@@ -26,10 +29,12 @@
                     <tr>
                         <td>{{increment @index}}</td>
                         <td>{{this.teacher.name}}</td>
+                        <td>{{this.Account.profile.fullName}}</td>
                         <td>{{this.gift.name}}</td>
                         <td>{{this.quantity}}</td>
                         <td>{{formatDate this.created_at}}</td>
                         <td>{{#if (eq this.status "Đã duyệt")}} {{formatDate this.updated_at}} {{else}} Đang chờ... {{/if}} </td>
+                        <td>{{#if (eq this.status "Đã duyệt")}} {{this.approved_by.profile.fullName}} {{else}} Đang chờ... {{/if}}</td>
                         <td style="color: {{#if (eq this.status "Chưa duyệt")}}red{{else}}green{{/if}};">
                             {{this.status}}
                         </td>

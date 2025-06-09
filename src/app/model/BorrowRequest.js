@@ -29,6 +29,11 @@ const borrowRequestSchema = new mongoose.Schema({
         enum: ["Đang mượn", "Đã trả", "Quá hạn"],
         default: "Đang mượn"
     },
+    IdAccount: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Account',
+        required: true
+    },
     borrow_date: {
         type: Date,
         default: Date.now

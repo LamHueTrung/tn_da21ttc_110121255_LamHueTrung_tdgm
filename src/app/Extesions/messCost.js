@@ -208,7 +208,7 @@ const messages = {
         borrowNotFound: "Không tìm thấy đơn mượn thiết bị.",
         invalidDeviceReturn: "Thiết bị không hợp lệ để trả.",
         alreadyReturned: "Tất cả thiết bị trong đơn này đã được trả.",
-        
+        accountNotFound: "Không tìm thấy tài khoản người dùng.",
     },
 
     createGift: {

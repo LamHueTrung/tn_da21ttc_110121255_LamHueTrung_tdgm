@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 const Location = require("./Location");
 
 const giftSchema = new mongoose.Schema({
+    Account: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Account",
+        required: true
+    },
     name: {
         type: String,
         required: true,

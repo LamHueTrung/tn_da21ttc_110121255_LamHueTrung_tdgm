@@ -37,7 +37,6 @@ class CreateTeacher {
      * API thêm giảng viên mới
      */
     Handle = async (req, res) => {
-        console.log(req.body);
         const errors = this.Validate(req);
         if (Object.keys(errors).length > 0) {
             return res.status(400).json({ success: false, errors });

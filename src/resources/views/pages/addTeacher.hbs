@@ -16,6 +16,12 @@
                 <div class="text-danger" id="nameError"></div>
             </div>
 
+            {{!-- <div class="mb-3">
+                <label class="form-label">Ngày sinh</label>
+                <input type="date" class="form-control" name="birthday" id="birthday">
+                <div id="birthdayError" class="text-danger"></div>
+            </div> --}}
+
             <div class="mb-3">
                 <label class="form-label">Email</label>
                 <input type="email" class="form-control" name="email" id="email" placeholder="Example: minhphuc@tvu.edu.vn">
@@ -28,11 +34,23 @@
                 <div class="text-danger" id="phoneError"></div>
             </div>
 
+            {{!-- <div class="mb-3">
+                <label class="form-label">Địa chỉ</label>
+                <input type="text" class="form-control" name="address" id="address" placeholder="Examples: Trà Vinh">
+                <div id="addressError" class="text-danger"></div>
+            </div> --}}
+
             <div class="mb-3">
                 <label class="form-label">Chuyên ngành</label>
                 <input type="text" class="form-control" name="department" id="department" placeholder="Example: Công nghệ thông tin">
                 <div class="text-danger" id="departmentError"></div>
             </div>
+
+            {{!-- <div class="mb-3">
+                <label class="form-label">Ảnh đại diện</label>
+                <input type="file" class="form-control" name="avatar" id="avatar">
+                <div id="avatarError" class="text-danger"></div>
+            </div> --}}
 
             <div class="d-flex" style="float: right;">
                 <button type="submit" class="btn btn-system btn-submit" id="submitBtn">Tạo mới</button>
@@ -52,6 +70,7 @@
             </div>
 
             <div class="d-flex" style="float: right;">
+                <a class="btn btn-darks mr-2" href="https://drive.google.com/uc?export=download&id=116aJduEnZ2fEv19vRukXpW98fuCC0i96">File mẫu</a>
                 <button type="submit" class="btn btn-system btn-submit">Tải lên</button>
                 <button type="button" onclick="javascript:history.back()" class="btn btn-secondary btn-previou">Quay lại</button>
             </div>
