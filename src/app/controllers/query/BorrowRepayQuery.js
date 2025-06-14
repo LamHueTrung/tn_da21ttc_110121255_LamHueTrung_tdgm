@@ -11,7 +11,7 @@ class BorrowRepayQuery {
     async Index(req, res, next) {
         try {
             const borrowRequests = await BorrowRequest.find()
-                .sort({ created_at: -1 })
+                .sort({ updated_at: -1 })
                 .populate("teacher", "name email phone department")
                 .populate("IdAccount", "username email role profile")
                 .populate("room", "name location")
@@ -46,7 +46,7 @@ class BorrowRepayQuery {
     async AddNew(req, res, next) {
         try {
             // Lấy danh sách thiết bị có ít nhất một DeviceItem có status "Mới" hoặc "Hoạt động"
-            const availableDevices = await Device.find().lean();
+            const availableDevices = await Device.find().lean().sort({ updated_at: -1 });
             // Lọc danh sách chỉ lấy thiết bị có DeviceItem khả dụng
             const filteredDevices = [];
 
@@ -87,7 +87,7 @@ class BorrowRepayQuery {
     async AddNewChoiceTeacher(req, res, next) {
         try {
             // Lấy danh sách thiết bị có ít nhất một DeviceItem có status "Mới" hoặc "Hoạt động"
-            const teachers = await Teacher.find().lean();
+            const teachers = await Teacher.find().lean().sort({ updated_at: -1 });
 
             return res.render("pages/addBorrowRepayTeacher", { 
                 layout: "main",
@@ -113,7 +113,7 @@ class BorrowRepayQuery {
 
             const total = await Teacher.countDocuments();
 
-            const rooms = await Room.find({name: { $ne: 'Kho chính' }})
+            const rooms = await Room.find({name: { $ne: 'Kho chính' }}).sort({ updated_at: -1 })
                 .populate("location", "name description")
                 .lean();
 

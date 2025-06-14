@@ -10,7 +10,7 @@ class UpdateTeacher {
      * @returns {Object} errors - Danh sách lỗi nếu có
      */
     Validate(req) {
-        const { name, email, phone, department } = req.body;
+        const { name, email, phone, department, unit } = req.body;
         let errors = {};
 
         if (name) {
@@ -32,6 +32,11 @@ class UpdateTeacher {
         if (department) {
             const departmentError = Validator.notEmpty(department, "Bộ môn");
             if (departmentError) errors.department = departmentError;
+        }
+
+        if (unit) {
+            const unitError = Validator.notEmpty(unit, "Đơn vị");
+            if (unitError) errors.unit = unitError;
         }
 
         return errors;
@@ -57,7 +62,7 @@ class UpdateTeacher {
                 });
             }
 
-            const { name, email, phone, department } = req.body;
+            const { name, email, phone, department, unit } = req.body;
 
             // Kiểm tra nếu tên hoặc email giảng viên đã tồn tại trong CSDL (ngoài giảng viên hiện tại)
             const existingTeacherByName = await Teacher.findOne({ name });
@@ -86,6 +91,7 @@ class UpdateTeacher {
             teacher.email = email || teacher.email;
             teacher.phone = phone || teacher.phone;
             teacher.department = department || teacher.department;
+            teacher.unit = unit || teacher.unit;
 
             await teacher.save();
 

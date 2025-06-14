@@ -1,8 +1,17 @@
 <div class="card shadow mb-4" id="page-top">
     <div class="card-header py-3">
         <!-- Nút thêm đơn yêu cầu -->
-        <button class="btn btn-darks" data-bs-toggle="modal" data-bs-target="#addOrderModal">Thêm đơn yêu cầu</button>
-        <a class="btn btn-darks" href="https://drive.google.com/uc?export=download&id=1zIAKEqZoSVJFt-WDKAh8P7w2629rgCWk">File mẫu đơn yêu cầu</a>
+        <div class="btn-group">
+            <button class="btn btn-sm btn-darks" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Thêm đơn yêu cầu
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <a class="dropdown-item" href="/reward/addNewOrderReward">Tạo thủ công</a>
+
+                <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addOrderModal">Tạo bằng file</a>
+            </div>
+        </div>
+        <a class="btn btn-sm btn-darks" href="https://drive.google.com/uc?export=download&id=14khQv4zbjY5qWlS90HVIHV0qBY9yY3Ov">File mẫu đơn yêu cầu</a>
     </div>
     <div class="card-header py-3">
         <h6 class="m-0 font-weight-bold text-primary">Danh sách đơn yêu cầu quà tặng</h6>
@@ -15,10 +24,8 @@
                         <th>#</th>
                         <th>Người yêu cầu</th>
                         <th>Người tạo đơn</th>
-                        <th>Quà tặng</th>
-                        <th>Số lượng</th>
                         <th>Ngày yêu cầu</th>
-                        <th>Người yêu cầu</th>
+                        <th>Ngày duyệt đơn</th>
                         <th>Người duyệt đơn</th>
                         <th>Trạng thái</th>
                         <th>Thao tác</th>
@@ -30,11 +37,14 @@
                         <td>{{increment @index}}</td>
                         <td>{{this.teacher.name}}</td>
                         <td>{{this.Account.profile.fullName}}</td>
-                        <td>{{this.gift.name}}</td>
-                        <td>{{this.quantity}}</td>
                         <td>{{formatDate this.created_at}}</td>
+                        {{#if (eq this.status "Có hoàn trả")}}
+                        <td> {{formatDate this.updated_at}} </td>
+                        <td>{{this.approved_by.profile.fullName}}</td>
+                        {{else}}
                         <td>{{#if (eq this.status "Đã duyệt")}} {{formatDate this.updated_at}} {{else}} Đang chờ... {{/if}} </td>
                         <td>{{#if (eq this.status "Đã duyệt")}} {{this.approved_by.profile.fullName}} {{else}} Đang chờ... {{/if}}</td>
+                        {{/if}}
                         <td style="color: {{#if (eq this.status "Chưa duyệt")}}red{{else}}green{{/if}};">
                             {{this.status}}
                         </td>
@@ -42,6 +52,9 @@
                             <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#viewOrderModal" onclick="viewOrderDetails('{{this._id}}')">Xem</button>
                             {{#if (eq this.status "Chưa duyệt")}}
                             <button class="btn btn-success btn-sm" onclick="approveOrder('{{this._id}}')">Duyệt đơn</button>
+                            {{/if}}
+                            {{#if (eq this.status "Đã duyệt")}}
+                            <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#returnOrderModal" onclick="ViewReturnOrder('{{this._id}}')" >Hoàn trả</button>
                             {{/if}}
                         </td>
                     </tr>
@@ -94,6 +107,22 @@
     </div>
 </div>
 
+<!-- Modal Trả quà tặng -->
+<div class="modal fade" id="returnOrderModal" tabindex="-1" aria-labelledby="addOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addOrderModalLabel">Hoàn trả quà tặng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="returnOrderDetails">
+                    <!-- Thông tin đơn yêu cầu sẽ được hiển thị ở đây -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     function approveOrder(orderId) {
@@ -122,6 +151,148 @@
         });
     }
 
+    let selectedReturns = [];
+    function ViewReturnOrder(orderId) {
+        fetch(`/api/reward/order/getById/${orderId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Cập nhật modal với thông tin chi tiết đơn yêu cầu
+                    const order = data.order;
+                    let orderDetails = `
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-blue-100 text-blue-800">
+                                    <th class="p-3 border-b-2 border-blue-200"></th>
+                                    <th class="p-3 border-b-2 border-blue-200">Số lượng trả</th>
+                                    <th class="p-3 border-b-2 border-blue-200">Tên quà tặng</th>
+                                    <th class="p-3 border-b-2 border-blue-200">Số lượng yêu cầu</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${order.orders.map(item => `
+                                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                        <td class="p-3 border-b border-gray-200">
+                                            <input type="checkbox" class="checkbox form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
+                                                data-id="${item.giftId._id}"
+                                                data-name="${item.giftId.name}"
+                                                data-quantity="">
+                                        </td>
+                                        <td class="p-3 border-b border-gray-200">
+                                            <input type="number" class="w-20 p-1 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                                min="0" max="${item.quantity}" value="0">
+                                        </td>
+                                        <td class="p-3 border-b border-gray-200">${item.giftId.name}</td>
+                                        <td class="p-3 border-b border-gray-200">${item.quantity}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                        <div class="mt-4 flex justify-end">
+                            <button id="returnOrderBtn" type="submit" class="btn btn-system btn-submit ml-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                Hoàn trả
+                            </button>
+                        </div>
+                    `;
+                    document.getElementById("returnOrderDetails").innerHTML = orderDetails;
+
+                    document.querySelectorAll('#returnOrderDetails tbody tr').forEach((row) => {
+                        const quantityInput = row.querySelector('input[type="number"]');
+                        const checkbox = row.querySelector('input[type="checkbox"]');
+                        
+                        quantityInput.addEventListener('input', () => {
+                            const quantity = parseInt(quantityInput.value, 10) || 0;
+                            const giftId = checkbox.dataset.id;
+                            const giftName = checkbox.dataset.name;
+
+                            // Tự động check nếu > 0
+                            checkbox.checked = quantity > 0;
+
+                            // Xóa nếu đã tồn tại
+                            selectedReturns = selectedReturns.filter(item => item.giftId !== giftId);
+
+                            // Thêm nếu hợp lệ
+                            if (quantity > 0) {
+                                selectedReturns.push({ giftId, giftName, quantity });
+                            }
+
+                            console.log("selectedReturns:", selectedReturns);
+                        });
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Lỗi!',
+                        text: 'Không tìm thấy đơn yêu cầu!',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Lỗi!',
+                    text: 'Đã có lỗi xảy ra khi tải chi tiết đơn yêu cầu!',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            });
+
+        // Xử lý sự kiện khi nhấn nút "Hoàn trả"
+        document.getElementById('returnOrderModal').addEventListener('click', function (event) {
+            if (event.target.id === 'returnOrderBtn') {
+                event.preventDefault();
+                if (selectedReturns.length === 0) {
+                    Swal.fire({
+                        title: 'Lỗi!',
+                        text: 'Bạn chưa chọn quà tặng để hoàn trả!',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+
+                fetch(`/api/reward/order/return/${orderId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ returns: selectedReturns })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Thành công!',
+                            text: 'Đã hoàn trả quà tặng thành công!',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload(); // Tải lại trang để hiển thị đơn mới
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Lỗi!',
+                            text: data.message,
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Lỗi!',
+                        text: 'Đã có lỗi xảy ra khi hoàn trả quà tặng!',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                });
+            }
+        });
+    }
+
+
     // Chức năng Xem chi tiết đơn yêu cầu
     function viewOrderDetails(orderId) {
         fetch(`/api/reward/order/getById/${orderId}`)
@@ -130,14 +301,76 @@
                 if (data.success) {
                     // Cập nhật modal với thông tin chi tiết đơn yêu cầu
                     const order = data.order;
-                    const orderDetails = `
-                        <h5><strong>Người yêu cầu:</strong> ${order.teacher.name}</h5>
-                        <p><strong>Email:</strong> ${order.teacher.email}</p>
-                        <h5><strong>Quà tặng:</strong> ${order.gift.name}</h5>
-                        <p><strong>Danh mục:</strong> ${order.gift.category}</p>
-                        <p><strong>Giá:</strong> ${order.gift.price} VND</p>
-                        <p><strong>Số lượng:</strong> ${order.quantity}</p>
-                        <p><strong>Trạng thái:</strong> ${order.status}</p>
+                    console.log(order);
+                    let orderDetails = `
+                        <div class="p-6 bg-gray-50 shadow-md rounded-lg">
+                            <div class="mb-6 border-b-2 border-blue-200 pb-4">
+                                <h5 class="text-xl font-bold text-blue-800 mb-2">Thông tin người yêu cầu</h5>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800">
+                                    <p class="font-semibold text-indigo-700">Họ tên: <span class="font-normal text-gray-700">${order.teacher.name}</span></p>
+                                    <p class="font-semibold text-indigo-700">Email: <span class="font-normal text-gray-700">${order.teacher.email}</span></p>
+                                </div>
+                                    <p class="font-semibold text-indigo-700">Mục đích sử dụng: <span class="font-normal text-gray-700">${order.description}</span></p>
+                            </div>
+                            <div class="mb-6 border-b-2 border-blue-200 pb-4">
+                                <h5 class="text-xl font-bold text-blue-800 mb-2">Danh sách quà tặng</h5>
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-blue-100 text-blue-800">
+                                            <th class="p-2 border-b-2 border-blue-200">Tên quà tặng</th>
+                                            <th class="p-2 border-b-2 border-blue-200">Danh mục</th>
+                                            <th class="p-2 border-b-2 border-blue-200">Giá (VND)</th>
+                                            <th class="p-2 border-b-2 border-blue-200">Số lượng</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${order.orders.map(item => `
+                                            <tr class="hover:bg-blue-50 transition-colors duration-200">
+                                                <td class="p-2 border-b border-gray-200">${item.giftId.name}</td>
+                                                <td class="p-2 border-b border-gray-200">${item.giftId.category}</td>
+                                                <td class="p-2 border-b border-gray-200">${item.giftId.price}</td>
+                                                <td class="p-2 border-b border-gray-200">${item.quantity}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="mb-6 border-b-2 border-blue-200 pb-4">
+                                <h5 class="text-xl font-bold text-blue-800 mb-2">Danh sách hoàn trả</h5>
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-blue-100 text-blue-800">
+                                            <th class="p-2 border-b-2 border-blue-200">Tên quà tặng</th>
+                                            <th class="p-2 border-b-2 border-blue-200">Danh mục</th>
+                                            <th class="p-2 border-b-2 border-blue-200">Giá (VND)</th>
+                                            <th class="p-2 border-b-2 border-blue-200">Số lượng</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${order.returned.map(item => `
+                                            <tr class="hover:bg-blue-50 transition-colors duration-200">
+                                                <td class="p-2 border-b border-gray-200">${item.giftId.name}</td>
+                                                <td class="p-2 border-b border-gray-200">${item.giftId.category}</td>
+                                                <td class="p-2 border-b border-gray-200">${item.giftId.price}</td>
+                                                <td class="p-2 border-b border-gray-200">${item.quantity}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div>
+                                <h5 class="text-xl font-bold text-blue-800 mb-2">Trạng thái đơn</h5>
+                                <p class="text-gray-800">
+                                    <span class="font-medium text-indigo-700">Trạng thái:</span> 
+                                    <span class="inline-block px-4 py-2 rounded-full text-sm font-medium
+                                        ${order.status === 'Đã duyệt' ? 'bg-green-100 text-green-700' : 
+                                        order.status === 'Chờ duyệt' ? 'bg-yellow-100 text-yellow-700' : 
+                                        'bg-red-100 text-red-700'}">
+                                        ${order.status}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
                     `;
                     document.getElementById("orderDetails").innerHTML = orderDetails;
                 } else {
@@ -184,7 +417,7 @@
             } else {
                 Swal.fire({
                     title: 'Lỗi!',
-                    text: 'Có lỗi xảy ra khi tạo đơn yêu cầu!',
+                    text: data.message,
                     icon: 'error',
                     confirmButtonText: 'OK'
                 });

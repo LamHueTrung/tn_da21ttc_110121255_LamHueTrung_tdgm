@@ -35,7 +35,15 @@ class ImportRooms {
                 const rows = [];
                 await new Promise((resolve, reject) => {
                     fs.createReadStream(filePath)
-                        .pipe(csvParser({ separator, mapHeaders: ({ header }) => header.trim().replace(/^﻿/, "") }))
+                        .pipe(csvParser({ separator, mapHeaders: ({ header }) => {
+                            const headerMap = {
+                              "Tên phòng": "name",
+                              "Vị trí toà nhà": "location",
+                              "Sức chứa": "capacity",
+                            };
+                            const cleanHeader = header.trim().replace(/^﻿/, "");
+                            return headerMap[cleanHeader] || cleanHeader; // fallback nếu không ánh xạ
+                          } }))
                         .on("data", (row) => rows.push(row))
                         .on("end", resolve)
                         .on("error", reject);

@@ -1,8 +1,59 @@
 <div class="row add-user mb-4">
-    <h1 class="title-add-user text-center mb-4">Tạo đơn mượn thiết bị</h1>
+    <h1 class="title-add-user text-center mb-4">Tạo đơn yêu cầu quà tặng</h1>
 
     <div class="card-body">
        
+        <div id="manualForm">
+            <form id="createUserForm" enctype="multipart/form-data" class="col-md-6 offset-md-3">
+                <div class="mb-3">
+                    <label class="form-label">Mục đích sử dụng</label>
+                </div>
+
+                <table>
+                    <tr>
+                        <td>
+                            <input style="width: 38px;height: 25px;" type="checkbox" class="Lydo" 
+                            data-name="Công tác/nghiên cứu ở nước ngoài"
+                            >
+                        </td>
+                        <td>
+                            <label for="">Công tác/nghiên cứu ở nước ngoài</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input style="width: 38px;height: 25px;" type="checkbox" class="Lydo" 
+                            data-name="Tiếp đón khách trong/ngoài nước"
+                            >
+                        </td>
+                        <td>
+                            <label for="">Tiếp đón khách trong/ngoài nước</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input style="width: 38px;height: 25px;" type="checkbox" class="Lydo" 
+                            data-name="Tổ chức hội nghị/hội thảo"
+                            >
+                        </td>
+                        <td>
+                            <label for="">Tổ chức hội nghị/hội thảo</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input style="width: 38px;height: 25px;" type="checkbox" class="Lydo" 
+                            data-name="Giao lưu, trao đổi học thuật"
+                            >
+                        </td>
+                        <td>
+                            <label for="">Giao lưu, trao đổi học thuật</label>
+                        </td>
+                    </tr>
+                </table>
+                
+            </form>
+        </div>
         <div class="table-responsive">
             <h3 class="mt-4">Danh sách giảng viên</h3>
             <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
@@ -35,9 +86,8 @@
 
         <div class="d-flex mt-2" style="float: right;">
             <button type="button" onclick="javascript:history.back()" class="btn btn-secondary btn-previou">Quay lại</button>
-            <button id="createOrderBtn" type="submit" class="btn btn-system btn-submit ml-2">Tiếp tục chọn phòng</button>
+            <button id="createOrderBtn" type="submit" class="btn btn-system btn-submit ml-2">Hoàn tất mượn cá nhân</button>
         </div>
-            <button id="createOrderNotRoomBtn" type="submit" class="btn btn-system btn-submit ml-2">Hoàn tất mượn cá nhân</button>
 
     </div>
 </div>
@@ -46,9 +96,30 @@
     document.addEventListener("DOMContentLoaded", function () {
         const checkboxes = document.querySelectorAll(".checkbox");
         const createOrderBtn = document.getElementById("createOrderBtn");
-        const createOrderNotRoomBtn = document.getElementById("createOrderNotRoomBtn");
-
         let datas = JSON.parse(localStorage.getItem("data")) || [];
+        
+        document.querySelectorAll(".Lydo").forEach(cb => {
+            cb.addEventListener("change", function () {
+                const name = this.dataset.name;
+
+                if (this.checked) {
+                    // Kiểm tra nếu chưa có thì thêm
+                    if (!datas.some(d => d.purpose === name)) {
+                        datas.push({ purpose: name });
+                    }
+                } else {
+                    // Bỏ chọn thì xóa khỏi danh sách
+                    datas = datas.filter(d => d.purpose !== name);
+                }
+
+                // Cập nhật localStorage
+                localStorage.setItem("data", JSON.stringify(datas));
+            });
+        });
+
+        function removePurpose(selected) {
+            datas = datas.filter(data => !selected.includes(data.purpose));
+        }
 
         checkboxes.forEach((checkbox) => {
             checkbox.addEventListener("change", function () {
@@ -72,24 +143,8 @@
         }
 
         createOrderBtn.addEventListener("click", function () {
-            if (datas.length === 1) {
-                Swal.fire({
-                    icon: "warning",
-                    title: "Chưa chọn giảng viên",
-                    text: "Vui lòng chọn ít nhất một giảng viên trước khi tiếp tục.",
-                });
-                return;
-            }
 
             localStorage.setItem("data", JSON.stringify(datas));
-            window.location.href = "/borrowRepay/addNewChoiceRoom";
-        });
-
-        createOrderNotRoomBtn.addEventListener("click", function () {
-            // Lưu tạm dữ liệu (nếu chưa lưu trước đó)
-            localStorage.setItem("data", JSON.stringify(datas));
-
-            // Lấy lại dữ liệu từ localStorage
             const storedData = JSON.parse(localStorage.getItem("data")) || [];
 
             // Tìm giáo viên
@@ -99,37 +154,45 @@
                 return;
             }
 
-            // Lấy danh sách thiết bị
-            const devices = storedData
-                .filter(item => item.deviceId)
-                .map(device => ({
-                    deviceId: device.deviceId,
-                    quantity: device.quantity
+            // Lấy danh sách quà tặng
+            const gifts = storedData
+                .filter(item => item.giftId)
+                .map(gift => ({
+                    giftId: gift.giftId,
+                    quantity: gift.quantity
                 }));
 
-            if (devices.length === 0) {
-                Swal.fire("Thiếu thiết bị!", "Vui lòng chọn ít nhất một thiết bị.", "warning");
+            if (gifts.length === 0) {
+                Swal.fire("Thiếu quà tặng!", "Vui lòng chọn ít nhất một quà tặng.", "warning");
                 return;
             }
 
+            const purpose = storedData
+                .filter(item => item.purpose)
+                .map(item => item.purpose);
+
+            if (purpose.length === 0) {
+                Swal.fire("Thiếu mục đích!", "Vui lòng chọn ít nhất một mục đích sử dụng.", "warning");
+                return;
+            }
             // Tạo dữ liệu đơn mượn
             const borrowOrder = {
                 teacherId: teacher.teacherId,
-                roomId: null,
-                devices: devices
+                gifts: gifts,
+                purposes: purpose
             };
 
             console.log("Dữ liệu gửi đi:", borrowOrder);
 
             Swal.fire({
-                title: 'Giảng viên mượn cá nhân?',
+                title: 'Đã kiểm tra thông tin?',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Đồng ý',
                 cancelButtonText: 'Hủy',
             }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch("/api/borrowReturn/borrow", {
+                    fetch("/api/reward/order/create", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json"
@@ -144,14 +207,14 @@
                             Swal.fire({
                                 icon: "success",
                                 title: "Thành công!",
-                                text: "Đơn mượn thiết bị đã được tạo.",
+                                text: "Đơn yêu cầu quà tặng đã được tạo.",
                                 confirmButtonText: "OK"
                             }).then(() => {
                                 localStorage.removeItem("data");
-                                window.location.href = "/borrowRepay/home";
+                                window.location.href = "/reward/listRequestReward";
                             });
                         } else {
-                            Swal.fire("Lỗi!", data.message || "Không thể tạo đơn.", "error");
+                            Swal.fire("Lỗi!", data.message || "Không thể tạo yêu cầu quà tặng.", "error");
                         }
                     })
                     .catch(error => {
@@ -161,6 +224,5 @@
                 }
             });
         });
-
     });
 </script>

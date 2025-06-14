@@ -14,7 +14,7 @@ class NotificationQuery {
 
         try {
             const allNotifications = await Notification.find({})
-                .sort({ created_at: -1 }) 
+                .sort({ updated_at: -1 })
                 .lean(); 
 
             const unreadNotifications = allNotifications.filter(noti =>

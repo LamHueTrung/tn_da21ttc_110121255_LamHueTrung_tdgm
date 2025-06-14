@@ -29,6 +29,11 @@ const teacherSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    unit: {
+        type: String,
+        required: true,
+        trim: true
+    },
     borrowedDevices: [
         {
             type: mongoose.Schema.Types.ObjectId,

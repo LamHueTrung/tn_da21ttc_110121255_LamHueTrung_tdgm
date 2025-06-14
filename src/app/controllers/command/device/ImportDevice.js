@@ -35,11 +35,21 @@ class ImportDevice {
 
                 await new Promise((resolve, reject) => {
                     fs.createReadStream(filePath)
-                        .pipe(csvParser({ separator, mapHeaders: ({ header }) => header.trim().replace(/^﻿/, "") }))
+                        .pipe(csvParser({ separator, mapHeaders: ({ header }) => {
+                            const headerMap = {
+                              "Tên thiết bị": "name",
+                              "Loại thiết bị": "category",
+                              "Số lượng": "quantity",
+                              "Mô tả": "description",
+                              "Link hình ảnh trên máy": "img"
+                            };
+                            const cleanHeader = header.trim().replace(/^﻿/, "");
+                            return headerMap[cleanHeader] || cleanHeader; // fallback nếu không ánh xạ
+                          } }))
                         .on("data", (row) => rows.push(row))
                         .on("end", resolve)
                         .on("error", reject);
-                });
+                }); 
 
                 if (rows.length === 0) {
                     return res.status(400).json({ success: false, message: messages.importRewards.emptyFile });

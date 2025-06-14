@@ -236,6 +236,14 @@ const messages = {
         notFound: 'Không tìm thấy quà tặng.',   
         updateSuccess: 'Quà tặng đã được cập nhật.',   
         updateError: 'Lỗi khi cập nhật quà tặng.',
+        getAvailableSuccess: 'Lấy danh sách quà tặng có sẵn thành công.',
+        getAvailableError: 'Lỗi khi lấy danh sách quà tặng có sẵn.',
+        noGiftProvided: 'Không có quà tặng nào được cung cấp.',
+        invalidGift: 'Quà tặng không hợp lệ.',
+        accountNotFound: 'Không tìm thấy tài khoản người dùng.',
+        notEnoughGifts: 'Không đủ số lượng quà tặng để mượn.',
+        createOrderSuccess: 'Đơn yêu cầu quà tặng đã được tạo thành công.',
+        createOrderFailed: 'Lỗi khi tạo đơn yêu cầu quà tặng.',
     },
     
     getGift: {
@@ -263,6 +271,19 @@ const messages = {
         DeleteSuccess: 'Thông báo đã được xóa thành công.',
         DeleteError: 'Lỗi khi xóa thông báo.',
         FetchError: 'Lỗi khi lấy thông báo.',
+    },
+    Order: {
+        fileNotFound: 'Không tìm thấy file PDF.',
+        invalidDataExtracted: 'Dữ liệu trích xuất từ PDF không hợp lệ.',
+        missingRequiredFields: 'Thiếu các trường bắt buộc trong dữ liệu trích xuất.',
+        orderCreatedSuccessfully: 'Đơn yêu cầu đã được tạo thành công.',
+        errorProcessingPDF: 'Lỗi khi xử lý file PDF.',
+        teacherNotFound: 'Không tìm thấy giảng viên với tên đã cung cấp.',
+        giftNotFound: 'Không tìm thấy quà tặng với ID đã cung cấp.',
+        orderNotFound: 'Không tìm thấy đơn yêu cầu với ID đã cung cấp.',
+        orderNotApproved: 'Đơn yêu cầu chưa được duyệt.',
+        invalidQuantity: 'Số lượng quà tặng không hợp lệ.',
+        quantityExceeds: 'Số lượng quà tặng yêu cầu vượt quá số lượng có sẵn.',
     }
 };
 

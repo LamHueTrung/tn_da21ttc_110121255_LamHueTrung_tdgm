@@ -9,7 +9,8 @@ const DeleteGiftCommand = require("../../app/controllers/command/reward/DeleteGi
 const GiftManagerQuery = require("../../app/controllers/query/GiftManagerQuery");
 const OrderImportCommand = require("../../app/controllers/command/reward/ImportOrder");
 const ApproveOrderCommand = require("../../app/controllers/command/reward/ApproveOrder");
-
+const OrderCreateCommand = require("../../app/controllers/command/reward/CreateOrder");
+const OrderReturnCommand = require("../../app/controllers/command/reward/ReturnOrder");
 /**
  * @swagger
  * tags:
@@ -232,5 +233,9 @@ router.get("/order/getById/:orderId", GiftManagerQuery.getOrderById);
  *         description: Internal server error
  */
 router.put("/order/approve/:orderId", ApproveOrderCommand.approve);
+
+router.post("/order/create", OrderCreateCommand.Handle);
+
+router.put("/order/return/:orderId", OrderReturnCommand.Handle);
 
 module.exports = router;

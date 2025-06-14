@@ -173,9 +173,10 @@ class GiftManagerQuery {
             // Lấy tất cả đơn yêu cầu quà tặng từ MongoDB
             const orders = await Order.find()
                 .populate('teacher', 'name email') // Tìm thông tin giáo viên
-                .populate('gift', 'name category price') // Tìm thông tin quà tặng
+                .populate('orders', 'name category price') // Tìm thông tin quà tặng
                 .populate('approved_by', 'username email profile') // Tìm thông tin người duyệt đơn
                 .populate("Account", "username email profile")
+                .sort({ updated_at: -1 })
                 .lean(); // Sử dụng lean để trả về đối tượng thuần (plain object)
 
             // Trả về kết quả
@@ -251,6 +252,7 @@ class GiftManagerQuery {
         try {
             // Lấy tất cả đơn yêu cầu quà tặng từ MongoDB
             const orders = await Order.find()
+                .sort({ updated_at: -1 })
                 .populate('teacher', 'name email') // Tìm thông tin giáo viên
                 .populate('gift', 'name category price') // Tìm thông tin quà tặng
                 .lean(); // Sử dụng lean để trả về đối tượng thuần (plain object)
@@ -285,7 +287,8 @@ class GiftManagerQuery {
             // Truy vấn đơn yêu cầu theo ID
             const order = await Order.findById(orderId)
                 .populate('teacher', 'name email') // Tìm thông tin giáo viên
-                .populate('gift', 'name category price') // Tìm thông tin quà tặng
+                .populate('orders.giftId', 'name category price') // Tìm thông tin quà tặng
+                .populate('returned.giftId', 'name category price') // Tìm thông tin quà tặng đã hoàn trả
                 .lean(); // Sử dụng lean để trả về đối tượng thuần (plain object)
 
             if (!order) {

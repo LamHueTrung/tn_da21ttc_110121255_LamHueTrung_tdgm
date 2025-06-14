@@ -10,7 +10,7 @@ class CreateTeacher {
      * @returns {Object} errors - Danh sách lỗi nếu có
      */
     Validate(req) {
-        const { name, email, phone, department } = req.body;
+        const { name, email, phone, department, unit } = req.body;
         let errors = {};
 
         const nameError = Validator.notEmpty(name, "Tên giảng viên") ||
@@ -30,6 +30,9 @@ class CreateTeacher {
         const departmentError = Validator.notEmpty(department, "Bộ môn");
         if (departmentError) errors.department = departmentError;
 
+        const unitError = Validator.notEmpty(unit, "Đơn vị");
+        if (unitError) errors.Unit = unitError;
+
         return errors;
     }
 
@@ -42,7 +45,7 @@ class CreateTeacher {
             return res.status(400).json({ success: false, errors });
         }
         
-        const { name, email, phone, department } = req.body;
+        const { name, email, phone, department, unit } = req.body;
 
         try {
             // Kiểm tra email đã tồn tại chưa
@@ -54,7 +57,7 @@ class CreateTeacher {
                 });
             }
 
-            const newTeacher = new Teacher({ name, email, phone, department });
+            const newTeacher = new Teacher({ name, email, phone, department, unit });
             await newTeacher.save();
 
             // Gửi thông báo đến người dùng

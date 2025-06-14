@@ -43,7 +43,18 @@ class ImportGiff {
 
                 await new Promise((resolve, reject) => {
                     fs.createReadStream(filePath)
-                        .pipe(csvParser({ separator, mapHeaders: ({ header }) => header.trim().replace(/^﻿/, "") }))
+                        .pipe(csvParser({ separator, mapHeaders: ({ header }) => {
+                            const headerMap = {
+                              "Tên quà tặng": "name",
+                              "Loại quà tặng": "category",
+                              "Số lượng": "quantity",
+                              "Giá": "price",
+                              "Mô tả": "description",
+                              "Link hình ảnh trên máy": "img",
+                            };
+                            const cleanHeader = header.trim().replace(/^﻿/, "");
+                            return headerMap[cleanHeader] || cleanHeader; // fallback nếu không ánh xạ
+                          } }))
                         .on("data", (row) => rows.push(row))
                         .on("end", resolve)
                         .on("error", reject);

@@ -28,6 +28,12 @@
                 <div class="text-danger" id="departmentError"></div>
             </div>
 
+            <div class="mb-3">
+                <label class="form-label">Đơn vị</label>
+                <input type="text" class="form-control" name="unit" id="unit">
+                <div id="unitError" class="text-danger"></div>
+            </div>
+
             <div class="d-flex" style="float: right;">
                 <button type="submit" class="btn btn-system btn-submit" id="submitBtn">Tạo mới</button>
                 <button type="button" onclick="javascript:history.back()" class="btn btn-secondary btn-previou">Quay lại</button>
@@ -51,6 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 document.getElementById("email").value = data.teacher.email;
                 document.getElementById("phone").value = data.teacher.phone;
                 document.getElementById("department").value = data.teacher.department;
+                document.getElementById("unit").value = data.teacher.unit;
             } else {
                 console.error('Error:', data.error);
                 Swal.fire('Lỗi', 'Không thể tải thông tin người dùng', 'error');

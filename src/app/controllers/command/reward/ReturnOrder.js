@@ -4,12 +4,13 @@ const { sendNotification } = require("../../../Extesions/notificationService");
 const sendEmail = require("../../../Extesions/sendEmail");
 const messages = require("../../../Extesions/messCost");
 
-class ApproveOrderController {
-  // Duyệt đơn yêu cầu
-  async approve(req, res) {
+class ReturnOrder {
+  // Trả quà tặng
+  async Handle(req, res) {
     try {
       const { orderId } = req.params;
-
+      const returns = req.body.returns || [];
+      
       const IdAccount = req.user.id;
       if (!IdAccount) {
         return res.status(401).json({
@@ -20,37 +21,52 @@ class ApproveOrderController {
 
       const order = await Order.findById(orderId).populate('orders.giftId', 'name category price');
       if (!order) {
-        return res.status(404).json({ success: false, message: "Đơn không tồn tại." });
+        return res.status(404).json({ success: false, message: messages.Order.orderNotFound });
       }
 
-      if (order.status !== "Chưa duyệt") {
-        return res.status(400).json({ success: false, message: "Đơn đã được duyệt hoặc đã giao trước đó." });
+      if (order.status !== "Đã duyệt") {
+        return res.status(400).json({ success: false, message: messages.Order.orderNotApproved });
       }
 
-      const gift = order.orders;
-      for( const item of gift) {
+      for( const item of returns) {
         if (!item.giftId) {
-          return res.status(400).json({ success: false, message: "Quà tặng không hợp lệ trong đơn." });
+          return res.status(400).json({ success: false, message: messages.Order.giftNotFound });
         }
 
-        const gift = await Gift.findById(item.giftId._id);
-        if (item.quantity > gift.quantity_in_stock) {
-          return res.status(400).json({ success: false, message: "Không đủ số lượng quà tặng trong kho." });
+        const gift = await Gift.findById(item.giftId);
+        if (item.quantity <= 0) {
+          return res.status(400).json({ success: false, message: messages.Order.invalidQuantity });
         }
 
-        gift.quantity_in_stock -= item.quantity;
+        gift.quantity_in_stock += item.quantity;
+        order.orders.forEach(orderItem => {
+          if (orderItem.giftId._id.toString() == item.giftId.toString()) {
+            orderItem.quantity -= item.quantity;
+            if (orderItem.quantity < 1) {
+              return res.status(400).json({ success: false, message: messages.Order.quantityExceeds });
+            }
+          }
+        });
+
+        order.returned.push({
+          giftId: item.giftId,
+          quantity: item.quantity,
+          returned_at: Date.now()
+        })
+
+
         await gift.save();
       }
 
 
-      order.status = "Đã duyệt";
+      order.status = "Có hoàn trả";
       order.approved_by = IdAccount; 
       order.updated_at = Date.now();
       await order.save();
 
       await sendNotification({
-        title: `Đơn yêu cầu quà tặng đã được duyệt`,
-        description: `Đơn yêu cầu quà tặng "${gift.name}" của bạn đã được duyệt.`,
+        title: `Quà tặng đã được trả`,
+        description: `Đơn yêu cầu quà tặng của giảng viên ${order.teacher.name} đã được trả thành công.`,
         url: `/reward/listRequestReward`,
         role: 'gift_manager',
         type: 'success',
@@ -61,7 +77,7 @@ class ApproveOrderController {
       .sort({ created_at: -1 })
       .populate("teacher", "name email phone department")
       .populate({
-          path: "orders.giftId",
+          path: "returned.giftId",
           select: "name category"
       })
       .lean();
@@ -73,11 +89,11 @@ class ApproveOrderController {
 
       const borrowRequest = borrowRequests[0];
 
-      const giftNames = borrowRequest.orders?.length
-          ? borrowRequest.orders.map(gift => gift.giftId?.name || 'Không xác định').join(', ')
+      const giftNames = borrowRequest.returned?.length
+          ? borrowRequest.returned.map(gift => gift.giftId?.name || 'Không xác định').join(', ')
           : 'Không có quà tặng';
-      const giftQuantities = borrowRequest.orders?.length
-          ? borrowRequest.orders.map(gift => gift.quantity || '0').join(', ')
+      const giftQuantities = borrowRequest.returned?.length
+          ? borrowRequest.returned.map(gift => gift.quantity || '0').join(', ')
           : '0';
 
       // Gửi email
@@ -89,14 +105,14 @@ class ApproveOrderController {
                   <!-- Header -->
                   <tr>
                       <td align="center" bgcolor="#c0392b" style="padding: 30px 20px; border-bottom: 3px solid #e74c3c;">
-                          <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; letter-spacing: 1px;">THÔNG BÁO DUYỆT YÊU CẦU QUÀ TẶNG</h1>
+                          <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; letter-spacing: 1px;">THÔNG BÁO HOÀN TRẢ QUÀ TẶNG THÀNH CÔNG</h1>
                       </td>
                   </tr>
                   <!-- Main Content -->
                   <tr>
                       <td style="padding: 30px 25px;">
                           <h2 style="color: #e74c3c; font-size: 22px; margin-top: 0;">Xin chào,</h2>
-                          <p style="font-size: 16px; line-height: 1.6; color: #cccccc; margin-bottom: 20px;">Đơn yêu cầu quà tặng của giảng viên <strong>${borrowRequest.teacher?.name || 'Không xác định'}</strong> đã được duyệt.</p>
+                          <p style="font-size: 16px; line-height: 1.6; color: #cccccc; margin-bottom: 20px;">Đơn yêu cầu quà tặng của giảng viên <strong>${borrowRequest.teacher?.name || 'Không xác định'}</strong> đã hoàn trả thành công.</p>
                           <p style="font-size: 16px; line-height: 1.6; color: #cccccc; margin-bottom: 20px;">Thông tin chi tiết:</p>
                           <table width="100%" border="0" cellspacing="0" cellpadding="10" style="background-color: #3a3a3a; border-radius: 6px; margin-bottom: 20px;">
                               <tr>
@@ -139,4 +155,4 @@ class ApproveOrderController {
   }
 }
 
-module.exports = new ApproveOrderController();
+module.exports = new ReturnOrder();

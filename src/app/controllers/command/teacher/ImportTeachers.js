@@ -43,7 +43,6 @@ class ImportTeachers {
             try {
                 // Xác định dấu phân cách CSV
                 const separator = await detectSeparator(filePath);
-                console.log("🔍 Dấu phân cách phát hiện:", separator);
 
                 const rows = [];
                 let headerChecked = false;
@@ -51,11 +50,22 @@ class ImportTeachers {
                 // Đọc file CSV với dấu phân cách đã phát hiện
                 await new Promise((resolve, reject) => {
                     fs.createReadStream(filePath)
-                        .pipe(csvParser({ separator, mapHeaders: ({ header }) => header.trim().replace(/^﻿/, "") }))
+                        .pipe(csvParser({ separator,mapHeaders: ({ header }) => {
+                            const headerMap = {
+                              "Họ tên": "name",
+                              "Email": "email",
+                              "Số điện thoại": "phone",
+                              "Chuyên ngành": "department",
+                              "Đơn vị": "unit"
+                            };
+                            const cleanHeader = header.trim().replace(/^﻿/, "");
+                            return headerMap[cleanHeader] || cleanHeader; // fallback nếu không ánh xạ
+                          }
+                        }))
                         .on("data", (row) => {
                             if (!headerChecked) {
                                 // Kiểm tra xem file có đủ các cột cần thiết
-                                const requiredHeaders = ['name', 'email', 'phone', 'department'];
+                                const requiredHeaders = ['name', 'email', 'phone', 'department', 'unit'];
                                 const headers = Object.keys(row);
                                 const extraHeaders = headers.filter(header => !requiredHeaders.includes(header));
                                 
@@ -91,15 +101,17 @@ class ImportTeachers {
                 for (const row of rows) {
                     const name = row.name?.trim();
                     const email = row.email?.trim();
-                    const phone = row.phone?.trim();
+                    const phone = '0'+ row.phone?.trim();
                     const department = row.department?.trim();
+                    const unit = row.unit?.trim();
 
                     // Kiểm tra dữ liệu hợp lệ bằng Validator
                     const errorsInRow = {
                         name: Validator.notEmpty(name, "Tên giảng viên") || Validator.maxLength(name, 100, "Tên giảng viên"),
                         email: Validator.notEmpty(email, "Email") || Validator.isEmail(email),
                         phone: Validator.notEmpty(phone, "Số điện thoại") || Validator.isPhoneNumber(phone),
-                        department: Validator.notEmpty(department, "Bộ môn") || Validator.maxLength(department, 100, "Bộ môn")
+                        department: Validator.notEmpty(department, "Bộ môn") || Validator.maxLength(department, 100, "Bộ môn"),
+                        unit: Validator.notEmpty(unit, "Đơn vị") || Validator.maxLength(unit, 100, "Đơn vị")
                     };
 
                     // Nếu có lỗi, thêm vào danh sách lỗi
@@ -118,7 +130,7 @@ class ImportTeachers {
                         // Kiểm tra giảng viên đã tồn tại trong DB
                         const existingTeacher = await Teacher.findOne({ email });
                         if (!existingTeacher) {
-                            teachersToInsert.push({ name, email, phone, department });
+                            teachersToInsert.push({ name, email, phone, department, unit });
                         }
                     } catch (error) {
                         errors.add({ row, error: error.message });

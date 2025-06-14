@@ -18,19 +18,43 @@ const orderSchema = new mongoose.Schema({
         ref: "Teacher",
         required: true
     },
-    gift: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Gift",
-        required: true
+    orders: [{
+        giftId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Gift",
+            required: true
+        },
+        quantity: {
+            type: Number,
+            required: true,
+            min: 1
+        },
+    }
+    ],
+    description: {
+        type: String,
+        default: ""
     },
-    quantity: {
-        type: Number,
-        required: true,
-        min: 1
-    },
+    returned: [
+        {
+            giftId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Gift",
+                required: false
+            },
+            quantity: {
+                type: Number,
+                required: false,
+            },
+            returned_at: {
+                type: Date,
+                default: null
+            }
+        }
+    ],
     status: {
         type: String,
-        enum: ["Chưa duyệt", "Đã duyệt", "Đã giao"],
+        enum: ["Chưa duyệt", "Đã duyệt", "Có hoàn trả"],
         default: "Chưa duyệt"
     },
     created_at: {

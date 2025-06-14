@@ -141,6 +141,7 @@ class DeviceToRoomQuery {
     async GetAllRooms(req, res) {
         try {
             const rooms = await Room.find({name: { $ne: 'Kho chính' }})
+                .sort({ updated_at: -1 })
                 .populate("location", "name description")
                 .lean();
             
@@ -219,7 +220,7 @@ class DeviceToRoomQuery {
 
         try {
             // Kiểm tra xem phòng có tồn tại không
-            const room = await Room.findById(roomId).populate("location", "name description");
+            const room = await Room.findById(roomId).populate("location", "name description").sort({ updated_at: -1 });
             if (!room) {
                 return res.status(404).json({
                     success: false,
@@ -255,7 +256,7 @@ class DeviceToRoomQuery {
 
     GetAllLocations = async (req, res) => {
         try {
-            const locations = await Location.find().lean();
+            const locations = await Location.find().lean().sort({ updated_at: -1 });
             return res.status(200).json({
                 success: true,
                 message: messages.location.getAllSuccess,
