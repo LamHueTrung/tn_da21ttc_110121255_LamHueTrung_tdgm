@@ -17,18 +17,22 @@ const upload = require('../../app/Extesions/uploadDevice');
 
 /**
  * @swagger
- * /device/create:
+ * /api/device/create:
  *   post:
  *     summary: Create a new device
  *     tags: [Devices]
- *     consumes:
- *       - multipart/form-data
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
  *             type: object
+ *             required:
+ *               - name
+ *               - category
+ *               - quantity
  *             properties:
  *               name:
  *                 type: string
@@ -38,11 +42,14 @@ const upload = require('../../app/Extesions/uploadDevice');
  *                 type: string
  *               quantity:
  *                 type: integer
+ *               image:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       201:
  *         description: Device created successfully
  *       400:
- *         description: Validation errors
+ *         description: Validation error
  *       500:
  *         description: Internal server error
  */
@@ -52,12 +59,12 @@ router.post('/create', upload, (req, res) => {
 
 /**
  * @swagger
- * /device/update/{deviceId}:
+ * /api/device/update/{deviceId}:
  *   put:
  *     summary: Update device details by ID
  *     tags: [Devices]
- *     consumes:
- *       - multipart/form-data
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: deviceId
@@ -77,45 +84,46 @@ router.post('/create', upload, (req, res) => {
  *                 type: string
  *               description:
  *                 type: string
- *               status:
- *                 type: string
  *               quantity:
  *                 type: integer
+ *               status:
+ *                 type: string
+ *               image:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
  *         description: Device updated successfully
  *       400:
- *         description: Validation errors
+ *         description: Validation error
  *       404:
  *         description: Device not found
  *       500:
  *         description: Internal server error
  */
 router.put('/update/:deviceId', (req, res, next) => {
-    // Kiểm tra nếu request có file ảnh thì gọi multer
-    if (req.headers['content-type']?.includes('multipart/form-data')) {
-        upload(req, res, (err) => {
-            if (err instanceof multer.MulterError) {
-                return res.status(400).json({ success: false, message: 'Lỗi tải lên hình ảnh.', error: err.message });
-            } else if (err) {
-                return res.status(400).json({ success: false, message: 'Lỗi tải lên hình ảnh.', error: err.message });
-            }
-            next();
-        });
-    } else {
-        // Nếu không có ảnh, tiếp tục xử lý API mà không gọi upload
-        next();
-    }
+  if (req.headers['content-type']?.includes('multipart/form-data')) {
+    upload(req, res, (err) => {
+      if (err instanceof multer.MulterError || err) {
+        return res.status(400).json({ success: false, message: 'Lỗi tải lên hình ảnh.', error: err.message });
+      }
+      next();
+    });
+  } else {
+    next();
+  }
 }, (req, res) => {
-    UpdateDeviceCommand.Handle(req, res);
+  UpdateDeviceCommand.Handle(req, res);
 });
 
 /**
  * @swagger
- * /device/delete/{deviceId}:
+ * /api/device/delete/{deviceId}:
  *   delete:
  *     summary: Delete a device by ID
  *     tags: [Devices]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: deviceId
@@ -126,7 +134,7 @@ router.put('/update/:deviceId', (req, res, next) => {
  *       200:
  *         description: Device deleted successfully
  *       400:
- *         description: Cannot delete device as it is in use
+ *         description: Cannot delete device (may be in use)
  *       404:
  *         description: Device not found
  *       500:
@@ -138,13 +146,21 @@ router.delete('/delete/:deviceId', (req, res) => {
 
 /**
  * @swagger
- * /device/getAll:
+ * /api/device/getAll:
  *   get:
  *     summary: Get a list of all devices
  *     tags: [Devices]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: A list of devices
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
  *       500:
  *         description: Internal server error
  */
@@ -154,10 +170,12 @@ router.get('/getAll', (req, res) => {
 
 /**
  * @swagger
- * /device/getById/{deviceId}:
+ * /api/device/getById/{deviceId}:
  *   get:
  *     summary: Get device details by ID
  *     tags: [Devices]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: deviceId
@@ -166,7 +184,11 @@ router.get('/getAll', (req, res) => {
  *           type: string
  *     responses:
  *       200:
- *         description: Device details
+ *         description: Device detail
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
  *       404:
  *         description: Device not found
  *       500:
@@ -178,18 +200,20 @@ router.get('/getById/:deviceId', (req, res) => {
 
 /**
  * @swagger
- * /device/import:
+ * /api/device/import:
  *   post:
- *     summary: Import devices from a CSV file
+ *     summary: Import devices from CSV file
  *     tags: [Devices]
- *     consumes:
- *       - multipart/form-data
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
  *             type: object
+ *             required:
+ *               - file
  *             properties:
  *               file:
  *                 type: string
@@ -198,11 +222,11 @@ router.get('/getById/:deviceId', (req, res) => {
  *       200:
  *         description: Devices imported successfully
  *       400:
- *         description: File errors or missing required columns
+ *         description: Invalid file or format
  *       500:
  *         description: Internal server error
  */
-router.post("/import", (req, res) => {
+router.post('/import', (req, res) => {
   ImportDeviceCommand.Handle(req, res);
 });
 

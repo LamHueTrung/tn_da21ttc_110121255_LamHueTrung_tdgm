@@ -62,14 +62,22 @@
                 Swal.fire('Lỗi', 'Có lỗi xảy ra khi tải dữ liệu phòng', 'error');
             });
 
-        // Cập nhật data-quantity khi nhập số lượng
+        // Cập nhật data-quantity khi nhập số lượng và tự động checked checkbox
         document.querySelectorAll("tbody tr").forEach(row => {
             let quantityInput = row.querySelector("input[type='number']");
             let checkbox = row.querySelector(".device-checkbox");
+            let availableQty = parseInt(row.cells[4].innerText);
 
             if (quantityInput && checkbox) {
                 quantityInput.addEventListener("input", function () {
-                    checkbox.dataset.quantity = this.value; // Lưu giá trị vào checkbox
+                    let inputVal = parseInt(this.value);
+                    checkbox.dataset.quantity = this.value;
+
+                    if (inputVal > 0 && inputVal <= availableQty) {
+                        checkbox.checked = true;
+                    } else {
+                        checkbox.checked = false;
+                    }
                 });
             }
         });
@@ -77,14 +85,36 @@
         // Xử lý sự kiện khi bấm "Thêm thiết bị"
         document.getElementById("confirmAddDevice").addEventListener("click", async function () {
             let selectedDevices = [];
-            document.querySelectorAll(".device-checkbox:checked").forEach((checkbox) => {
-                let quantity = checkbox.dataset.quantity || 0; // Mặc định là 0 nếu không có giá trị
-                selectedDevices.push({
-                    id: checkbox.dataset.id,
-                    name: checkbox.dataset.name,
-                    quantity: parseInt(quantity, 10)
-                });
+            let hasInvalid = false;
+
+            document.querySelectorAll("tbody tr").forEach((row) => {
+                let checkbox = row.querySelector(".device-checkbox");
+                if (checkbox && checkbox.checked) {
+                    let quantity = parseInt(checkbox.dataset.quantity);
+                    let available = parseInt(row.cells[4].innerText);
+                    let name = checkbox.dataset.name;
+
+                    if (isNaN(quantity) || quantity <= 0) {
+                        hasInvalid = true;
+                        Swal.fire("Lỗi", `Số lượng thiết bị "${name}" không hợp lệ!`, "error");
+                        return;
+                    }
+
+                    if (quantity > available) {
+                        hasInvalid = true;
+                        Swal.fire("Lỗi", `Số lượng mượn của thiết bị "${name}" vượt quá số lượng có thể mượn (${available})!`, "error");
+                        return;
+                    }
+
+                    selectedDevices.push({
+                        id: checkbox.dataset.id,
+                        name: name,
+                        quantity: quantity
+                    });
+                }
             });
+
+            if (hasInvalid) return;
 
             if (selectedDevices.length === 0) {
                 Swal.fire("Lỗi", "Chưa có thiết bị được chọn!", "error");
@@ -117,7 +147,6 @@
                     }
                 }
 
-                // Nếu tất cả thiết bị được thêm thành công
                 Swal.fire({
                     title: "Thành công!",
                     text: `Thiết bị đã được thêm vào phòng ${nameRoom} thành công!`,
@@ -133,6 +162,5 @@
             }
         });
     });
-
-
 </script>
+

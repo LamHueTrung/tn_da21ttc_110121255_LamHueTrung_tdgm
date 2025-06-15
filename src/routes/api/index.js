@@ -10,9 +10,21 @@ const rewardRoute = require("./reward");
 const borrowReturnRoute = require("./borrowReturn");
 const Notification = require("./notification");
 const NotificationUnprotected = require("./NotificationUnprotected");
-const Feedback = require("./feedback");
 const Login = require("../../app/controllers/command/user/Login");
 const authenticateToken = require("../../app/middleware/authenticateTokenAdmin");
+
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *
+ * security:
+ *   - bearerAuth: []
+ */
 
 /**
  * @swagger
@@ -31,6 +43,8 @@ const authenticateToken = require("../../app/middleware/authenticateTokenAdmin")
  *     description: API for managing statistics
  *   - name: Rewards
  *     description: API for managing rewards
+ *   - name: Notifications
+ *     description: API for managing notifications
  */
 
 /**
@@ -46,7 +60,7 @@ const authenticateToken = require("../../app/middleware/authenticateTokenAdmin")
  *           schema:
  *             type: object
  *             properties:
- *               email:
+ *               username:
  *                 type: string
  *               password:
  *                 type: string
@@ -98,24 +112,15 @@ router.post("/logout", (req, res) => {
   }
 });
 
-
+// Protected routes
 router.use("/user", authenticateToken, userRoute);
-
 router.use("/device", authenticateToken, deviceRoute);
-
 router.use("/room", authenticateToken, roomRoute);
-
 router.use("/borrowReturn", authenticateToken, borrowReturnRoute);
-
 router.use("/teacher", authenticateToken, teacherRoute);
-
 router.use("/statistics", authenticateToken, statisticRoute);
-
 router.use("/reward", authenticateToken, rewardRoute);
-
-router.use("/notification", NotificationUnprotected);
-router.use("/notification", authenticateToken, Notification);
-
-router.use("/feedback", authenticateToken, Feedback);
+router.use("/notification", NotificationUnprotected); // Public access
+router.use("/notification", authenticateToken, Notification); // Protected access
 
 module.exports = router;

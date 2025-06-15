@@ -1,7 +1,6 @@
 const express = require("express");
-const multer = require("multer");
 const router = express.Router();
-const upload = require("../../app/Extesions/uploadDevice");
+
 const BorrowRepayQuery = require("../../app/controllers/query/BorrowRepayQuery");
 const CreateBorrowRepayCommand = require("../../app/controllers/command/borrowReturn/CreateBorrowRequest");
 const ReturnBorrowRequest = require("../../app/controllers/command/borrowReturn/ReturnBorrowRequest");
@@ -15,13 +14,21 @@ const ReturnBorrowRequest = require("../../app/controllers/command/borrowReturn/
 
 /**
  * @swagger
- * /borrowRepay/available:
+ * /api/borrowReturn/available:
  *   get:
  *     summary: Get a list of available devices that can be borrowed
  *     tags: [Borrow and Return]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of available devices
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
  *       500:
  *         description: Internal server error
  */
@@ -31,16 +38,22 @@ router.get("/available", (req, res) => {
 
 /**
  * @swagger
- * /borrowRepay/borrow:
+ * /api/borrowReturn/borrow:
  *   post:
  *     summary: Create a new borrow request for devices
  *     tags: [Borrow and Return]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - teacherId
+ *               - roomId
+ *               - devices
  *             properties:
  *               teacherId:
  *                 type: string
@@ -69,10 +82,12 @@ router.post("/borrow", (req, res) => {
 
 /**
  * @swagger
- * /borrowRepay/return/{borrowRequestId}:
+ * /api/borrowReturn/return/{borrowRequestId}:
  *   put:
- *     summary: Return borrowed devices by providing the borrow request ID
+ *     summary: Return borrowed devices by borrow request ID
  *     tags: [Borrow and Return]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: borrowRequestId
@@ -83,7 +98,9 @@ router.post("/borrow", (req, res) => {
  *       200:
  *         description: Devices returned successfully
  *       400:
- *         description: Request has already been returned or invalid request
+ *         description: Already returned or invalid request
+ *       404:
+ *         description: Borrow request not found
  *       500:
  *         description: Internal server error
  */
@@ -93,13 +110,21 @@ router.put("/return/:borrowRequestId", (req, res) => {
 
 /**
  * @swagger
- * /borrowRepay/getAll:
+ * /api/borrowReturn/getAll:
  *   get:
  *     summary: Get all borrow requests
  *     tags: [Borrow and Return]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: A list of all borrow requests
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
  *       500:
  *         description: Internal server error
  */
@@ -109,10 +134,12 @@ router.get("/getAll", (req, res) => {
 
 /**
  * @swagger
- * /borrowRepay/getById/{id}:
+ * /api/borrowReturn/getById/{id}:
  *   get:
  *     summary: Get details of a borrow request by ID
  *     tags: [Borrow and Return]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -122,6 +149,10 @@ router.get("/getAll", (req, res) => {
  *     responses:
  *       200:
  *         description: Borrow request details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
  *       404:
  *         description: Borrow request not found
  *       500:
