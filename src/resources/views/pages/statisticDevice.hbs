@@ -1,187 +1,288 @@
-<div class="container py-4">
-    <!-- Tiêu đề và bộ lọc -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <h3 class="text-primary">Thống kê thiết bị</h3>
-        </div>
-        <div class="col-md-6 text-end">
-            <button id="exportDeviceCSV" class="btn btn-outline-success">\uD83D\uDCC4 Xuất CSV</button>
-        </div>
-    </div>
-
-    <!-- Biểu đồ theo loại thiết bị -->
-    <div class="card shadow mb-4">
-        <div class="card-header bg-info text-white">Tổng số thiết bị theo loại</div>
-        <div class="card-body">
-            <canvas id="deviceCategoryChart"></canvas>
-        </div>
-    </div>
-
-    <!-- Biểu đồ theo trạng thái -->
-    <div class="card shadow mb-4">
-        <div class="card-header bg-warning">Trạng thái thiết bị</div>
-        <div class="card-body">
-            <canvas id="deviceStatusChart"></canvas>
-        </div>
-    </div>
-
-    <!-- Biểu đồ theo phòng -->
-    <div class="card shadow mb-4">
-        <div class="card-header bg-secondary text-white">Thiết bị theo phòng</div>
-        <div class="card-body">
-            <canvas id="deviceByRoomChart"></canvas>
-        </div>
-    </div>
-
-    <!-- Top thiết bị sử dụng nhiều -->
-    <div class="card shadow mb-4">
-        <div class="card-header bg-success text-white">Top 10 thiết bị được mượn nhiều nhất</div>
-        <div class="card-body">
-            <canvas id="mostUsedDevicesChart"></canvas>
-        </div>
-    </div>
-
-    <!-- Danh sách sắp bảo trì -->
-    <div class="card shadow mb-4">
-        <div class="card-header bg-danger text-white">Thiết bị sắp đến kỳ bảo trì</div>
-        <div class="card-body">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Tên thiết bị</th>
-                        <th>Loại</th>
-                        <th>Trạng thái</th>
-                        <th>Ngày bảo trì gần nhất</th>
-                    </tr>
-                </thead>
-                <tbody id="upcomingMaintenanceList"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Thiết bị trong kho chính -->
-    <div class="card shadow mb-4">
-        <div class="card-header bg-dark text-white">Thiết bị đang trong Kho chính</div>
-        <div class="card-body">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Tên thiết bị</th>
-                        <th>Loại</th>
-                        <th>Số lượng</th>
-                    </tr>
-                </thead>
-                <tbody id="mainWarehouseList"></tbody>
-            </table>
-        </div>
-    </div>
-
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", async () => {
-        const [categoryRes, statusRes, roomRes, mostUsedRes, maintenanceRes, warehouseRes ] = await Promise.all([
-            fetch("/api/statistics/device/summary-by-category").then(res => res.json()),
-            fetch("/api/statistics/device/status-counts").then(res => res.json()),
-            fetch("/api/statistics/device/by-room").then(res => res.json()),
-            fetch("/api/statistics/device/most-used").then(res => res.json()),
-            fetch("/api/statistics/device/upcoming-maintenance").then(res => res.json()),
-            fetch("/api/statistics/device/in-main-warehouse").then(res => res.json())
-        ]);
-
-        // Vẽ biểu đồ loại thiết bị
-        if (categoryRes.success) {
-            const labels = categoryRes.data.map(c => c.category);
-            const values = categoryRes.data.map(c => c.total);
-            new Chart(document.getElementById("deviceCategoryChart"), {
-                type: "bar",
-                data: {
-                    labels,
-                    datasets: [{ label: "Số lượng", data: values }]
-                }
-            });
+<style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #1A1A1A;
+            color: #D1D5DB;
         }
-
-        // Vẽ biểu đồ trạng thái
-        if (statusRes.success) {
-            const labels = statusRes.data.map(s => s.status);
-            const values = statusRes.data.map(s => s.total);
-            new Chart(document.getElementById("deviceStatusChart"), {
-                type: "pie",
-                data: {
-                    labels,
-                    datasets: [{ label: "Trạng thái", data: values }]
-                }
-            });
+        .card-shadow {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border: 1px solid #E02424;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-
-        // Vẽ biểu đồ theo phòng
-        if (roomRes.success) {
-            const labels = roomRes.data.map(r => r.roomName);
-            const values = roomRes.data.map(r => r.total);
-            new Chart(document.getElementById("deviceByRoomChart"), {
-                type: "bar",
-                data: {
-                    labels,
-                    datasets: [{ label: "Thiết bị", data: values }]
-                }
-            });
+        .card-shadow:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 16px rgba(224, 36, 36, 0.3);
         }
-
-        // Top thiết bị sử dụng nhiều
-        if (mostUsedRes.success) {
-            const labels = mostUsedRes.data.map(d => d.name);
-            const values = mostUsedRes.data.map(d => d.totalBorrowed);
-            new Chart(document.getElementById("mostUsedDevicesChart"), {
-                type: "bar",
-                data: {
-                    labels,
-                    datasets: [{ label: "Số lần mượn", data: values }]
-                }
-            });
+        .gradient-bg {
+            background: linear-gradient(to bottom, #2D2D2D, #1A1A1A);
         }
-
-        // Thiết bị sắp bảo trì
-        if (maintenanceRes.success) {
-            const list = document.getElementById("upcomingMaintenanceList");
-            list.innerHTML = "";
-            maintenanceRes.data.forEach(item => {
-                list.innerHTML += `
-                    <tr>
-                        <td>${item.device?.name}</td>
-                        <td>${item.device?.category}</td>
-                        <td>${item.status}</td>
-                        <td>${new Date(item.last_maintenance).toLocaleDateString()}</td>
-                    </tr>`;
-            });
+        .btn-hover {
+            transition: all 0.3s ease;
+            background: linear-gradient(to right, #E02424, #B91C1C);
         }
-
-        // Thiết bị chưa gán phòng / vị trí
-        if (warehouseRes.success) {
-            const list = document.getElementById("mainWarehouseList");
-            list.innerHTML = "";
-            warehouseRes.data.forEach(item => {
-                list.innerHTML += `
-                    <tr>
-                        <td>${item.name}</td>
-                        <td>${item.category}</td>
-                        <td>${item.total}</td>
-                    </tr>`;
-            });
+        .btn-hover:hover {
+            background: linear-gradient(to right, #B91C1C, #E02424);
+            box-shadow: 0 0 10px rgba(224, 36, 36, 0.5);
+            transform: translateY(-2px);
         }
+        .table-row-hover:hover {
+            background-color: #3E1F1F;
+        }
+    </style>
+    <div class="container mx-auto p-6">
+        <!-- Tiêu đề và bộ lọc -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+            <h3 class="text-2xl font-bold text-dark mb-4 md:mb-0">Thống kê thiết bị</h3>
+            {{!-- <button id="exportDeviceCSV" class="btn-hover text-white px-6 py-2 rounded-full text-sm font-semibold">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H3a2 2 0 01-2-2V3a2 2 0 012-2h18a2 2 0 012 2v16a2 2 0 01-2 2z"></path></svg>
+                Xuất CSV
+            </button> --}}
+        </div>
 
-        // Export CSV
-        document.getElementById("exportDeviceCSV").addEventListener("click", () => {
-            let csv = "Tên thiết bị,Loại,Trạng thái,Ngày bảo trì\n";
-            maintenanceRes.data.forEach(item => {
-                csv += `${item.device?.name},${item.device?.category},${item.status},${new Date(item.last_maintenance).toLocaleDateString()}\n`;
-            });
-            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = "thongke-thietbi.csv";
-            link.click();
+        <!-- Biểu đồ theo loại thiết bị -->
+        <div class="card-shadow gradient-bg rounded-lg mb-8">
+            <div class="bg-red-600 text-white p-4 rounded-t-lg">
+                <h3 class="text-lg font-bold">Tổng số thiết bị theo loại</h3>
+            </div>
+            <div class="p-6">
+                <canvas id="deviceCategoryChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Biểu đồ theo trạng thái -->
+        <div class="card-shadow gradient-bg rounded-lg mb-8">
+            <div class="bg-red-600 text-white p-4 rounded-t-lg">
+                <h3 class="text-lg font-bold">Trạng thái thiết bị</h3>
+            </div>
+            <div class="p-6">
+                <canvas id="deviceStatusChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Biểu đồ theo phòng -->
+        <div class="card-shadow gradient-bg rounded-lg mb-8">
+            <div class="bg-red-600 text-white p-4 rounded-t-lg">
+                <h3 class="text-lg font-bold">Thiết bị theo phòng</h3>
+            </div>
+            <div class="p-6">
+                <canvas id="deviceByRoomChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Top thiết bị sử dụng nhiều -->
+        <div class="card-shadow gradient-bg rounded-lg mb-8">
+            <div class="bg-red-600 text-white p-4 rounded-t-lg">
+                <h3 class="text-lg font-bold">Top 10 thiết bị được mượn nhiều nhất</h3>
+            </div>
+            <div class="p-6">
+                <canvas id="mostUsedDevicesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Danh sách sắp bảo trì -->
+        <div class="card-shadow gradient-bg rounded-lg mb-8">
+            <div class="bg-red-600 text-white p-4 rounded-t-lg">
+                <h3 class="text-lg font-bold">Thiết bị sắp đến kỳ bảo trì</h3>
+            </div>
+            <div class="p-6">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-800 text-white">
+                                <th class="p-3 text-sm font-semibold">Tên thiết bị</th>
+                                <th class="p-3 text-sm font-semibold">Loại</th>
+                                <th class="p-3 text-sm font-semibold">Trạng thái</th>
+                                <th class="p-3 text-sm font-semibold">Ngày bảo trì gần nhất</th>
+                            </tr>
+                        </thead>
+                        <tbody id="upcomingMaintenanceList" class="divide-y divide-gray-700"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thiết bị trong kho chính -->
+        <div class="card-shadow gradient-bg rounded-lg">
+            <div class="bg-red-600 text-white p-4 rounded-t-lg">
+                <h3 class="text-lg font-bold">Thiết bị đang trong Kho chính</h3>
+            </div>
+            <div class="p-6">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-800 text-white">
+                                <th class="p-3 text-sm font-semibold">Tên thiết bị</th>
+                                <th class="p-3 text-sm font-semibold">Loại</th>
+                                <th class="p-3 text-sm font-semibold">Số lượng</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mainWarehouseList" class="divide-y divide-gray-700"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const [categoryRes, statusRes, roomRes, mostUsedRes, maintenanceRes, warehouseRes] = await Promise.all([
+                fetch("/api/statistics/device/summary-by-category").then(res => res.json()),
+                fetch("/api/statistics/device/status-counts").then(res => res.json()),
+                fetch("/api/statistics/device/by-room").then(res => res.json()),
+                fetch("/api/statistics/device/most-used").then(res => res.json()),
+                fetch("/api/statistics/device/upcoming-maintenance").then(res => res.json()),
+                fetch("/api/statistics/device/in-main-warehouse").then(res => res.json())
+            ]);
+
+            // Vẽ biểu đồ loại thiết bị
+            if (categoryRes.success) {
+                const labels = categoryRes.data.map(c => c.category);
+                const values = categoryRes.data.map(c => c.total);
+                new Chart(document.getElementById("deviceCategoryChart"), {
+                    type: "bar",
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: "Số lượng",
+                            data: values,
+                            backgroundColor: "#E02424",
+                            borderColor: "#B91C1C",
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'Số lượng', color: '#D1D5DB' }, ticks: { color: '#D1D5DB' } },
+                            x: { title: { display: true, text: 'Loại thiết bị', color: '#D1D5DB' }, ticks: { color: '#D1D5DB' } }
+                        },
+                        plugins: { legend: { labels: { color: '#D1D5DB' } } }
+                    }
+                });
+            }
+
+            // Vẽ biểu đồ trạng thái
+            if (statusRes.success) {
+                const labels = statusRes.data.map(s => s.status);
+                const values = statusRes.data.map(s => s.total);
+                new Chart(document.getElementById("deviceStatusChart"), {
+                    type: "pie",
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: "Trạng thái",
+                            data: values,
+                            backgroundColor: ["#E02424", "#B91C1C", "#2D2D2D", "#4B5563"],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { labels: { color: '#D1D5DB' } } }
+                    }
+                });
+            }
+
+            // Vẽ biểu đồ theo phòng
+            if (roomRes.success) {
+                const labels = roomRes.data.map(r => r.roomName);
+                const values = roomRes.data.map(r => r.total);
+                new Chart(document.getElementById("deviceByRoomChart"), {
+                    type: "bar",
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: "Thiết bị",
+                            data: values,
+                            backgroundColor: "#E02424",
+                            borderColor: "#B91C1C",
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'Số lượng', color: '#D1D5DB' }, ticks: { color: '#D1D5DB' } },
+                            x: { title: { display: true, text: 'Phòng', color: '#D1D5DB' }, ticks: { color: '#D1D5DB' } }
+                        },
+                        plugins: { legend: { labels: { color: '#D1D5DB' } } }
+                    }
+                });
+            }
+
+            // Top thiết bị sử dụng nhiều
+            if (mostUsedRes.success) {
+                const labels = mostUsedRes.data.map(d => d.name);
+                const values = mostUsedRes.data.map(d => d.totalBorrowed);
+                new Chart(document.getElementById("mostUsedDevicesChart"), {
+                    type: "bar",
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: "Số lần mượn",
+                            data: values,
+                            backgroundColor: "#E02424",
+                            borderColor: "#B91C1C",
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'Số lần mượn', color: '#D1D5DB' }, ticks: { color: '#D1D5DB' } },
+                            x: { title: { display: true, text: 'Thiết bị', color: '#D1D5DB' }, ticks: { color: '#D1D5DB' } }
+                        },
+                        plugins: { legend: { labels: { color: '#D1D5DB' } } }
+                    }
+                });
+            }
+
+            // Thiết bị sắp bảo trì
+            if (maintenanceRes.success) {
+                const list = document.getElementById("upcomingMaintenanceList");
+                list.innerHTML = "";
+                maintenanceRes.data.forEach(item => {
+                    list.innerHTML += `
+                        <tr class="table-row-hover text-gray-300">
+                            <td class="p-3">${item.device?.name || "Không rõ"}</td>
+                            <td class="p-3">${item.device?.category || "Không rõ"}</td>
+                            <td class="p-3">${item.status || "Không rõ"}</td>
+                            <td class="p-3">${new Date(item.last_maintenance).toLocaleDateString('vi-VN') || "Không rõ"}</td>
+                        </tr>`;
+                });
+            } else {
+                document.getElementById("upcomingMaintenanceList").innerHTML = '<tr><td colspan="4" class="p-3 text-center text-gray-500">Không có dữ liệu</td></tr>';
+            }
+
+            // Thiết bị trong kho chính
+            if (warehouseRes.success) {
+                const list = document.getElementById("mainWarehouseList");
+                list.innerHTML = "";
+                warehouseRes.data.forEach(item => {
+                    list.innerHTML += `
+                        <tr class="table-row-hover text-gray-300">
+                            <td class="p-3">${item.name || "Không rõ"}</td>
+                            <td class="p-3">${item.category || "Không rõ"}</td>
+                            <td class="p-3">${item.total || 0}</td>
+                        </tr>`;
+                });
+            } else {
+                document.getElementById("mainWarehouseList").innerHTML = '<tr><td colspan="3" class="p-3 text-center text-gray-500">Không có dữ liệu</td></tr>';
+            }
+
+            // Export CSV
+            {{!-- document.getElementById("exportDeviceCSV").addEventListener("click", () => {
+                let csv = '\uFEFF'; // UTF-8 BOM cho ký tự tiếng Việt
+                csv += "Tên thiết bị,Loại,Trạng thái,Ngày bảo trì gần nhất\n";
+                maintenanceRes.data.forEach(item => {
+                    csv += `"${item.device?.name || "Không rõ"},"${item.device?.category || "Không rõ"},"${item.status || "Không rõ"},"${new Date(item.last_maintenance).toLocaleDateString('vi-VN') || "Không rõ"}\n`;
+                });
+                const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                const link = document.createElement("a");
+                const currentDate = new Date().toLocaleDateString('vi-VN').replace(/\//g, '-');
+                link.href = URL.createObjectURL(blob);
+                link.download = `thongke-thietbi_${currentDate}.csv`;
+                link.click();
+            }); --}}
         });
-    });
-</script>
+    </script>
