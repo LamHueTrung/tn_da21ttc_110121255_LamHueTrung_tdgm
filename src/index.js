@@ -6,6 +6,7 @@ const route = require('./routes');
 const connectDB = require('./app/database'); 
 const CreateAdmin = require('./app/controllers/command/user/CreateAdmin');
 const setupSwagger = require('../src/app/Extesions/swagger');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const port = 3000;
@@ -101,6 +102,14 @@ setupSwagger(app);
 
 // Route
 route(app);
+
+const limiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 phút
+  max: 20, // Tối đa 20 requests mỗi phút
+  message: "Quá nhiều yêu cầu. Vui lòng thử lại sau ít phút. Truy cập qua micro server: https://tdgm-microserver.onrender.com",
+});
+
+app.use(limiter);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
