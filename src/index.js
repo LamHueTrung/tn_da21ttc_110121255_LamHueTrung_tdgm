@@ -106,7 +106,7 @@ route(app);
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 phút
   max: 20, // Tối đa 20 requests mỗi phút
-  message: "Quá nhiều yêu cầu. Vui lòng thử lại sau ít phút. Truy cập qua micro server: https://tdgm-microserver.onrender.com",
+  message: "Quá nhiều yêu cầu. Vui lòng thử lại sau ít phút. Truy cập qua micro server: https://tdgm-victory-microserver.up.railway.app",
 });
 
 app.use(limiter);
