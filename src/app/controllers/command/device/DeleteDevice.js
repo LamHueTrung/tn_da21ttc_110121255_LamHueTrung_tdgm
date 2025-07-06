@@ -59,8 +59,8 @@ class DeleteDevice {
 
             // Gửi thông báo đến người dùng
             await sendNotification({
-                title: `Thiết bị "${newDevice.name}" đã bị xoá.`,
-                description: `Thiết bị "${newDevice.name}" đã được xoá khỏi hệ thống.`,
+                title: `Thiết bị "${device.name}" đã bị xoá.`,
+                description: `Thiết bị "${device.name}" đã được xoá khỏi hệ thống.`,
                 url: "/deviceManger/home",
                 role: "device_manager",
                 type: "warning",

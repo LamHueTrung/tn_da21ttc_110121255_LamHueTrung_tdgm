@@ -33,9 +33,9 @@
                 </table>
             </div>
 
-            <!-- Bảng top giáo viên yêu cầu -->
+            <!-- Bảng top giảng viên yêu cầu -->
             <div class="col-lg-6">
-                <h6 class="font-weight-bold text-secondary mb-3">Top giáo viên yêu cầu quà</h6>
+                <h6 class="font-weight-bold text-secondary mb-3">Top giảng viên yêu cầu quà</h6>
                 <table class="table table-bordered">
                     <thead>
                         <tr>
@@ -122,7 +122,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         </tr>
     `).join("");
 
-    // Bảng Top giáo viên
+    // Bảng Top giảng viên
     const topTeacherRes = await fetch("/api/statistics/reward/top-teachers");
     const topTeacherData = await topTeacherRes.json();
     const topTeacherBody = document.getElementById("topTeachersTableBody");

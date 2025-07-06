@@ -140,7 +140,7 @@
     <!-- Top giáo viên -->
     <div class="col-lg-6 mb-4">
       <div class="card shadow">
-        <div class="card-header text-warning font-weight-bold">Top giáo viên mượn nhiều thiết bị</div>
+        <div class="card-header text-warning font-weight-bold">Top giảng viên mượn nhiều thiết bị</div>
         <div class="card-body">
           <canvas id="topTeachersChart"></canvas>
           <div class="table-responsive mt-3">
@@ -173,14 +173,6 @@
         <div class="card-header text-danger font-weight-bold">Top quà tặng được yêu cầu nhiều</div>
         <div class="card-body">
           <canvas id="topGiftsChart"></canvas>
-          <div class="table-responsive mt-3">
-            <table class="table table-sm table-bordered">
-              <thead class="table-light">
-                <tr><th>Tên quà tặng</th><th>Danh mục</th><th>Lượt yêu cầu</th></tr>
-              </thead>
-              <tbody id="topGiftsTableBody"></tbody>
-            </table>
-          </div>
         </div>
       </div>
     </div>
@@ -191,7 +183,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", async function () {
-    // 1️⃣ Biểu đồ lượt mượn thiết bị theo ngày/tháng
+    //Biểu đồ lượt mượn thiết bị theo ngày/tháng
     const borrowRes = await fetch("/api/statistics/borrow-return/by-date");
     const borrowData = await borrowRes.json();
 
@@ -215,7 +207,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     });
 
-    // 2️⃣ Biểu đồ trạng thái thiết bị
+    //Biểu đồ trạng thái thiết bị
     const statusRes = await fetch("/api/statistics/device/status-counts");
     const statusData = await statusRes.json();
 
@@ -237,7 +229,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     });
 
-    // 3️⃣ Biểu đồ Top thiết bị được mượn nhiều nhất
+    //Biểu đồ Top thiết bị được mượn nhiều nhất
     const topDeviceRes = await fetch("/api/statistics/borrow-return/by-device");
     const topDeviceData = await topDeviceRes.json();
 
@@ -260,7 +252,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     });
 
-    // 4️⃣ Biểu đồ Top giáo viên mượn nhiều thiết bị
+    //Biểu đồ Top giáo viên mượn nhiều thiết bị
     const topTeacherRes = await fetch("/api/statistics/borrow-return/by-teacher");
     const topTeacherData = await topTeacherRes.json();
 
@@ -282,7 +274,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     });
 
-    // 5️⃣ Biểu đồ số lượng yêu cầu quà theo tháng
+    //Biểu đồ số lượng yêu cầu quà theo tháng
     const giftMonthRes = await fetch("/api/statistics/reward/request-by-month");
     const giftMonthData = await giftMonthRes.json();
 
@@ -306,7 +298,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     });
 
-    // 6️⃣ Biểu đồ Top quà tặng được yêu cầu nhiều nhất
+    //Biểu đồ Top quà tặng được yêu cầu nhiều nhất
     const topGiftRes = await fetch("/api/statistics/reward/top-requested");
     const topGiftData = await topGiftRes.json();
 
@@ -328,7 +320,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             }
         }
     });
-
 
 });
 </script>

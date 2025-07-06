@@ -130,7 +130,7 @@ class ImportGiff {
                                 fs.copyFileSync(imagePath, tempPath);
                                 fs.renameSync(tempPath, finalPath);
 
-                                gift.images = [finalPath.replace("src\\public", "")];
+                                gift.images = [finalPath.replace("src/public", "")];
                                 await gift.save();
                             }
 

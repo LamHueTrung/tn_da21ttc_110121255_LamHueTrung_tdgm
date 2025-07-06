@@ -397,54 +397,50 @@ class StatisticQuery {
 
     async inMainWarehouse(req, res) {
         try {
-            // ✅ Lấy Room "Kho chính"
-            const mainRoom = await Room.ensureMainWarehouse();
-    
-            // ✅ Lấy location._id từ Room
-            const locationId = mainRoom.location;
-    
-            const result = await DeviceItem.aggregate([
-                {
-                    $match: {
-                        location: new mongoose.Types.ObjectId(locationId)
-                    }
-                },
-                {
-                    $lookup: {
-                        from: "devices",
-                        localField: "device",
-                        foreignField: "_id",
-                        as: "device"
-                    }
-                },
-                { $unwind: "$device" },
-                {
-                    $group: {
-                        _id: "$device.name",
-                        category: { $first: "$device.category" },
-                        total: { $sum: 1 }
-                    }
-                },
-                {
-                    $project: {
-                        _id: 0,
-                        name: "$_id",
-                        category: 1,
-                        total: 1
-                    }
-                },
-                { $sort: { total: -1 } }
-            ]);
-    
-            res.json({ success: true, data: result });
+          const mainRoom = await Room.ensureMainWarehouse();
+      
+          const result = await DeviceItem.aggregate([
+            {
+              $match: {
+                room: mainRoom._id
+              }
+            },
+            {
+              $lookup: {
+                from: "devices",
+                localField: "device",
+                foreignField: "_id",
+                as: "device"
+              }
+            },
+            { $unwind: "$device" },
+            {
+              $group: {
+                _id: "$device.name",
+                category: { $first: "$device.category" },
+                total: { $sum: 1 }
+              }
+            },
+            {
+              $project: {
+                _id: 0,
+                name: "$_id",
+                category: 1,
+                total: 1
+              }
+            },
+            { $sort: { total: -1 } }
+          ]);
+      
+          res.json({ success: true, data: result });
         } catch (err) {
-            res.status(500).json({
-                success: false,
-                message: "Lỗi thống kê thiết bị trong Kho chính (location)",
-                error: err.message
-            });
+          res.status(500).json({
+            success: false,
+            message: "Lỗi thống kê thiết bị trong Kho chính (room)",
+            error: err.message
+          });
         }
-    }
+      }
 
     //Thống kê quà tặng
     async giftSummaryByCategory(req, res) {
@@ -481,91 +477,110 @@ class StatisticQuery {
     
     async mostRequestedGifts(req, res) {
         try {
-            const result = await Order.aggregate([
-                {
-                    $group: {
-                        _id: "$gift",
-                        totalRequested: { $sum: "$quantity" }
-                    }
-                },
-                {
-                    $lookup: {
-                        from: "gifts",
-                        localField: "_id",
-                        foreignField: "_id",
-                        as: "gift"
-                    }
-                },
-                { $unwind: "$gift" },
-                {
-                    $project: {
-                        _id: 0,
-                        name: "$gift.name",
-                        category: "$gift.category",
-                        totalRequested: 1
-                    }
-                },
-                { $sort: { totalRequested: -1 } },
-                { $limit: 10 }
-            ]);
-            res.json({ success: true, data: result });
+          const result = await Order.aggregate([
+            { $unwind: "$orders" }, 
+            {
+              $group: {
+                _id: "$orders.giftId", 
+                totalRequested: { $sum: "$orders.quantity" }
+              }
+            },
+            {
+              $lookup: {
+                from: "gifts",
+                localField: "_id",
+                foreignField: "_id",
+                as: "gift"
+              }
+            },
+            { $unwind: "$gift" },
+            {
+              $project: {
+                _id: 0,
+                name: "$gift.name",
+                category: "$gift.category",
+                totalRequested: 1
+              }
+            },
+            { $sort: { totalRequested: -1 } },
+            { $limit: 10 }
+          ]);
+      
+          res.json({ success: true, data: result });
         } catch (err) {
-            res.status(500).json({ success: false, message: "Lỗi thống kê yêu cầu quà tặng", error: err.message });
+          res.status(500).json({
+            success: false,
+            message: "Lỗi thống kê yêu cầu quà tặng",
+            error: err.message
+          });
         }
-    }
+      }
     
     async rewardRequestByMonth(req, res) {
         try {
-            const result = await Order.aggregate([
-                {
-                    $group: {
-                        _id: {
-                            $dateToString: { format: "%Y-%m", date: "$created_at" }
-                        },
-                        total: { $sum: "$quantity" }
-                    }
+          const result = await Order.aggregate([
+            { $unwind: "$orders" }, 
+            {
+              $group: {
+                _id: {
+                  $dateToString: { format: "%Y-%m", date: "$created_at" }
                 },
-                { $sort: { _id: 1 } }
-            ]);
-            res.json({ success: true, data: result });
+                total: { $sum: "$orders.quantity" }
+              }
+            },
+            { $sort: { _id: 1 } }
+          ]);
+      
+          res.json({ success: true, data: result });
         } catch (err) {
-            res.status(500).json({ success: false, message: "Lỗi thống kê theo tháng", error: err.message });
+          res.status(500).json({
+            success: false,
+            message: "Lỗi thống kê theo tháng",
+            error: err.message
+          });
         }
-    }
+      }
     
-    async mostActiveTeachers(req, res) {
+      async mostActiveTeachers(req, res) {
         try {
-            const result = await Order.aggregate([
-                {
-                    $group: {
-                        _id: "$teacher",
-                        totalRequested: { $sum: "$quantity" }
-                    }
-                },
-                {
-                    $lookup: {
-                        from: "teachers",
-                        localField: "_id",
-                        foreignField: "_id",
-                        as: "teacher"
-                    }
-                },
-                { $unwind: "$teacher" },
-                {
-                    $project: {
-                        name: "$teacher.name",
-                        email: "$teacher.email",
-                        totalRequested: 1
-                    }
-                },
-                { $sort: { totalRequested: -1 } },
-                { $limit: 10 }
-            ]);
-            res.json({ success: true, data: result });
+          const result = await Order.aggregate([
+            { $unwind: "$orders" }, 
+            {
+              $group: {
+                _id: "$teacher",
+                totalRequested: { $sum: "$orders.quantity" }
+              }
+            },
+            {
+              $lookup: {
+                from: "teachers",
+                localField: "_id",
+                foreignField: "_id",
+                as: "teacher"
+              }
+            },
+            { $unwind: "$teacher" },
+            {
+              $project: {
+                _id: 0,
+                name: "$teacher.name",
+                email: "$teacher.email",
+                totalRequested: 1
+              }
+            },
+            { $sort: { totalRequested: -1 } },
+            { $limit: 10 }
+          ]);
+      
+          res.json({ success: true, data: result });
         } catch (err) {
-            res.status(500).json({ success: false, message: "Lỗi thống kê giáo viên yêu cầu", error: err.message });
+          res.status(500).json({
+            success: false,
+            message: "Lỗi thống kê giáo viên yêu cầu",
+            error: err.message
+          });
         }
-    }
+      }
     
 };
 

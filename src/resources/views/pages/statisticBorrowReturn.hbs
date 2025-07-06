@@ -114,7 +114,7 @@
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-gray-800 text-white">
-                                <th class="p-3 text-sm font-semibold">Giáo viên</th>
+                                <th class="p-3 text-sm font-semibold">Giảng viên</th>
                                 <th class="p-3 text-sm font-semibold">Thiết bị</th>
                                 <th class="p-3 text-sm font-semibold">Loại</th>
                                 <th class="p-3 text-sm font-semibold">Ngày mượn</th>
@@ -141,6 +141,7 @@
             const exportCSVBtn = document.getElementById("exportCSV");
             const exportPDFBtn = document.getElementById("exportPDF");
             let activeDataCache = [];
+            let summaryDataRaw = {}, dateDataRaw = {}, deviceDataRaw = {}, roomDataRaw = {};
 
             async function loadStatistics(monthYear) {
                 const params = monthYear ? `?month=${monthYear}` : "";
@@ -160,6 +161,11 @@
                         roomRes.json(),
                         activeRes.json()
                     ]);
+
+                    summaryDataRaw = summaryData;
+                    dateDataRaw = dateData;
+                    deviceDataRaw = deviceData;
+                    roomDataRaw = roomData;
 
                     // Tổng quan
                     if (summaryData.success && summaryData.data) {
@@ -286,22 +292,54 @@
 
             // Xuất CSV
             exportCSVBtn.addEventListener("click", () => {
-                if (activeDataCache.length === 0) {
-                    alert("Không có dữ liệu để xuất CSV!");
+                if (
+                    !summaryDataRaw || !dateDataRaw || !deviceDataRaw || !roomDataRaw
+                ) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Không có đủ dữ liệu để xuất CSV!',
+                        text: 'Vui lòng tải lại hoặc kiểm tra lại dữ liệu thống kê.',
+                        confirmButtonText: 'OK'
+                    });
                     return;
                 }
-                let csv = '\uFEFF';
-                csv += "Giáo viên,Thiết bị,Loại,Ngày mượn\n";
-                activeDataCache.forEach(req => {
-                    req.devices.forEach(device => {
-                        csv += `"${req.teacher?.name || "Không rõ"}","${device.name}","${device.category}","${new Date(req.borrow_date).toLocaleDateString('vi-VN')}"\n`;
-                    });
-                });
 
+                let csv = '\uFEFF'; // BOM để tránh lỗi tiếng Việt
+
+                // ==== 1. Tổng quan ====
+                csv += '--- TỔNG QUAN ---\n';
+                csv += 'Tổng yêu cầu mượn,Đang mượn,Đã trả\n';
+                csv += `${summaryDataRaw.data.totalBorrowRequests || 0},${summaryDataRaw.data.statusCounts["Đang mượn"] || 0},${summaryDataRaw.data.statusCounts["Đã trả"] || 0}\n\n`;
+
+                // ==== 2. Biểu đồ mượn theo thời gian ====
+                csv += '--- MƯỢN THEO THỜI GIAN ---\n';
+                csv += 'Thời gian,Lượt mượn\n';
+                dateDataRaw.data.forEach(d => {
+                    csv += `${d._id},${d.total}\n`;
+                });
+                csv += '\n';
+
+                // ==== 3. Top thiết bị được mượn ====
+                csv += '--- TOP 10 THIẾT BỊ MƯỢN NHIỀU NHẤT ---\n';
+                csv += 'Thiết bị,Loại,Số lượt mượn\n';
+                deviceDataRaw.data.forEach(d => {
+                    csv += `"${d.name}","${d.category}",${d.totalBorrowed}\n`;
+                });
+                csv += '\n';
+
+                // ==== 4. Mượn theo phòng ====
+                csv += '--- MƯỢN THEO PHÒNG ---\n';
+                csv += 'Phòng,Lượt mượn\n';
+                roomDataRaw.data.forEach(r => {
+                    csv += `"${r.roomName}",${r.total}\n`;
+                });
+                csv += '\n';
+
+                // Xuất file
                 const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
                 const link = document.createElement("a");
                 link.href = URL.createObjectURL(blob);
-                link.download = `thietbi-dang-muon_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.csv`;
+                link.download = `thong-ke-muon-thiet-bi_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.csv`;
                 link.click();
             });
 
@@ -341,7 +379,7 @@
 
                 doc.autoTable({
                     startY: 50,
-                    head: [["Giáo viên", "Thiết bị", "Loại", "Ngày mượn"]],
+                    head: [["Giảng viên", "Thiết bị", "Loại", "Ngày mượn"]],
                     body: rows,
                     theme: 'grid',
                     headStyles: { fillColor: [224, 36, 36], textColor: [255, 255, 255], fontSize: 10 },

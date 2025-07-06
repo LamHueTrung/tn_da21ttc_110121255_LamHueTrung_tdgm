@@ -116,7 +116,7 @@ class ImportDevice {
                             const finalPath = path.join("src/public/uploads/devices/", fileName);
 
                             fs.copyFileSync(imagePath, tempPath);
-                            fs.renameSync(tempPath, finalPath);
+                            fs.renameSync(tempPath, finalPath); 
 
                             device.images = [finalPath.replace("src\\public", "")];
                             await device.save();
