@@ -9,7 +9,7 @@ const setupSwagger = require('../src/app/Extesions/swagger');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
-const port = 4000;
+const port = 3000;
 
 // Kết nối tới MongoDB
 connectDB();
