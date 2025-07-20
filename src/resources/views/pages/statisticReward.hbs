@@ -1,137 +1,408 @@
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Thống kê quà tặng</h6>
-    </div>
-    <div class="card-body">
-        <div class="row mb-4">
-            <!-- Biểu đồ kho quà thưởng -->
-            <div class="col-lg-6 mb-4">
-                <canvas id="giftStockChart"></canvas>
-            </div>
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #1A1A1A;
+        color: #D1D5DB;
+    }
+    .card-shadow {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        border: 1px solid #E02424;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card-shadow:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 16px rgba(224, 36, 36, 0.3);
+    }
+    .gradient-bg {
+        background: linear-gradient(to bottom, #2D2D2D, #1A1A1A);
+    }
+    .btn-hover {
+        transition: all 0.3s ease;
+        background: linear-gradient(to right, #E02424, #B91C1C);
+    }
+    .btn-hover:hover {
+        background: linear-gradient(to right, #B91C1C, #E02424);
+        box-shadow: 0 0 10px rgba(224, 36, 36, 0.5);
+        transform: translateY(-2px);
+    }
+    .table-row-hover:hover {
+        background-color: #3E1F1F;
+    }
+    input[type="month"] {
+        background-color: #2D2D2D;
+        color: #FFFFFF;
+        border-color: #E02424;
+    }
+    input[type="month"]:focus {
+        border-color: #E02424;
+        outline: none;
+        box-shadow: 0 0 5px rgba(224, 36, 36, 0.5);
+    }
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    th, td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #4B5563;
+    }
+    th {
+        background-color: #2D2D2D;
+        font-weight: bold;
+    }
+</style>
 
-            <!-- Biểu đồ yêu cầu theo tháng -->
-            <div class="col-lg-6 mb-4">
-                <canvas id="giftTransactionChart"></canvas>
+<div class="container mx-auto p-6">
+    <!-- Tiêu đề và bộ lọc -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+        <h3 class="text-2xl font-bold text-dark mb-4 md:mb-0">Thống kê quà tặng</h3>
+        <div class="flex flex-col md:flex-row items-center space-x-4">
+            <div class="w-full md:w-auto">
+                <label for="monthFilter" class="block text-sm font-medium text-dark mb-1">Lọc theo tháng:</label>
+                <input type="month" id="monthFilter" class="w-full px-3 py-2 rounded-md border focus:ring-0">
+            </div>
+            <button id="exportCSV" class="btn-hover text-white px-6 py-2 rounded-full text-sm font-semibold flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H3a2 2 0 01-2-2V3a2 2 0 012-2h18a2 2 0 012 2v16a2 2 0 01-2 2z"></path></svg>
+                Xuất CSV
+            </button>
+        </div>
+    </div>
+
+    <!-- Tổng quan -->
+    <div class="card-shadow gradient-bg rounded-lg mb-8 p-6">
+        <div class="bg-red-600 text-white p-4 rounded-t-lg">
+            <h3 class="text-lg font-bold">Tổng quan quà tặng</h3>
+        </div>
+        <div class="p-6 flex flex-col md:flex-row gap-6">
+            <div class="w-full md:w-1/3">
+                <h3 class="text-lg font-bold text-white">Thống kê tổng quan</h3>
+                <p id="totalStock" class="text-xl font-bold text-red-500 mt-2">Tổng tồn kho: 245</p>
+                <p id="totalRequests" class="text-xl font-bold text-red-500 mt-2">Tổng yêu cầu: 240</p>
+                <p id="totalTeachers" class="text-xl font-bold text-red-500 mt-2">Số giảng viên: 1</p>
+            </div>
+            <div class="w-full md:w-2/3">
+                <canvas id="summaryChart"></canvas>
             </div>
         </div>
+    </div>
 
-        <div class="row">
-            <!-- Bảng top quà tặng được yêu cầu -->
-            <div class="col-lg-6">
-                <h6 class="font-weight-bold text-secondary mb-3">Top quà tặng được yêu cầu nhiều nhất</h6>
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Tên quà tặng</th>
-                            <th>Danh mục</th>
-                            <th>Số lượt yêu cầu</th>
-                        </tr>
-                    </thead>
-                    <tbody id="topGiftsTableBody">
-                        <!-- Dữ liệu sẽ được thêm bằng JS -->
-                    </tbody>
-                </table>
+    <!-- Biểu đồ kết hợp cột + đường -->
+    <div class="card-shadow gradient-bg rounded-lg mb-8">
+        <div class="bg-red-600 text-white p-4 rounded-t-lg">
+            <h3 class="text-lg font-bold">Tồn kho và yêu cầu quà tặng</h3>
+        </div>
+        <div class="p-6">
+            <canvas id="combinedChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Biểu đồ yêu cầu theo danh mục qua thời gian -->
+    <div class="card-shadow gradient-bg rounded-lg mb-8">
+        <div class="bg-red-600 text-white p-4 rounded-t-lg">
+            <h3 class="text-lg font-bold">Yêu cầu quà tặng theo danh mục qua thời gian</h3>
+        </div>
+        <div class="p-6">
+            <canvas id="categoryByMonthChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Bảng top quà tặng và top giảng viên -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="card-shadow gradient-bg rounded-lg">
+            <div class="bg-red-600 text-white p-4 rounded-t-lg">
+                <h3 class="text-lg font-bold">Top quà tặng được yêu cầu</h3>
             </div>
-
-            <!-- Bảng top giảng viên yêu cầu -->
-            <div class="col-lg-6">
-                <h6 class="font-weight-bold text-secondary mb-3">Top giảng viên yêu cầu quà</h6>
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Họ tên</th>
-                            <th>Email</th>
-                            <th>Tổng số yêu cầu</th>
-                        </tr>
-                    </thead>
-                    <tbody id="topTeachersTableBody">
-                        <!-- Dữ liệu sẽ được thêm bằng JS -->
-                    </tbody>
-                </table>
+            <div class="p-6">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="bg-gray-800 text-white">
+                                <th class="p-3 text-sm font-semibold">Tên quà tặng</th>
+                                <th class="p-3 text-sm font-semibold">Danh mục</th>
+                                <th class="p-3 text-sm font-semibold">Số lượt yêu cầu</th>
+                                <th class="p-3 text-sm font-semibold">Tỷ lệ (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="topGiftsTableBody" class="divide-y divide-gray-700"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="card-shadow gradient-bg rounded-lg">
+            <div class="bg-red-600 text-white p-4 rounded-t-lg">
+                <h3 class="text-lg font-bold">Top giảng viên yêu cầu quà</h3>
+            </div>
+            <div class="p-6">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="bg-gray-800 text-white">
+                                <th class="p-3 text-sm font-semibold">Họ tên</th>
+                                <th class="p-3 text-sm font-semibold">Email</th>
+                                <th class="p-3 text-sm font-semibold">Tổng yêu cầu</th>
+                                <th class="p-3 text-sm font-semibold">Tỷ lệ (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="topTeachersTableBody" class="divide-y divide-gray-700"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Import Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded", async function () {
-    // Lấy dữ liệu tồn kho quà tặng
-    const stockRes = await fetch("/api/statistics/reward/gift-stock");
-    const stockData = await stockRes.json();
+    document.addEventListener("DOMContentLoaded", function () {
+        const monthFilter = document.getElementById("monthFilter");
+        const exportCSVBtn = document.getElementById("exportCSV");
+        let stockDataRaw = {}, topRequestedDataRaw = {}, topTeachersDataRaw = {};
 
-    const stockLabels = stockData.data.map(g => g.name);
-    const stockValues = stockData.data.map(g => g.quantity_in_stock);
+        // Dữ liệu mẫu cho API /api/statistics/reward/request-by-month
+        const monthDataRaw = {
+            success: true,
+            data: [
+                { _id: "2025-07", total: 240 },
+                { _id: "2025-06", total: 200 },
+                { _id: "2025-05", total: 180 }
+            ]
+        };
 
-    new Chart(document.getElementById("giftStockChart"), {
-        type: "bar",
-        data: {
-            labels: stockLabels,
-            datasets: [{
-                label: "Tồn kho",
-                data: stockValues,
-                backgroundColor: "#28a745"
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: {
-                    display: true,
-                    text: "Biểu đồ tồn kho quà tặng"
+        async function loadStatistics(monthYear) {
+            const params = monthYear ? `?month=${monthYear}` : "";
+            try {
+                const [stockRes, topRequestedRes, topTeachersRes] = await Promise.all([
+                    fetch("/api/statistics/reward/gift-stock" + params).then(res => res.json()),
+                    fetch("/api/statistics/reward/top-requested" + params).then(res => res.json()),
+                    fetch("/api/statistics/reward/top-teachers" + params).then(res => res.json())
+                ]);
+
+                stockDataRaw = stockRes;
+                topRequestedDataRaw = topRequestedRes;
+                topTeachersDataRaw = topTeachersRes;
+
+                // Tổng quan
+                if (stockDataRaw.success && topRequestedDataRaw.success) {
+                    const totalStock = stockDataRaw.data.reduce((sum, g) => sum + g.quantity_in_stock, 0);
+                    const totalRequests = topRequestedDataRaw.data.reduce((sum, g) => sum + g.totalRequested, 0);
+                    document.getElementById("totalStock").innerText = `Tổng tồn kho: ${totalStock}`;
+                    document.getElementById("totalRequests").innerText = `Tổng yêu cầu: ${totalRequests}`;
+                    document.getElementById("totalTeachers").innerText = `Số giảng viên: ${topTeachersDataRaw.data.length}`;
+
+                    // Biểu đồ tổng quan (Pie Chart)
+                    const categories = ["Học viên", "Đối tác"];
+                    const stockByCategory = categories.map(cat => 
+                        stockDataRaw.data.filter(g => topRequestedDataRaw.data.find(t => t.name === g.name && t.category === cat))
+                            .reduce((sum, g) => sum + g.quantity_in_stock, 0)
+                    );
+                    const requestsByCategory = categories.map(cat => 
+                        topRequestedDataRaw.data.filter(g => g.category === cat)
+                            .reduce((sum, g) => sum + g.totalRequested, 0)
+                    );
+                    renderChart("summaryChart", "pie", [...categories.map(c => `Tồn kho - ${c}`), ...categories.map(c => `Yêu cầu - ${c}`)], [{
+                        label: "Tồn kho và yêu cầu",
+                        data: [...stockByCategory, ...requestsByCategory],
+                        backgroundColor: ["#E02424", "#4CAF50", "#FFC107", "#2196F3"],
+                        borderColor: ["#B91C1C", "#388E3C", "#FFA000", "#1976D2"],
+                        borderWidth: 1
+                    }], {
+                        plugins: {
+                            legend: { position: 'top', labels: { color: '#D1D5DB' } },
+                            title: { display: true, text: 'Tổng quan tồn kho và yêu cầu theo danh mục', color: '#D1D5DB' }
+                        }
+                    });
                 }
+
+                // Biểu đồ kết hợp cột + đường
+                if (stockDataRaw.success && topRequestedDataRaw.success) {
+                    const labels = stockDataRaw.data.map(g => g.name);
+                    const stockValues = stockDataRaw.data.map(g => g.quantity_in_stock);
+                    const requestValues = stockDataRaw.data.map(g => {
+                        const gift = topRequestedDataRaw.data.find(t => t.name === g.name);
+                        return gift ? gift.totalRequested : 0;
+                    });
+
+                    renderChart("combinedChart", "bar", labels, [
+                        {
+                            type: "bar",
+                            label: "Tồn kho",
+                            data: stockValues,
+                            backgroundColor: "#E02424",
+                            borderColor: "#B91C1C",
+                            borderWidth: 1
+                        },
+                        {
+                            type: "line",
+                            label: "Số lượt yêu cầu",
+                            data: requestValues,
+                            borderColor: "#4CAF50",
+                            backgroundColor: "rgba(76, 175, 80, 0.2)",
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ], {
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'Số lượng / Lượt yêu cầu', color: '#D1D5DB' }, ticks: { color: '#D1D5DB' } },
+                            x: { title: { display: true, text: 'Quà tặng', color: '#D1D5DB' }, ticks: { color: '#D1D5DB' } }
+                        },
+                        plugins: {
+                            legend: { labels: { color: '#D1D5DB' } },
+                            title: { display: true, text: 'Tồn kho và yêu cầu quà tặng', color: '#D1D5DB' }
+                        }
+                    });
+                }
+
+                // Biểu đồ yêu cầu theo danh mục qua thời gian (Stacked Bar)
+                if (monthDataRaw.success && topRequestedDataRaw.success) {
+                    const labels = monthDataRaw.data.map(m => m._id);
+                    const categories = ["Học viên", "Đối tác"];
+                    const datasets = categories.map((cat, index) => ({
+                        label: cat,
+                        data: labels.map((month, i) => {
+                            const total = monthDataRaw.data[i].total;
+                            const catTotal = topRequestedDataRaw.data.filter(g => g.category === cat)
+                                .reduce((sum, g) => sum + g.totalRequested, 0);
+                            return Math.round((total / 240) * catTotal); // Phân phối giả định
+                        }),
+                        backgroundColor: ["#E02424", "#4CAF50"][index % 2],
+                        borderColor: ["#B91C1C", "#388E3C"][index % 2],
+                        borderWidth: 1
+                    }));
+
+                    renderChart("categoryByMonthChart", "bar", labels, datasets, {
+                        scales: {
+                            x: { stacked: true, title: { display: true, text: 'Tháng', color: '#D1D5DB' }, ticks: { color: '#D1D5DB' } },
+                            y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Số lượt yêu cầu', color: '#D1D5DB' }, ticks: { color: '#D1D5DB' } }
+                        },
+                        plugins: {
+                            legend: { labels: { color: '#D1D5DB' } },
+                            title: { display: true, text: 'Yêu cầu quà tặng theo danh mục qua thời gian', color: '#D1D5DB' }
+                        }
+                    });
+                }
+
+                // Bảng top quà tặng
+                if (topRequestedDataRaw.success) {
+                    const totalRequests = topRequestedDataRaw.data.reduce((sum, g) => sum + g.totalRequested, 0);
+                    const topGiftBody = document.getElementById("topGiftsTableBody");
+                    topGiftBody.innerHTML = topRequestedDataRaw.data.map(gift => `
+                        <tr class="table-row-hover text-gray-300">
+                            <td class="p-3">${gift.name}</td>
+                            <td class="p-3">${gift.category}</td>
+                            <td class="p-3">${gift.totalRequested}</td>
+                            <td class="p-3">${((gift.totalRequested / totalRequests) * 100).toFixed(2)}%</td>
+                        </tr>
+                    `).join("");
+                }
+
+                // Bảng top giảng viên
+                if (topTeachersDataRaw.success) {
+                    const totalRequests = topTeachersDataRaw.data.reduce((sum, t) => sum + t.totalRequested, 0);
+                    const topTeacherBody = document.getElementById("topTeachersTableBody");
+                    topTeacherBody.innerHTML = topTeachersDataRaw.data.map(t => `
+                        <tr class="table-row-hover text-gray-300">
+                            <td class="p-3">${t.name}</td>
+                            <td class="p-3">${t.email}</td>
+                            <td class="p-3">${t.totalRequested}</td>
+                            <td class="p-3">${((t.totalRequested / totalRequests) * 100).toFixed(2)}%</td>
+                        </tr>
+                    `).join("");
+                }
+            } catch (error) {
+                console.error("Lỗi khi tải dữ liệu:", error);
+                alert("Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại.");
             }
         }
-    });
 
-    // Lấy dữ liệu yêu cầu theo tháng
-    const monthRes = await fetch("/api/statistics/reward/request-by-month");
-    const monthData = await monthRes.json();
-
-    new Chart(document.getElementById("giftTransactionChart"), {
-        type: "line",
-        data: {
-            labels: monthData.data.map(d => d._id),
-            datasets: [{
-                label: "Số lượng yêu cầu",
-                data: monthData.data.map(d => d.total),
-                borderColor: "#007bff",
-                fill: false
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: {
-                    display: true,
-                    text: "Biểu đồ số lượng yêu cầu theo tháng"
-                }
+        function renderChart(canvasId, type, labels, datasets, options = {}) {
+            const ctx = document.getElementById(canvasId)?.getContext("2d");
+            if (!ctx) {
+                console.error(`Không tìm thấy thẻ canvas với ID: ${canvasId}`);
+                return;
             }
+
+            if (window[canvasId] instanceof Chart) {
+                window[canvasId].destroy();
+            }
+
+            window[canvasId] = new Chart(ctx, {
+                type,
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top', labels: { color: '#D1D5DB' } },
+                        tooltip: { enabled: true, backgroundColor: '#2D2D2D', titleColor: '#FFFFFF', bodyColor: '#D1D5DB' }
+                    },
+                    ...options
+                }
+            });
         }
+
+        // Xuất CSV
+        exportCSVBtn.addEventListener("click", () => {
+            if (!stockDataRaw.success || !topRequestedDataRaw.success || !topTeachersDataRaw.success) {
+                alert("Không có đủ dữ liệu để xuất CSV!");
+                return;
+            }
+
+            let csv = '\uFEFF'; // BOM để tránh lỗi tiếng Việt
+
+            // Tổng quan
+            csv += '--- TỔNG QUAN ---\n';
+            csv += 'Tổng tồn kho,Tổng yêu cầu,Số giảng viên\n';
+            csv += `${stockDataRaw.data.reduce((sum, g) => sum + g.quantity_in_stock, 0)},${topRequestedDataRaw.data.reduce((sum, g) => sum + g.totalRequested, 0)},${topTeachersDataRaw.data.length}\n\n`;
+
+            // Tồn kho
+            csv += '--- TỒN KHO QUÀ TẶNG ---\n';
+            csv += 'Tên quà tặng,Số lượng tồn kho\n';
+            stockDataRaw.data.forEach(g => {
+                csv += `"${g.name}",${g.quantity_in_stock}\n`;
+            });
+            csv += '\n';
+
+            // Yêu cầu theo danh mục qua thời gian
+            csv += '--- YÊU CẦU THEO DANH MỤC ---\n';
+            csv += 'Tháng,Học viên,Đối tác\n';
+            monthDataRaw.data.forEach(m => {
+                const total = m.total;
+                const learnerTotal = topRequestedDataRaw.data.filter(g => g.category === "Học viên").reduce((sum, g) => sum + g.totalRequested, 0);
+                const partnerTotal = topRequestedDataRaw.data.filter(g => g.category === "Đối tác").reduce((sum, g) => sum + g.totalRequested, 0);
+                csv += `${m._id},${Math.round((total / 240) * learnerTotal)},${Math.round((total / 240) * partnerTotal)}\n`;
+            });
+            csv += '\n';
+
+            // Top quà tặng
+            csv += '--- TOP QUÀ TẶNG ---\n';
+            csv += 'Tên quà tặng,Danh mục,Số lượt yêu cầu,Tỷ lệ (%)\n';
+            const totalRequests = topRequestedDataRaw.data.reduce((sum, g) => sum + g.totalRequested, 0);
+            topRequestedDataRaw.data.forEach(g => {
+                csv += `"${g.name}","${g.category}",${g.totalRequested},${((g.totalRequested / totalRequests) * 100).toFixed(2)}\n`;
+            });
+            csv += '\n';
+
+            // Top giảng viên
+            csv += '--- TOP GIẢNG VIÊN ---\n';
+            csv += 'Họ tên,Email,Tổng yêu cầu,Tỷ lệ (%)\n';
+            const totalTeacherRequests = topTeachersDataRaw.data.reduce((sum, t) => sum + t.totalRequested, 0);
+            topTeachersDataRaw.data.forEach(t => {
+                csv += `"${t.name}","${t.email}",${t.totalRequested},${((t.totalRequested / totalTeacherRequests) * 100).toFixed(2)}\n`;
+            });
+
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `thong-ke-qua-tang_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.csv`;
+            link.click();
+        });
+
+        // Lọc theo tháng
+        monthFilter.addEventListener("change", () => {
+            loadStatistics(monthFilter.value);
+        });
+
+        loadStatistics();
     });
-
-    // Bảng Top quà tặng
-    const topGiftRes = await fetch("/api/statistics/reward/top-requested");
-    const topGiftData = await topGiftRes.json();
-    const topGiftBody = document.getElementById("topGiftsTableBody");
-    topGiftBody.innerHTML = topGiftData.data.map(gift => `
-        <tr>
-            <td>${gift.name}</td>
-            <td>${gift.category}</td>
-            <td>${gift.totalRequested}</td>
-        </tr>
-    `).join("");
-
-    // Bảng Top giảng viên
-    const topTeacherRes = await fetch("/api/statistics/reward/top-teachers");
-    const topTeacherData = await topTeacherRes.json();
-    const topTeacherBody = document.getElementById("topTeachersTableBody");
-    topTeacherBody.innerHTML = topTeacherData.data.map(t => `
-        <tr>
-            <td>${t.name}</td>
-            <td>${t.email}</td>
-            <td>${t.totalRequested}</td>
-        </tr>
-    `).join("");
-});
 </script>

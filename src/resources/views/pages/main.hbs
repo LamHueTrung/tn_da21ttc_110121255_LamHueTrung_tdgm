@@ -1,325 +1,246 @@
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #1A1A1A;
+        color: #D1D5DB;
+    }
+    .card-shadow {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        border: 1px solid #E02424;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card-shadow:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 16px rgba(224, 36, 36, 0.3);
+    }
+    .gradient-bg {
+        background: linear-gradient(to bottom, #2D2D2D, #1A1A1A);
+    }
+</style>
+
+<!-- Kiểm tra và lưu token -->
 <script>
-    // Kiểm tra xem token có tồn tại hay không
     const token = "{{token}}"; // Lấy giá trị token từ server
     if (token) {
-        // Lưu token vào localStorage
         localStorage.setItem('token', token);
         console.log('Token saved to localStorage:', token);
     } else {
         console.log('No token provided');
     }
 </script>
-<!-- Page Heading -->
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+
+<div class="container mx-auto p-6">
+    <!-- Card thống kê -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+        <!-- Thiết bị -->
+        <div class="card-shadow gradient-bg rounded-lg">
+            <div class="bg-red-600 text-white p-4 rounded-t-lg">
+                <h6 class="text-xs font-bold uppercase">Thiết bị</h6>
+            </div>
+            <div class="p-4 flex items-center">
+                <div class="flex-1">
+                    <h5 class="text-2xl font-bold text-white">{{dashboardStats.deviceCount}}</h5>
+                </div>
+                <div>
+                    <i class="fa-regular fa-hard-drive fa-2x text-gray-300"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quà tặng -->
+        <div class="card-shadow gradient-bg rounded-lg">
+            <div class="bg-red-600 text-white p-4 rounded-t-lg">
+                <h6 class="text-xs font-bold uppercase">Quà tặng</h6>
+            </div>
+            <div class="p-4 flex items-center">
+                <div class="flex-1">
+                    <h5 class="text-2xl font-bold text-white">{{dashboardStats.giftCount}}</h5>
+                </div>
+                <div>
+                    <i class="fa-solid fa-gift fa-2x text-gray-300"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phòng -->
+        <div class="card-shadow gradient-bg rounded-lg">
+            <div class="bg-red-600 text-white p-4 rounded-t-lg">
+                <h6 class="text-xs font-bold uppercase">Phòng</h6>
+            </div>
+            <div class="p-4 flex items-center">
+                <div class="flex-1">
+                    <h5 class="text-2xl font-bold text-white">{{dashboardStats.roomCount}}</h5>
+                </div>
+                <div>
+                    <i class="fa-solid fa-house fa-2x text-gray-300"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Đơn mượn/trả - yêu cầu -->
+        <div class="card-shadow gradient-bg rounded-lg">
+            <div class="bg-red-600 text-white p-4 rounded-t-lg">
+                <h6 class="text-xs font-bold uppercase">Đơn mượn/trả - yêu cầu</h6>
+            </div>
+            <div class="p-4 flex items-center">
+                <div class="flex-1">
+                    <h5 class="text-2xl font-bold text-white">{{sum dashboardStats.giftOrderCount dashboardStats.borrowCount}}</h5>
+                </div>
+                <div>
+                    <i class="fa-regular fa-face-dizzy fa-2x text-gray-300"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nhóm: Biểu đồ tổng quan -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Biểu đồ tổng quan thiết bị -->
+        <div class="card-shadow gradient-bg rounded-lg">
+            <div class="bg-red-600 text-white p-4 rounded-t-lg">
+                <h3 class="text-lg font-bold">Tổng quan thiết bị</h3>
+            </div>
+            <div class="p-6">
+                <canvas id="deviceSummaryChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Biểu đồ tổng quan quà tặng -->
+        <div class="card-shadow gradient-bg rounded-lg">
+            <div class="bg-red-600 text-white p-4 rounded-t-lg">
+                <h3 class="text-lg font-bold">Tổng quan quà tặng</h3>
+            </div>
+            <div class="p-6">
+                <canvas id="giftSummaryChart"></canvas>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- Content Row -->
-<div class="row" id="page-top">
-
-    <!-- Courses Card -->
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-primary shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            Thiết bị</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{dashboardStats.deviceCount}}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fa-regular fa-hard-drive fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Users Card -->
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-success shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            Quà tặng</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{dashboardStats.giftCount}}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fa-solid fa-gift fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Posts Card  -->
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-info shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Phòng
-                        </div>
-                        <div class="row no-gutters align-items-center">
-                            <div class="col-auto">
-                                <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">{{dashboardStats.roomCount}}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fa-solid fa-house fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Comments Card -->
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-warning shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                            Đơn mượn/trả - yêu cầu</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{sum dashboardStats.giftOrderCount
-                            dashboardStats.borrowCount}}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fa-regular fa-face-dizzy fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Content Row -->
-
-<div class="container-fluid">
-
-  <!-- Nhóm: Thiết bị -->
-  <h5 class="text-dark font-weight-bold mt-4 mb-3">📦 Thống kê thiết bị</h5>
-  <div class="row">
-    <!-- Biểu đồ mượn theo tháng -->
-    <div class="col-lg-6 mb-4">
-      <div class="card shadow">
-        <div class="card-header text-primary font-weight-bold">Lượt mượn thiết bị theo thời gian</div>
-        <div class="card-body"><canvas id="borrowByDateChart"></canvas></div>
-      </div>
-    </div>
-
-    <!-- Biểu đồ trạng thái thiết bị -->
-    <div class="col-lg-6 mb-4">
-      <div class="card shadow">
-        <div class="card-header text-success font-weight-bold">Tình trạng thiết bị</div>
-        <div class="card-body"><canvas id="deviceStatusChart"></canvas></div>
-      </div>
-    </div>
-
-    <!-- Top thiết bị mượn nhiều -->
-    <div class="col-lg-6 mb-4">
-      <div class="card shadow">
-        <div class="card-header text-secondary font-weight-bold">Top thiết bị được mượn nhiều</div>
-        <div class="card-body">
-          <canvas id="topDevicesChart"></canvas>
-          <div class="table-responsive mt-3">
-            <table class="table table-sm table-bordered">
-              <thead class="table-light">
-                <tr><th>Tên thiết bị</th><th>Danh mục</th><th>Lượt mượn</th></tr>
-              </thead>
-              <tbody id="topDevicesTableBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Top giáo viên -->
-    <div class="col-lg-6 mb-4">
-      <div class="card shadow">
-        <div class="card-header text-warning font-weight-bold">Top giảng viên mượn nhiều thiết bị</div>
-        <div class="card-body">
-          <canvas id="topTeachersChart"></canvas>
-          <div class="table-responsive mt-3">
-            <table class="table table-sm table-bordered">
-              <thead class="table-light">
-                <tr><th>Họ tên</th><th>Email</th><th>Lượt mượn</th></tr>
-              </thead>
-              <tbody id="topTeachersTableBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Nhóm: Quà tặng -->
-  <h5 class="text-dark font-weight-bold mt-5 mb-3">🎁 Thống kê quà tặng</h5>
-  <div class="row">
-    <!-- Yêu cầu quà theo tháng -->
-    <div class="col-lg-6 mb-4">
-      <div class="card shadow">
-        <div class="card-header text-info font-weight-bold">Số lượng yêu cầu quà theo tháng</div>
-        <div class="card-body"><canvas id="giftRequestByMonthChart"></canvas></div>
-      </div>
-    </div>
-
-    <!-- Top quà tặng -->
-    <div class="col-lg-6 mb-4">
-      <div class="card shadow">
-        <div class="card-header text-danger font-weight-bold">Top quà tặng được yêu cầu nhiều</div>
-        <div class="card-body">
-          <canvas id="topGiftsChart"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</div>
-
+<!-- Import Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded", async function () {
-    //Biểu đồ lượt mượn thiết bị theo ngày/tháng
-    const borrowRes = await fetch("/api/statistics/borrow-return/by-date");
-    const borrowData = await borrowRes.json();
+    document.addEventListener("DOMContentLoaded", async function () {
+        let deviceCategoryDataRaw = {}, deviceStatusDataRaw = {};
+        let giftStockDataRaw = {}, giftTopRequestedDataRaw = {};
 
-    new Chart(document.getElementById("borrowByDateChart"), {
-        type: "line",
-        data: {
-            labels: borrowData.data.map(d => d._id),
-            datasets: [{
-                label: "Số lượt mượn",
-                data: borrowData.data.map(d => d.total),
-                borderColor: "#007bff",
-                backgroundColor: "rgba(0,123,255,0.1)",
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: { display: true, text: "Lượt mượn thiết bị theo thời gian" }
+        async function loadStatistics() {
+            try {
+                const [
+                    deviceCategoryRes, deviceStatusRes,
+                    giftStockRes, giftTopRequestedRes
+                ] = await Promise.all([
+                    fetch("/api/statistics/device/summary-by-category").then(res => res.json()),
+                    fetch("/api/statistics/device/status-counts").then(res => res.json()),
+                    fetch("/api/statistics/reward/gift-stock").then(res => res.json()),
+                    fetch("/api/statistics/reward/top-requested").then(res => res.json())
+                ]);
+
+                deviceCategoryDataRaw = deviceCategoryRes;
+                deviceStatusDataRaw = deviceStatusRes;
+                giftStockDataRaw = giftStockRes;
+                giftTopRequestedDataRaw = giftTopRequestedRes;
+
+                // Biểu đồ tổng quan thiết bị (Stacked Bar)
+                if (deviceStatusDataRaw.success && deviceCategoryDataRaw.success) {
+                    const labels = deviceCategoryDataRaw.data.map(c => c.category);
+                    const datasets = deviceStatusDataRaw.data.map((status, index) => ({
+                        label: status.status,
+                        data: deviceCategoryDataRaw.data.map(category => {
+                            // Giả định phân phối trạng thái theo danh mục (dựa trên tỷ lệ tổng)
+                            const totalDevices = deviceCategoryDataRaw.data.reduce((sum, c) => sum + c.total, 0);
+                            const statusTotal = status.total;
+                            const categoryTotal = category.total;
+                            return Math.round((statusTotal / totalDevices) * categoryTotal);
+                        }),
+                        backgroundColor: ["#E02424", "#4CAF50"][index % 2],
+                        borderColor: ["#B91C1C", "#388E3C"][index % 2],
+                        borderWidth: 1
+                    }));
+
+                    renderChart("deviceSummaryChart", "bar", labels, datasets, {
+                        scales: {
+                            x: { stacked: true, title: { display: true, text: 'Danh mục', color: '#D1D5DB', font: { size: 14 } }, ticks: { color: '#D1D5DB' } },
+                            y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Số lượng', color: '#D1D5DB', font: { size: 14 } }, ticks: { color: '#D1D5DB' } }
+                        },
+                        plugins: {
+                            legend: { position: 'top', labels: { color: '#D1D5DB', font: { size: 12 } } },
+                            title: { display: true, text: 'Thiết bị theo danh mục và trạng thái', color: '#D1D5DB', font: { size: 16 } },
+                            datalabels: { display: true, color: '#FFFFFF', font: { size: 12 } }
+                        }
+                    });
+                }
+
+                // Biểu đồ tổng quan quà tặng (Bar)
+                if (giftStockDataRaw.success && giftTopRequestedDataRaw.success) {
+                    const categories = ["Học viên", "Đối tác"];
+                    const stockData = categories.map(cat => 
+                        giftStockDataRaw.data.filter(g => giftTopRequestedDataRaw.data.find(t => t.name === g.name && t.category === cat))
+                            .reduce((sum, g) => sum + g.quantity_in_stock, 0)
+                    );
+                    const requestData = categories.map(cat => 
+                        giftTopRequestedDataRaw.data.filter(g => g.category === cat)
+                            .reduce((sum, g) => sum + g.totalRequested, 0)
+                    );
+
+                    renderChart("giftSummaryChart", "bar", categories, [
+                        {
+                            label: "Tồn kho",
+                            data: stockData,
+                            backgroundColor: "#E02424",
+                            borderColor: "#B91C1C",
+                            borderWidth: 1
+                        },
+                        {
+                            label: "Yêu cầu",
+                            data: requestData,
+                            backgroundColor: "#4CAF50",
+                            borderColor: "#388E3C",
+                            borderWidth: 1
+                        }
+                    ], {
+                        scales: {
+                            x: { title: { display: true, text: 'Danh mục', color: '#D1D5DB', font: { size: 14 } }, ticks: { color: '#D1D5DB' } },
+                            y: { beginAtZero: true, title: { display: true, text: 'Số lượng / Lượt yêu cầu', color: '#D1D5DB', font: { size: 14 } }, ticks: { color: '#D1D5DB' } }
+                        },
+                        plugins: {
+                            legend: { position: 'top', labels: { color: '#D1D5DB', font: { size: 12 } } },
+                            title: { display: true, text: 'Tồn kho và yêu cầu quà tặng', color: '#D1D5DB', font: { size: 16 } },
+                            datalabels: { display: true, color: '#FFFFFF', font: { size: 12 } }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error("Lỗi khi tải dữ liệu:", error);
+                alert("Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại.");
             }
         }
-    });
 
-    //Biểu đồ trạng thái thiết bị
-    const statusRes = await fetch("/api/statistics/device/status-counts");
-    const statusData = await statusRes.json();
-
-    new Chart(document.getElementById("deviceStatusChart"), {
-        type: "doughnut",
-        data: {
-            labels: statusData.data.map(s => s.status),
-            datasets: [{
-                data: statusData.data.map(s => s.total),
-                backgroundColor: ["#28a745", "#ffc107", "#dc3545", "#17a2b8"]
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: { display: true, text: "Tình trạng thiết bị" },
-                legend: { position: "bottom" }
+        function renderChart(canvasId, type, labels, datasets, options = {}) {
+            const ctx = document.getElementById(canvasId)?.getContext("2d");
+            if (!ctx) {
+                console.error(`Không tìm thấy thẻ canvas với ID: ${canvasId}`);
+                return;
             }
-        }
-    });
 
-    //Biểu đồ Top thiết bị được mượn nhiều nhất
-    const topDeviceRes = await fetch("/api/statistics/borrow-return/by-device");
-    const topDeviceData = await topDeviceRes.json();
-
-    new Chart(document.getElementById("topDevicesChart"), {
-        type: "bar",
-        data: {
-            labels: topDeviceData.data.map(d => d.name),
-            datasets: [{
-                label: "Lượt mượn",
-                data: topDeviceData.data.map(d => d.totalBorrowed),
-                backgroundColor: "#6c757d"
-            }]
-        },
-        options: {
-            responsive: true,
-            indexAxis: 'y', // Cột ngang
-            plugins: {
-                title: { display: true, text: "Top thiết bị được mượn nhiều" }
+            if (window[canvasId] instanceof Chart) {
+                window[canvasId].destroy();
             }
+
+            window[canvasId] = new Chart(ctx, {
+                type,
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top', labels: { color: '#D1D5DB' } },
+                        tooltip: { enabled: true, backgroundColor: '#2D2D2D', titleColor: '#FFFFFF', bodyColor: '#D1D5DB' }
+                    },
+                    ...options
+                }
+            });
         }
+
+        loadStatistics();
     });
-
-    //Biểu đồ Top giáo viên mượn nhiều thiết bị
-    const topTeacherRes = await fetch("/api/statistics/borrow-return/by-teacher");
-    const topTeacherData = await topTeacherRes.json();
-
-    new Chart(document.getElementById("topTeachersChart"), {
-        type: "bar",
-        data: {
-            labels: topTeacherData.data.map(t => t.name),
-            datasets: [{
-                label: "Lượt mượn",
-                data: topTeacherData.data.map(t => t.totalBorrowed),
-                backgroundColor: "#fd7e14"
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: { display: true, text: "Top giáo viên mượn thiết bị" }
-            }
-        }
-    });
-
-    //Biểu đồ số lượng yêu cầu quà theo tháng
-    const giftMonthRes = await fetch("/api/statistics/reward/request-by-month");
-    const giftMonthData = await giftMonthRes.json();
-
-    new Chart(document.getElementById("giftRequestByMonthChart"), {
-        type: "line",
-        data: {
-            labels: giftMonthData.data.map(g => g._id),
-            datasets: [{
-                label: "Số lượng yêu cầu",
-                data: giftMonthData.data.map(g => g.total),
-                borderColor: "#6610f2",
-                backgroundColor: "rgba(102,16,242,0.1)",
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: { display: true, text: "Số lượng yêu cầu quà tặng theo tháng" }
-            }
-        }
-    });
-
-    //Biểu đồ Top quà tặng được yêu cầu nhiều nhất
-    const topGiftRes = await fetch("/api/statistics/reward/top-requested");
-    const topGiftData = await topGiftRes.json();
-
-    new Chart(document.getElementById("topGiftsChart"), {
-        type: "bar",
-        data: {
-            labels: topGiftData.data.map(g => g.name),
-            datasets: [{
-                label: "Lượt yêu cầu",
-                data: topGiftData.data.map(g => g.totalRequested),
-                backgroundColor: "#20c997"
-            }]
-        },
-        options: {
-            responsive: true,
-            indexAxis: 'y',
-            plugins: {
-                title: { display: true, text: "Top quà tặng được yêu cầu nhiều" }
-            }
-        }
-    });
-
-});
 </script>

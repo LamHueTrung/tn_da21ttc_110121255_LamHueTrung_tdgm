@@ -1,413 +1,369 @@
 <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #1A1A1A;
-            color: #D1D5DB;
-        }
-        .card-shadow {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            border: 1px solid #E02424;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .card-shadow:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 6px 16px rgba(224, 36, 36, 0.3);
-        }
-        .btn-hover {
-            transition: all 0.3s ease;
-            background: linear-gradient(to right, #E02424, #B91C1C);
-        }
-        .btn-hover:hover {
-            background: linear-gradient(to right, #B91C1C, #E02424);
-            box-shadow: 0 0 10px rgba(224, 36, 36, 0.5);
-            transform: translateY(-2px);
-        }
-        .gradient-bg {
-            background: linear-gradient(to bottom, #2D2D2D, #1A1A1A);
-        }
-        .table-row-hover:hover {
-            background-color: #3E1F1F;
-        }
-        input[type="month"] {
-            background-color: #2D2D2D;
-            color: #FFFFFF;
-            border-color: #E02424;
-        }
-        input[type="month"]:focus {
-            border-color: #E02424;
-            outline: none;
-            box-shadow: 0 0 5px rgba(224, 36, 36, 0.5);
-        }
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #1A1A1A;
+        color: #D1D5DB;
+    }
+    .card-shadow {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        border: 1px solid #E02424;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card-shadow:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 16px rgba(224, 36, 36, 0.3);
+    }
+    .btn-hover {
+        transition: all 0.3s ease;
+        background: linear-gradient(to right, #E02424, #B91C1C);
+    }
+    .btn-hover:hover {
+        background: linear-gradient(to right, #B91C1C, #E02424);
+        box-shadow: 0 0 10px rgba(224, 36, 36, 0.5);
+        transform: translateY(-2px);
+    }
+    .gradient-bg {
+        background: linear-gradient(to bottom, #2D2D2D, #1A1A1A);
+    }
+    .table-row-hover:hover {
+        background-color: #3E1F1F;
+    }
+    input[type="month"] {
+        background-color: #2D2D2D;
+        color: #FFFFFF;
+        border-color: #E02424;
+    }
+    input[type="month"]:focus {
+        border-color: #E02424;
+        outline: none;
+        box-shadow: 0 0 5px rgba(224, 36, 36, 0.5);
+    }
 </style>
-    <div class="container mx-auto p-6">
-        <!-- Bộ lọc + xuất khẩu -->
-        <div class="flex flex-col md:flex-row justify-between items-center mb-8">
-            <div class="w-full md:w-1/3 mb-4 md:mb-0">
-                <label for="monthFilter" class="block text-sm font-medium text-dark mb-1">Lọc theo tháng:</label>
-                <input type="month" id="monthFilter" class="w-full px-3 py-2 rounded-md border focus:ring-0">
+
+<div class="container mx-auto p-6">
+    <!-- Bộ lọc + xuất khẩu -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+        <div class="w-full md:w-1/3 mb-4 md:mb-0">
+            <label for="monthFilter" class="block text-sm font-medium text-dark mb-1">Lọc theo tháng:</label>
+            <input type="month" id="monthFilter" class="w-full px-3 py-2 rounded-md border focus:ring-0">
+        </div>
+        <div class="flex space-x-4">
+            <button id="exportCSV" class="btn-hover text-white px-6 py-2 rounded-full text-sm font-semibold flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H3a2 2 0 01-2-2V3a2 2 0 012-2h18a2 2 0 012 2v16a2 2 0 01-2 2z"></path></svg>
+                Xuất CSV
+            </button>
+        </div>
+    </div>
+
+    <!-- Tổng quan -->
+    <div class="card-shadow gradient-bg rounded-lg mb-8 p-6">
+        <div class="bg-red-600 text-white p-4 rounded-t-lg">
+            <h3 class="text-lg font-bold">Tổng quan trạng thái mượn</h3>
+        </div>
+        <div class="p-6 flex flex-col md:flex-row gap-6">
+            <div class="w-full md:w-1/3">
+                <h3 class="text-lg font-bold text-white">Số liệu tổng quan</h3>
+                <p id="totalRequests" class="text-2xl font-bold text-red-500 mt-2">Tổng yêu cầu: ...</p>
+                <p id="totalBorrowing" class="text-2xl font-bold text-red-500 mt-2">Đang mượn: ...</p>
+                <p id="totalReturned" class="text-2xl font-bold text-red-500 mt-2">Đã trả: ...</p>
+                <p id="totalOverdue" class="text-2xl font-bold text-red-500 mt-2">Quá hạn: ...</p>
             </div>
-            <div class="flex space-x-4">
-                <button id="exportCSV" class="btn-hover text-white px-6 py-2 rounded-full text-sm font-semibold flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H3a2 2 0 01-2-2V3a2 2 0 012-2h18a2 2 0 012 2v16a2 2 0 01-2 2z"></path></svg>
-                    Xuất CSV
-                </button>
-                {{!-- <button id="exportPDF" class="btn-hover text-white px-6 py-2 rounded-full text-sm font-semibold flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                    Xuất PDF
-                </button> --}}
+            <div class="w-full md:w-2/3">
+                <canvas id="summaryChart"></canvas>
             </div>
         </div>
+    </div>
 
-        <!-- Tổng quan -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="card-shadow gradient-bg rounded-lg p-6">
-                <h3 class="text-lg font-bold text-white">Tổng yêu cầu mượn</h3>
-                <p id="totalRequests" class="text-3xl font-bold text-red-500 mt-2">...</p>
-            </div>
-            <div class="card-shadow gradient-bg rounded-lg p-6">
-                <h3 class="text-lg font-bold text-white">Đang mượn</h3>
-                <p id="totalBorrowing" class="text-3xl font-bold text-red-500 mt-2">...</p>
-            </div>
-            <div class="card-shadow gradient-bg rounded-lg p-6">
-                <h3 class="text-lg font-bold text-white">Đã trả</h3>
-                <p id="totalOverdue" class="text-3xl font-bold text-red-500 mt-2">...</p>
-            </div>
+    <!-- Biểu đồ mượn theo thời gian -->
+    <div class="card-shadow gradient-bg rounded-lg mb-8">
+        <div class="bg-red-600 text-white p-4 rounded-t-lg">
+            <h3 class="text-lg font-bold">Mượn thiết bị theo thời gian</h3>
         </div>
+        <div class="p-6">
+            <canvas id="borrowByDateChart"></canvas>
+        </div>
+    </div>
 
-        <!-- Biểu đồ mượn theo thời gian -->
-        <div class="card-shadow gradient-bg rounded-lg mb-8">
+    <!-- Biểu đồ thiết bị và phòng -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="card-shadow gradient-bg rounded-lg">
             <div class="bg-red-600 text-white p-4 rounded-t-lg">
-                <h3 class="text-lg font-bold">Biểu đồ mượn thiết bị theo thời gian</h3>
-            </div>
-            <div class="p-6">
-                <canvas id="borrowByDateChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Biểu đồ thiết bị mượn nhiều -->
-        <div class="card-shadow gradient-bg rounded-lg mb-8">
-            <div class="bg-red-600 text-white p-4 rounded-t-lg">
-                <h3 class="text-lg font-bold">Top 10 thiết bị được mượn nhiều nhất</h3>
+                <h3 class="text-lg font-bold">Top thiết bị được mượn</h3>
             </div>
             <div class="p-6">
                 <canvas id="topDevicesChart"></canvas>
             </div>
         </div>
-
-        <!-- Biểu đồ theo phòng -->
-        <div class="card-shadow gradient-bg rounded-lg mb-8">
+        <div class="card-shadow gradient-bg rounded-lg">
             <div class="bg-red-600 text-white p-4 rounded-t-lg">
-                <h3 class="text-lg font-bold">Biểu đồ mượn theo phòng</h3>
+                <h3 class="text-lg font-bold">Phân phối mượn theo phòng</h3>
             </div>
             <div class="p-6">
                 <canvas id="borrowByRoomChart"></canvas>
             </div>
         </div>
+    </div>
 
-        <!-- Danh sách thiết bị đang mượn -->
-        <div class="card-shadow gradient-bg rounded-lg">
-            <div class="bg-red-600 text-white p-4 rounded-t-lg">
-                <h3 class="text-lg font-bold">Danh sách thiết bị đang mượn</h3>
-            </div>
-            <div class="p-6">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-gray-800 text-white">
-                                <th class="p-3 text-sm font-semibold">Giảng viên</th>
-                                <th class="p-3 text-sm font-semibold">Thiết bị</th>
-                                <th class="p-3 text-sm font-semibold">Loại</th>
-                                <th class="p-3 text-sm font-semibold">Ngày mượn</th>
-                            </tr>
-                        </thead>
-                        <tbody id="activeBorrowTable" class="divide-y divide-gray-700"></tbody>
-                    </table>
-                </div>
+    <!-- Danh sách thiết bị đang mượn -->
+    <div class="card-shadow gradient-bg rounded-lg">
+        <div class="bg-red-600 text-white p-4 rounded-t-lg">
+            <h3 class="text-lg font-bold">Danh sách thiết bị đang mượn</h3>
+        </div>
+        <div class="p-6">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-800 text-white">
+                            <th class="p-3 text-sm font-semibold">Giảng viên</th>
+                            <th class="p-3 text-sm font-semibold">Thiết bị</th>
+                            <th class="p-3 text-sm font-semibold">Loại</th>
+                            <th class="p-3 text-sm font-semibold">Phòng</th>
+                            <th class="p-3 text-sm font-semibold">Ngày mượn</th>
+                            <th class="p-3 text-sm font-semibold">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activeBorrowTable" class="divide-y divide-gray-700"></tbody>
+                </table>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Import jsPDF core -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- Import Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const monthFilter = document.getElementById("monthFilter");
+        const exportCSVBtn = document.getElementById("exportCSV");
+        let activeDataCache = [];
+        let summaryDataRaw = {}, dateDataRaw = {}, deviceDataRaw = {}, roomDataRaw = {};
 
-    <!-- Import jsPDF AutoTable plugin -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+        async function loadStatistics(monthYear) {
+            const params = monthYear ? `?month=${monthYear}` : "";
+            try {
+                const [summaryRes, dateRes, deviceRes, roomRes, activeRes] = await Promise.all([
+                    fetch("/api/statistics/borrow-return/summary" + params),
+                    fetch("/api/statistics/borrow-return/by-date" + params),
+                    fetch("/api/statistics/borrow-return/by-device" + params),
+                    fetch("/api/statistics/borrow-return/by-room" + params),
+                    fetch("/api/statistics/borrow-return/active" + params)
+                ]);
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const { jsPDF } = window.jspdf;
+                const [summaryData, dateData, deviceResData, roomData, activeData] = await Promise.all([
+                    summaryRes.json(),
+                    dateRes.json(),
+                    deviceRes.json(),
+                    roomRes.json(),
+                    activeRes.json()
+                ]);
 
-            const monthFilter = document.getElementById("monthFilter");
-            const exportCSVBtn = document.getElementById("exportCSV");
-            const exportPDFBtn = document.getElementById("exportPDF");
-            let activeDataCache = [];
-            let summaryDataRaw = {}, dateDataRaw = {}, deviceDataRaw = {}, roomDataRaw = {};
+                summaryDataRaw = summaryData;
+                dateDataRaw = dateData;
+                deviceDataRaw = deviceResData;
+                roomDataRaw = roomData;
 
-            async function loadStatistics(monthYear) {
-                const params = monthYear ? `?month=${monthYear}` : "";
-                try {
-                    const [summaryRes, dateRes, deviceRes, roomRes, activeRes] = await Promise.all([
-                        fetch("/api/statistics/borrow-return/summary" + params),
-                        fetch("/api/statistics/borrow-return/by-date" + params),
-                        fetch("/api/statistics/borrow-return/by-device" + params),
-                        fetch("/api/statistics/borrow-return/by-room" + params),
-                        fetch("/api/statistics/borrow-return/active" + params)
-                    ]);
+                // Tổng quan
+                if (summaryData.success && summaryData.data) {
+                    document.getElementById("totalRequests").innerText = `Tổng yêu cầu: ${summaryData.data.totalBorrowRequests || 0}`;
+                    document.getElementById("totalBorrowing").innerText = `Đang mượn: ${summaryData.data.statusCounts["Đang mượn"] || 0}`;
+                    document.getElementById("totalReturned").innerText = `Đã trả: ${summaryData.data.statusCounts["Đã trả"] || 0}`;
+                    document.getElementById("totalOverdue").innerText = `Quá hạn: ${summaryData.data.statusCounts["Quá hạn"] || 0}`;
 
-                    const [summaryData, dateData, deviceData, roomData, activeData] = await Promise.all([
-                        summaryRes.json(),
-                        dateRes.json(),
-                        deviceRes.json(),
-                        roomRes.json(),
-                        activeRes.json()
-                    ]);
-
-                    summaryDataRaw = summaryData;
-                    dateDataRaw = dateData;
-                    deviceDataRaw = deviceData;
-                    roomDataRaw = roomData;
-
-                    // Tổng quan
-                    if (summaryData.success && summaryData.data) {
-                        document.getElementById("totalRequests").innerText = summaryData.data.totalBorrowRequests || 0;
-                        document.getElementById("totalBorrowing").innerText = summaryData.data.statusCounts["Đang mượn"] || 0;
-                        document.getElementById("totalOverdue").innerText = summaryData.data.statusCounts["Đã trả"] || 0;
-                    }
-
-                    // Danh sách thiết bị đang mượn
-                    if (activeData.success && activeData.data.length > 0) {
-                        const table = document.getElementById("activeBorrowTable");
-                        table.innerHTML = "";
-                        activeDataCache = activeData.data;
-                        activeData.data.forEach(req => {
-                            req.devices.forEach(device => {
-                                const row = `
-                                    <tr class="table-row-hover text-gray-300">
-                                        <td class="p-3">${req.teacher?.name || "Không rõ"}</td>
-                                        <td class="p-3">${device.name}</td>
-                                        <td class="p-3">${device.category}</td>
-                                        <td class="p-3">${new Date(req.borrow_date).toLocaleDateString('vi-VN')}</td>
-                                    </tr>
-                                `;
-                                table.innerHTML += row;
-                            });
-                        });
-                    } else {
-                        document.getElementById("activeBorrowTable").innerHTML = '<tr><td colspan="4" class="p-3 text-center text-gray-500">Không có dữ liệu</td></tr>';
-                    }
-
-                    // Biểu đồ mượn theo thời gian
-                    if (dateData.success && dateData.data.length > 0) {
-                        const labels = dateData.data.map(d => d._id);
-                        const counts = dateData.data.map(d => d.total);
-                        renderChart("borrowByDateChart", "line", labels, [{
-                            label: "Lượt mượn",
-                            data: counts,
-                            borderColor: "#E02424",
-                            backgroundColor: "rgba(224, 36, 36, 0.2)",
-                            fill: true,
-                            tension: 0.4
-                        }], {
-                            scales: {
-                                y: { beginAtZero: true, title: { display: true, text: 'Số lượt mượn', color: '#D1D5DB' }, ticks: { color: '#D1D5DB' } },
-                                x: { title: { display: true, text: 'Ngày', color: '#D1D5DB' }, ticks: { color: '#D1D5DB' } }
-                            },
-                            plugins: { legend: { labels: { color: '#D1D5DB' } } }
-                        });
-                    } else {
-                        console.warn("Không có dữ liệu cho biểu đồ borrowByDateChart");
-                    }
-
-                    // Biểu đồ top thiết bị
-                    if (deviceData.success && deviceData.data.length > 0) {
-                        const labels = deviceData.data.map(d => d.name);
-                        const counts = deviceData.data.map(d => d.totalBorrowed);
-                        renderChart("topDevicesChart", "bar", labels, [{
-                            label: "Số lượt mượn",
-                            data: counts,
-                            backgroundColor: "#E02424",
-                            borderColor: "#B91C1C",
-                            borderWidth: 1
-                        }], {
-                            scales: {
-                                y: { beginAtZero: true, title: { display: true, text: 'Số lượt mượn', color: '#D1D5DB' }, ticks: { color: '#D1D5DB' } },
-                                x: { title: { display: true, text: 'Thiết bị', color: '#D1D5DB' }, ticks: { color: '#D1D5DB' } }
-                            },
-                            plugins: { legend: { labels: { color: '#D1D5DB' } } }
-                        });
-                    } else {
-                        console.warn("Không có dữ liệu cho biểu đồ topDevicesChart");
-                    }
-
-                    // Biểu đồ theo phòng
-                    if (roomData.success && roomData.data.length > 0) {
-                        const labels = roomData.data.map(r => r.roomName);
-                        const counts = roomData.data.map(r => r.total);
-                        renderChart("borrowByRoomChart", "bar", labels, [{
-                            label: "Lượt mượn theo phòng",
-                            data: counts,
-                            backgroundColor: "#E02424",
-                            borderColor: "#B91C1C",
-                            borderWidth: 1
-                        }], {
-                            scales: {
-                                y: { beginAtZero: true, title: { display: true, text: 'Số lượt mượn', color: '#D1D5DB' }, ticks: { color: '#D1D5DB' } },
-                                x: { title: { display: true, text: 'Phòng', color: '#D1D5DB' }, ticks: { color: '#D1D5DB' } }
-                            },
-                            plugins: { legend: { labels: { color: '#D1D5DB' } } }
-                        });
-                    } else {
-                        console.warn("Không có dữ liệu cho biểu đồ borrowByRoomChart");
-                    }
-                } catch (error) {
-                    console.error("Lỗi khi tải dữ liệu:", error);
-                    alert("Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại.");
-                }
-            }
-
-            function renderChart(canvasId, type, labels, datasets, options = {}) {
-                const ctx = document.getElementById(canvasId)?.getContext("2d");
-                if (!ctx) {
-                    console.error(`Không tìm thấy thẻ canvas với ID: ${canvasId}`);
-                    return;
-                }
-
-                if (window[canvasId] instanceof Chart) {
-                    window[canvasId].destroy();
-                }
-
-                window[canvasId] = new Chart(ctx, {
-                    type,
-                    data: { labels, datasets },
-                    options: {
-                        responsive: true,
+                    // Biểu đồ tổng quan (Pie Chart)
+                    renderChart("summaryChart", "pie", ["Đang mượn", "Đã trả", "Quá hạn"], [{
+                        label: "Trạng thái mượn",
+                        data: [
+                            summaryData.data.statusCounts["Đang mượn"] || 0,
+                            summaryData.data.statusCounts["Đã trả"] || 0,
+                            summaryData.data.statusCounts["Quá hạn"] || 0
+                        ],
+                        backgroundColor: ["#E02424", "#4CAF50", "#FFC107"],
+                        borderColor: ["#B91C1C", "#388E3C", "#FFA000"],
+                        borderWidth: 1
+                    }], {
                         plugins: {
-                            legend: { position: 'top' },
-                            tooltip: { enabled: true, backgroundColor: '#2D2D2D', titleColor: '#FFFFFF', bodyColor: '#D1D5DB' }
+                            legend: { position: 'top', labels: { color: '#D1D5DB' } },
+                            title: { display: true, text: 'Tỷ lệ trạng thái mượn', color: '#D1D5DB' }
+                        }
+                    });
+                }
+
+                // Danh sách thiết bị đang mượn
+                if (activeData.success && activeData.data.length > 0) {
+                    const table = document.getElementById("activeBorrowTable");
+                    table.innerHTML = "";
+                    activeDataCache = activeData.data;
+                    activeData.data.forEach(req => {
+                        req.devices.forEach(device => {
+                            const row = `
+                                <tr class="table-row-hover text-gray-300">
+                                    <td class="p-3">${req.teacher?.name || "Không rõ"}</td>
+                                    <td class="p-3">${device.name}</td>
+                                    <td class="p-3">${device.category}</td>
+                                    <td class="p-3">${req.deviceItems[0]?.location ? roomDataRaw.data.find(r => r.roomId === req.deviceItems[0].location)?.roomName || "Không rõ" : "Không rõ"}</td>
+                                    <td class="p-3">${new Date(req.borrow_date).toLocaleDateString('vi-VN')}</td>
+                                    <td class="p-3">${req.deviceItems[0]?.status || "Đang sử dụng"}</td>
+                                </tr>
+                            `;
+                            table.innerHTML += row;
+                        });
+                    });
+                } else {
+                    document.getElementById("activeBorrowTable").innerHTML = '<tr><td colspan="6" class="p-3 text-center text-gray-500">Không có dữ liệu</td></tr>';
+                }
+
+                // Biểu đồ mượn theo thời gian (Stacked Bar)
+                if (dateData.success && dateData.data.length > 0) {
+                    const labels = dateData.data.map(d => d._id);
+                    const counts = dateData.data.map(d => d.total);
+                    renderChart("borrowByDateChart", "bar", labels, [{
+                        label: "Lượt mượn",
+                        data: counts,
+                        backgroundColor: "#E02424",
+                        borderColor: "#B91C1C",
+                        borderWidth: 1
+                    }], {
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'Số lượt mượn', color: '#D1D5DB' }, ticks: { color: '#D1D5DB' } },
+                            x: { title: { display: true, text: 'Ngày', color: '#D1D5DB' }, ticks: { color: '#D1D5DB' } }
                         },
-                        ...options
-                    }
-                });
+                        plugins: { legend: { labels: { color: '#D1D5DB' } } }
+                    });
+                } else {
+                    console.warn("Không có dữ liệu cho biểu đồ borrowByDateChart");
+                }
+
+                // Biểu đồ top thiết bị (Horizontal Bar)
+                if (deviceResData.success && deviceResData.data.length > 0) {
+                    const labels = deviceResData.data.map(d => `${d.name} (${d.category})`);
+                    const counts = deviceResData.data.map(d => d.totalBorrowed);
+                    renderChart("topDevicesChart", "bar", labels, [{
+                        label: "Số lượt mượn",
+                        data: counts,
+                        backgroundColor: "#E02424",
+                        borderColor: "#B91C1C",
+                        borderWidth: 1
+                    }], {
+                        indexAxis: 'y',
+                        scales: {
+                            x: { beginAtZero: true, title: { display: true, text: 'Số lượt mượn', color: '#D1D5DB' }, ticks: { color: '#D1D5DB' } },
+                            y: { title: { display: true, text: 'Thiết bị', color: '#D1D5DB' }, ticks: { color: '#D1D5DB' } }
+                        },
+                        plugins: { legend: { labels: { color: '#D1D5DB' } } }
+                    });
+                } else {
+                    console.warn("Không có dữ liệu cho biểu đồ topDevicesChart");
+                }
+
+                // Biểu đồ theo phòng (Pie Chart)
+                if (roomData.success && roomData.data.length > 0) {
+                    const labels = roomData.data.map(r => r.roomName);
+                    const counts = roomData.data.map(r => r.total);
+                    renderChart("borrowByRoomChart", "pie", labels, [{
+                        label: "Lượt mượn theo phòng",
+                        data: counts,
+                        backgroundColor: ["#E02424", "#4CAF50", "#FFC107", "#2196F3", "#9“C27B0"],
+                        borderColor: ["#B91C1C", "#388E3C", "#FFA000", "#1976D2", "#7B1FA2"],
+                        borderWidth: 1
+                    }], {
+                        plugins: {
+                            legend: { position: 'top', labels: { color: '#D1D5DB' } },
+                            title: { display: true, text: 'Phân phối mượn theo phòng', color: '#D1D5DB' }
+                        }
+                    });
+                } else {
+                    console.warn("Không có dữ liệu cho biểu đồ borrowByRoomChart");
+                }
+            } catch (error) {
+                console.error("Lỗi khi tải dữ liệu:", error);
+                alert("Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại.");
+            }
+        }
+
+        function renderChart(canvasId, type, labels, datasets, options = {}) {
+            const ctx = document.getElementById(canvasId)?.getContext("2d");
+            if (!ctx) {
+                console.error(`Không tìm thấy thẻ canvas với ID: ${canvasId}`);
+                return;
             }
 
-            // Xuất CSV
-            exportCSVBtn.addEventListener("click", () => {
-                if (
-                    !summaryDataRaw || !dateDataRaw || !deviceDataRaw || !roomDataRaw
-                ) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Không có đủ dữ liệu để xuất CSV!',
-                        text: 'Vui lòng tải lại hoặc kiểm tra lại dữ liệu thống kê.',
-                        confirmButtonText: 'OK'
-                    });
-                    return;
+            if (window[canvasId] instanceof Chart) {
+                window[canvasId].destroy();
+            }
+
+            window[canvasId] = new Chart(ctx, {
+                type,
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: { enabled: true, backgroundColor: '#2D2D2D', titleColor: '#FFFFFF', bodyColor: '#D1D5DB' }
+                    },
+                    ...options
                 }
+            });
+        }
 
-                let csv = '\uFEFF'; // BOM để tránh lỗi tiếng Việt
+        // Xuất CSV
+        exportCSVBtn.addEventListener("click", () => {
+            if (!summaryDataRaw || !dateDataRaw || !deviceDataRaw || !roomDataRaw) {
+                alert("Không có đủ dữ liệu để xuất CSV!");
+                return;
+            }
 
-                // ==== 1. Tổng quan ====
-                csv += '--- TỔNG QUAN ---\n';
-                csv += 'Tổng yêu cầu mượn,Đang mượn,Đã trả\n';
-                csv += `${summaryDataRaw.data.totalBorrowRequests || 0},${summaryDataRaw.data.statusCounts["Đang mượn"] || 0},${summaryDataRaw.data.statusCounts["Đã trả"] || 0}\n\n`;
+            let csv = '\uFEFF'; // BOM để tránh lỗi tiếng Việt
 
-                // ==== 2. Biểu đồ mượn theo thời gian ====
-                csv += '--- MƯỢN THEO THỜI GIAN ---\n';
-                csv += 'Thời gian,Lượt mượn\n';
-                dateDataRaw.data.forEach(d => {
-                    csv += `${d._id},${d.total}\n`;
+            // Tổng quan
+            csv += '--- TỔNG QUAN ---\n';
+            csv += 'Tổng yêu cầu mượn,Đang mượn,Đã trả,Quá hạn\n';
+            csv += `${summaryDataRaw.data.totalBorrowRequests || 0},${summaryDataRaw.data.statusCounts["Đang mượn"] || 0},${summaryDataRaw.data.statusCounts["Đã trả"] || 0},${summaryDataRaw.data.statusCounts["Quá hạn"] || 0}\n\n`;
+
+            // Mượn theo thời gian
+            csv += '--- MƯỢN THEO THỜI GIAN ---\n';
+            csv += 'Thời gian,Lượt mượn\n';
+            dateDataRaw.data.forEach(d => {
+                csv += `${d._id},${d.total}\n`;
+            });
+            csv += '\n';
+
+            // Top thiết bị
+            csv += '--- TOP THIẾT BỊ MƯỢN ---\n';
+            csv += 'Thiết bị,Loại,Số lượt mượn\n';
+            deviceDataRaw.data.forEach(d => {
+                csv += `"${d.name}","${d.category}",${d.totalBorrowed}\n`;
+            });
+            csv += '\n';
+
+            // Mượn theo phòng
+            csv += '--- MƯỢN THEO PHÒNG ---\n';
+            csv += 'Phòng,Lượt mượn\n';
+            roomDataRaw.data.forEach(r => {
+                csv += `"${r.roomName}",${r.total}\n`;
+            });
+            csv += '\n';
+
+            // Danh sách thiết bị đang mượn
+            csv += '--- THIẾT BỊ ĐANG MƯỢN ---\n';
+            csv += 'Giảng viên,Thiết bị,Loại,Phòng,Ngày mượn,Trạng thái\n';
+            activeDataCache.forEach(req => {
+                req.devices.forEach(device => {
+                    csv += `"${req.teacher?.name || 'Không rõ'}","${device.name}","${device.category}","${req.deviceItems[0]?.location ? roomDataRaw.data.find(r => r.roomId === req.deviceItems[0].location)?.roomName || 'Không rõ' : 'Không rõ'}","${new Date(req.borrow_date).toLocaleDateString('vi-VN')}","${req.deviceItems[0]?.status || 'Đang sử dụng'}"\n`;
                 });
-                csv += '\n';
-
-                // ==== 3. Top thiết bị được mượn ====
-                csv += '--- TOP 10 THIẾT BỊ MƯỢN NHIỀU NHẤT ---\n';
-                csv += 'Thiết bị,Loại,Số lượt mượn\n';
-                deviceDataRaw.data.forEach(d => {
-                    csv += `"${d.name}","${d.category}",${d.totalBorrowed}\n`;
-                });
-                csv += '\n';
-
-                // ==== 4. Mượn theo phòng ====
-                csv += '--- MƯỢN THEO PHÒNG ---\n';
-                csv += 'Phòng,Lượt mượn\n';
-                roomDataRaw.data.forEach(r => {
-                    csv += `"${r.roomName}",${r.total}\n`;
-                });
-                csv += '\n';
-
-                // Xuất file
-                const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-                const link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = `thong-ke-muon-thiet-bi_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.csv`;
-                link.click();
             });
 
-            // Xuất PDF
-            {{!-- exportPDFBtn.addEventListener("click", () => {
-                if (activeDataCache.length === 0) {
-                    alert("Không có dữ liệu để xuất PDF!");
-                    return;
-                }
-
-                const doc = new jsPDF();
-                doc.setFont("Roboto", "normal");
-
-                // Header
-                doc.setFillColor(224, 36, 36);
-                doc.rect(0, 0, 210, 30, 'F');
-                doc.setFontSize(18);
-                doc.setTextColor(255, 255, 255);
-                doc.text("Báo Cáo Thiết Bị Đang Mượn", 14, 20);
-                doc.setFontSize(10);
-                doc.text(`Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}`, 180, 20, { align: 'right' });
-
-                // Subheader
-                doc.setTextColor(0, 0, 0);
-                doc.setFontSize(12);
-                doc.text(`Tháng: ${monthFilter.value || 'Tất cả'}`, 14, 40);
-
-                // Table
-                const rows = activeDataCache.flatMap(req =>
-                    req.devices.map(device => [
-                        req.teacher?.name || "Không rõ",
-                        device.name,
-                        device.category,
-                        new Date(req.borrow_date).toLocaleDateString('vi-VN')
-                    ])
-                );
-
-                doc.autoTable({
-                    startY: 50,
-                    head: [["Giảng viên", "Thiết bị", "Loại", "Ngày mượn"]],
-                    body: rows,
-                    theme: 'grid',
-                    headStyles: { fillColor: [224, 36, 36], textColor: [255, 255, 255], fontSize: 10 },
-                    bodyStyles: { fontSize: 9, textColor: [33, 33, 33] },
-                    alternateRowStyles: { fillColor: [45, 45, 45], textColor: [209, 213, 219] },
-                    margin: { top: 50 },
-                    styles: { font: "Roboto", fontStyle: "normal" }
-                });
-
-                // Footer
-                const pageCount = doc.internal.getNumberOfPages();
-                for (let i = 1; i <= pageCount; i++) {
-                    doc.setPage(i);
-                    doc.setFillColor(45, 45, 45);
-                    doc.rect(0, 287, 210, 10, 'F');
-                    doc.setFontSize(10);
-                    doc.setTextColor(255, 255, 255);
-                    doc.text(`Trang ${i} / ${pageCount}`, 180, 293, { align: 'right' });
-                }
-
-                doc.save(`thietbi-dang-muon_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.pdf`);
-            }); --}}
-
-            // Lọc theo tháng
-            monthFilter.addEventListener("change", () => {
-                loadStatistics(monthFilter.value);
-            });
-
-            loadStatistics();
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `thong-ke-muon-thiet-bi_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}.csv`;
+            link.click();
         });
-    </script>
+
+        // Lọc theo tháng
+        monthFilter.addEventListener("change", () => {
+            loadStatistics(monthFilter.value);
+        });
+
+        loadStatistics();
+    });
+</script>
